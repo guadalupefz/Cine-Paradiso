@@ -1,0 +1,19 @@
+# --- ENTORNOS VIRTUALES Y CACHÉ ---
+env/
+venv/
+.env/
+.venv/
+__pycache__/
+*.pyc
+
+# --- ESPECÍFICO DE FLASK ---
+.env
+.flaskenv
+instance/
+*.db
+*.sqlite3
+
+# --- SISTEMA Y EDITORES ---
+.directory
+.vscode/
+*.swp
