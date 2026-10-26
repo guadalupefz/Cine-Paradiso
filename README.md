@@ -22,7 +22,7 @@ GRUPO TP final IDS
 - Integrante 3: Julieta Nágera
 - Integrante 4: Sarai Slavkis
 - Integrante 5: Carlos Sixto
-- Integrante 6:
+- Integrante 6: Santino Muller
 - Integrante 7:
 - Integrante 8: Matías Goro
 - Integrante 9: Nicolas Merlo 
