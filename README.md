@@ -26,4 +26,4 @@ GRUPO TP final IDS
 - Integrante 7:
 - Integrante 8:
 - Integrante 9: 
-- Integrante 10:
+- Integrante 10: Henry Luis
