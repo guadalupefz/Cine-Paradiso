@@ -21,7 +21,7 @@ GRUPO TP final IDS
 - Integrante 2: Tiziana Gonzales
 - Integrante 3: Julieta Nágera
 - Integrante 4: Sarai Slavkis
-- Integrante 5:
+- Integrante 5: Carlos Sixto
 - Integrante 6:
 - Integrante 7:
 - Integrante 8:
