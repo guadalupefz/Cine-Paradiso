@@ -17,10 +17,10 @@ OBJETIVOS
 - Generar y validar códigos QR asociados a las entradas.
 
 GRUPO TP final IDS
-- Integrante 1: 
-- Integrante 2:
+- Integrante 1: Guadalupe Fernandez
+- Integrante 2: Tiziana Gonzales
 - Integrante 3: Julieta Nágera
-- Integrante 4:
+- Integrante 4: Sarai Slavkis
 - Integrante 5:
 - Integrante 6:
 - Integrante 7:
