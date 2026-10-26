@@ -22,7 +22,7 @@ Para el desarrollo del sistema se establecen los siguientes supuestos iniciales:
 
 5. **Compras:** los clientes podrán adquirir entradas únicamente para funciones con estado disponible y contratar los servicios adicionales habilitados para dicha función o compra. Cada compra deberá registrar, como mínimo, el cliente, la función, las butacas, el importe total, la fecha y el estado de la operación.
 
-6. **Confirmación de compra:** una vez aprobada una compra, el sistema deberá generar un código QR asociado de forma única a ella y enviar un correo electrónico de confirmación a la dirección registrada del cliente. Si el envío falla, la compra deberá conservar su estado y quedar registrada para su reintento o consulta administrativa.
+6. **Confirmación de compra:** una vez aprobada una compra, el sistema deberá generar un código QR por entrada asociado de forma única a ella y enviar un correo electrónico de confirmación a la dirección registrada del cliente. Si el envío falla, la compra deberá conservar su estado y quedar registrada para su reintento o consulta administrativa.
 
 7. **Cancelaciones:** las entradas podrán cancelarse únicamente hasta el plazo establecido antes del inicio de la función. El sistema deberá rechazar automáticamente las solicitudes recibidas después de dicho límite y registrar la fecha, el usuario y el resultado de cada solicitud.
 
