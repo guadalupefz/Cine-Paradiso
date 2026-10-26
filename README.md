@@ -18,7 +18,7 @@ OBJETIVOS
 
 GRUPO TP final IDS
 - Integrante 1: Guadalupe Fernandez
-- Integrante 2: Tiziana Gonzales
+- Integrante 2: Tiziana Gonzalez
 - Integrante 3: Julieta Nágera
 - Integrante 4: Sarai Slavkis
 - Integrante 5: Carlos Sixto
