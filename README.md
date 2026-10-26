@@ -25,5 +25,5 @@ GRUPO TP final IDS
 - Integrante 6:
 - Integrante 7:
 - Integrante 8:
-- Integrante 9: 
+- Integrante 9: Nicolas Merlo 
 - Integrante 10: Henry Luis
