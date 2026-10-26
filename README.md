@@ -24,6 +24,6 @@ GRUPO TP final IDS
 - Integrante 5: Carlos Sixto
 - Integrante 6:
 - Integrante 7:
-- Integrante 8:
+- Integrante 8: Matías Goro
 - Integrante 9: Nicolas Merlo 
 - Integrante 10: Henry Luis
