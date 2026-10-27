@@ -1,37 +1,97 @@
-# Sistema de venta de entradas de cine — Cine Paradiso
+# Sistema de venta de entradas de cine — Cine Paradiso — Hipótesis y supuestos
 
 ## 1. Hipótesis
 
-Se plantea que el desarrollo de una aplicación web permitirá a Cine Paradiso centralizar, en un único sistema, la gestión de sus tres locales, incluidas las películas, las salas, las funciones, las ventas y los servicios adicionales. Esta mejora se considerará verificable si los administradores pueden consultar y modificar dicha información desde la aplicación, sin recurrir a registros independientes para cada local.
+**1.1. Centralización de la información**
 
-Se considera que una plataforma en línea que permita a los usuarios consultar la cartelera, seleccionar una función, elegir sus butacas y realizar compras contribuirá a reducir el tiempo necesario para completar una transacción y a disminuir los errores en la asignación de butacas. Esta hipótesis se validará mediante pruebas de uso que midan el tiempo requerido para efectuar una compra y la cantidad de conflictos de reserva registrados.
+Se plantea que centralizar la información de las tres sucursales permitirá administrar las películas, funciones, salas y compras desde un único sistema, facilitando la organización y el acceso a la información.
 
-Asimismo, se espera que el sistema facilite las tareas administrativas mediante herramientas destinadas a gestionar salas, programar funciones, administrar servicios adicionales y consultar estadísticas de ventas y ocupación. Esta hipótesis se considerará cumplida si un administrador puede ejecutar dichas operaciones desde el sistema y obtener informes filtrados por local, sala y período.
+**1.2. Simplificación de la compra de entradas**
 
-## 2. Supuestos
+Se plantea que permitir la compra de entradas por internet facilitará el proceso para los clientes y reducirá los errores relacionados con la disponibilidad de butacas.
 
-Para el desarrollo del sistema se establecen los siguientes supuestos iniciales:
+**1.3. Simplificación de la administración**
 
-1. **Locales y salas:** Cine Paradiso cuenta con exactamente tres locales. Cada local dispone de una o más salas, y cada sala tiene una capacidad definida mediante un número entero positivo de butacas.
+Se plantea que contar con un panel de administración permitirá gestionar la información del cine y consultar estadísticas de manera más sencilla.
 
-2. **Películas y funciones:** una película puede proyectarse en distintas funciones. Cada función corresponde a una única película, una única sala y una fecha y hora de inicio previamente establecidas. No podrán existir dos funciones superpuestas en una misma sala.
+## 2. Supuestos y decisiones de funcionamiento
 
-3. **Butacas:** cada sala cuenta con butacas identificadas individualmente mediante un código único dentro de la sala. Una butaca no podrá venderse ni reservarse para más de una compra confirmada en una misma función.
+### 2.1. Cancelación de compras
 
-4. **Usuarios y roles:** el sistema contempla dos roles principales: cliente y administrador. El cliente puede consultar funciones, seleccionar butacas y comprar entradas; el administrador puede gestionar la información operativa y consultar estadísticas. Cada usuario tendrá un único rol activo.
+Se propone permitir la cancelación de una compra hasta dos horas antes del comienzo de la función. Una vez superado ese límite, el sistema no permitirá cancelarla.
 
-5. **Compras:** los clientes podrán adquirir entradas únicamente para funciones con estado disponible y contratar los servicios adicionales habilitados para dicha función o compra. Cada compra deberá registrar, como mínimo, el cliente, la función, las butacas, el importe total, la fecha y el estado de la operación.
+### 2.2. Reserva temporal de butacas
 
-6. **Confirmación de compra:** una vez aprobada una compra, el sistema deberá generar un código QR por entrada asociado de forma única a ella y enviar un correo electrónico de confirmación a la dirección registrada del cliente. Si el envío falla, la compra deberá conservar su estado y quedar registrada para su reintento o consulta administrativa.
+Cuando un cliente seleccione una butaca, esta quedará reservada temporalmente durante diez minutos para que pueda completar la compra. Si el tiempo se cumple sin confirmar la operación, la butaca volverá a estar disponible.
 
-7. **Cancelaciones:** las entradas podrán cancelarse únicamente hasta el plazo establecido antes del inicio de la función. El sistema deberá rechazar automáticamente las solicitudes recibidas después de dicho límite y registrar la fecha, el usuario y el resultado de cada solicitud.
+Antes de confirmar la compra, el sistema deberá verificar nuevamente que las butacas seleccionadas continúen disponibles.
 
-8. **Administración:** los administradores podrán crear, consultar, modificar y desactivar películas, salas, funciones y servicios, siempre que dichos cambios no contradigan compras confirmadas. También podrán consultar estadísticas de ventas y ocupación filtradas, como mínimo, por local y período.
+### 2.3. Registro e inicio de sesión
 
-9. **Catálogo de películas:** el sistema consumirá una API externa gratuita para obtener información sobre las películas. Deberá almacenar la identificación externa, el título, la sinopsis, la duración, la clasificación y la fecha de consulta. Si la API no estuviera disponible, el sistema deberá conservar la última información válida o permitir su carga manual por parte de un administrador.
+Los clientes podrán consultar la cartelera sin iniciar sesión. Para realizar una compra, deberán registrarse o iniciar sesión con una cuenta existente.
 
-10. **Acceso al sistema:** las funcionalidades estarán disponibles según el rol del usuario. El servidor deberá verificar el acceso a cada funcionalidad protegida. Si un usuario no está autenticado, el sistema responderá con el código HTTP **401 (Unauthorized)**. Si se solicita un recurso que no existe, responderá con el código HTTP **404 (Not Found)**.
+El sistema permitirá consultar el perfil y las compras realizadas por cada cliente.
 
-11. **Acceso desde dispositivos móviles:** la aplicación web deberá adaptarse a pantallas con un ancho mínimo de 320 píxeles y funcionar en las versiones vigentes de los navegadores Chrome, Firefox, Safari y Edge en celulares, tabletas y computadoras. Las funciones principales de consulta y compra no deberán requerir desplazamiento horizontal.
+### 2.4. Confirmación de compras y pagos
 
-Los aspectos que aún no estén definidos deberán acordarse durante la planificación del proyecto y registrarse antes de iniciar la implementación de las funcionalidades afectadas. Como mínimo, deberán establecerse el plazo exacto de cancelación, los medios de pago aceptados, los servicios adicionales disponibles, la API externa seleccionada, las políticas de reembolso, el tiempo de retención de las reservas no pagadas y los criterios de disponibilidad de las funciones.
+El sistema contará con una pantalla de pago simulado, sin procesar dinero real ni integrar una plataforma de pagos externa.
+
+Una compra se considerará confirmada únicamente cuando el sistema registre que el pago fue aprobado. Si el pago es rechazado, la compra no se confirmará y las butacas reservadas volverán a estar disponibles.
+
+Mientras el pago no tenga un resultado definitivo, la compra permanecerá pendiente y no se emitirán entradas confirmadas.
+
+### 2.5. Servicios adicionales
+
+Los clientes podrán agregar servicios adicionales disponibles a su compra, según lo que ofrezca el cine.
+
+Si una compra que incluye servicios adicionales se cancela dentro del plazo permitido, los servicios asociados también quedarán cancelados. No se permitirá cancelar los servicios por separado desde el sistema una vez superado el plazo de cancelación de la compra.
+
+### 2.6. Obtención y actualización de información de películas
+
+Se utilizará una API externa gratuita para obtener información de las películas.
+
+Se propone importar los datos al momento de incorporar una película al sistema y permitir que un administrador los actualice manualmente cuando sea necesario.
+
+Si la API no estuviera disponible, el sistema conservará la información ya almacenada. Además, el administrador podrá completar o corregir manualmente los datos necesarios.
+
+### 2.7. Envío de confirmaciones por correo electrónico
+
+Una vez confirmada la compra, el sistema intentará enviar un correo electrónico con los datos de la operación y las entradas correspondientes.
+
+Si el envío falla, la compra seguirá confirmada. El sistema deberá permitir consultar las entradas desde el perfil del cliente y contemplar la posibilidad de volver a intentar el envío del correo.
+
+### 2.8. Modificación o cancelación de funciones con entradas vendidas
+
+No se permitirá eliminar directamente una función que tenga entradas vendidas sin resolver previamente qué ocurrirá con esas compras.
+
+Si una función debe modificarse o cancelarse, se deberá contemplar un procedimiento para gestionar las compras afectadas y notificar a los clientes correspondientes.
+
+### 2.9. Validación de entradas mediante código QR
+
+Cada entrada tendrá un código QR único asociado a su compra y función.
+
+El código será válido únicamente si la compra está confirmada, no fue cancelada y la entrada todavía no fue utilizada. Una vez validada, la entrada quedará marcada como utilizada y no podrá validarse nuevamente.
+
+### 2.10. Permisos y seguridad
+
+Los clientes solo podrán consultar sus propios datos, compras y entradas.
+
+Los administradores podrán realizar las operaciones de gestión que correspondan a su rol. Los endpoints deberán verificar que el usuario tenga autorización para ejecutar cada operación y rechazar las solicitudes de usuarios que no tengan los permisos necesarios.
+
+### 2.11. Cuentas de usuario
+
+El registro solicitará los datos necesarios para identificar al cliente y gestionar sus compras.
+
+Las contraseñas se almacenarán mediante un mecanismo seguro de hash, nunca como texto plano. La creación de cuentas de administrador estará restringida y no podrá realizarse mediante el registro público de clientes.
+
+### 2.12. Disponibilidad y precios de los servicios adicionales
+
+Solo se ofrecerán durante la compra los servicios que estén disponibles.
+
+El precio de cada servicio se registrará en la compra al momento de confirmarla, de modo que los cambios posteriores en los precios no modifiquen las compras anteriores.
+
+## 3. Consideración final
+
+Estas hipótesis y supuestos constituyen una propuesta inicial para definir el funcionamiento de Cine Paradiso y orientar el diseño de la base de datos, los endpoints y las interfaces.
+
+Las decisiones deberán revisarse con el grupo antes de implementarlas. Si alguna contradice un requisito explícito de la consigna, deberá prevalecer lo establecido en el proyecto.
