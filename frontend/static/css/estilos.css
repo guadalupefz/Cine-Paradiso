@@ -1,0 +1,64 @@
+
+/* Estilos generales de Cine Paradiso */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #c90000;
+    color: #171111;
+}
+
+/* Encabezado */
+header {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 2px solid #fff16a;
+}
+
+/* Nombre del cine */
+.logo {
+    color: #fff16a;
+    text-decoration: none;
+}
+
+/* Navegación */
+nav {
+    margin-top: 20px;
+}
+
+nav a {
+    margin: 10px;
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+/* Efecto al pasar el cursor por los enlaces */
+nav a:hover {
+    color: #fff16a;
+}
+
+/* Contenido principal */
+main {
+    width: 90%;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: #fff8e8;
+    border-radius: 10px;
+}
+
+/* Títulos */
+h2 {
+    color: #c90000;
+    font-size: 28px;
+    text-align: center;
+}
+
+/* Pie de página */
+footer {
+    margin-top: 30px;
+    padding: 20px;
+    border-top: 2px solid #fff16a;
+    color: white;
+    text-align: center;
+}
+
