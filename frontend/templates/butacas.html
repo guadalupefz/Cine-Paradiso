@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Butacas - Cine Paradiso{% endblock %}
+
+{% block content %}
+    <section class="butacas">
+        <h2>{{ pelicula.titulo }}</h2>
+
+        <h3>Seleccioná tus butacas</h3>
+
+        {% if error %}
+            <p class="mensaje-error">
+                No se pudieron cargar las butacas.
+                Intentá nuevamente más tarde.
+            </p>
+
+        {% elif butacas %}
+            <div class="lista-butacas">
+                {% for butaca in butacas %}
+                    <div class="butaca">
+                        <p>Butaca {{ butaca.numero }}</p>
+                        <p>{{ butaca.estado }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="mensaje-vacio">
+                No hay información de butacas disponible.
+            </p>
+        {% endif %}
+
+        <a href="{{ url_for('index') }}">Volver a cartelera</a>
+    </section>
+{% endblock %}
