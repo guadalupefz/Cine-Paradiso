@@ -48,9 +48,19 @@ Si una compra que incluye servicios adicionales se cancela dentro del plazo perm
 
 ### 2.6. Obtención y actualización de información de películas
 
-Se utilizará una API externa gratuita para obtener información de las películas.
+Se utilizará una API externa gratuita (The Movie Database) para obtener información de las películas.
 
 Se propone importar los datos al momento de incorporar una película al sistema y permitir que un administrador los actualice manualmente cuando sea necesario.
+
+Se almacenarán como mínimo:
+- id_api_externa
+- título
+- sinopsis
+- duración
+- clasificación
+- poster_url
+
+El identificador externo será utilizado para evitar películas duplicadas en el sistema.
 
 Si la API no estuviera disponible, el sistema conservará la información ya almacenada. Además, el administrador podrá completar o corregir manualmente los datos necesarios.
 
