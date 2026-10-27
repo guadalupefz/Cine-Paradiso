@@ -2,9 +2,9 @@
 
 ## Descripción de las tablas
 
-* **local:** Almacena la información de cada sucursal del cine, como su nombre, dirección y estado.
+* **local:** Almacena la información de cada sucursal del cine, como su nombre, dirección y estado activo.
 * **usuario:** Registra los datos de los usuarios del sistema, incluyendo sus credenciales y rol (cliente o administrador).
-* **pelicula:** Contiene la información de las películas, como título, sinopsis, duración y clasificación. También permite identificar la película en una API externa.
+* **pelicula:** Contiene la información de las películas y permite su activación o desactivación sin perder información histórica.
 * **genero:** Almacena los géneros cinematográficos disponibles.
 * **pelicula_genero:** Relaciona las películas con sus géneros, permitiendo que una película tenga varios géneros y que un género corresponda a varias películas.
 * **sala:** Registra las salas de cada sucursal y su información básica.
@@ -12,7 +12,7 @@
 * **funcion:** Almacena las funciones programadas, indicando la película, la sala, el horario y el precio base.
 * **compra:** Registra las compras realizadas por los usuarios, junto con la fecha, el importe total y el estado de la operación. En caso de cancelación, almacena la fecha y el motivo de cancelación para conservar el historial de la compra.
 * **entrada:** Representa cada entrada comprada e incluye la función, la butaca, el precio, el estado y un código QR individual.
-* **servicio_extra:** Almacena los productos o servicios adicionales que se pueden comprar, junto con su descripción, precio y disponibilidad.
+* **servicio_extra:** Almacena los productos o servicios adicionales disponibles, permitiendo activarlos o desactivarlos sin eliminar registros históricos.
 * **detalle_servicio_compra:** Relaciona los servicios adicionales con una compra e indica la cantidad y el precio unitario al momento de la compra.
 
 ## Relaciones principales
