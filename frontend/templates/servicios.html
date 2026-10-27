@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Servicios - Cine Paradiso{% endblock %}
+
+{% block content %}
+    <section class="servicios">
+        <h2>Comprar</h2>
+        <h3>Servicios adicionales</h3>
+
+        {% if error %}
+            <p class="mensaje-error">
+                No se pudieron cargar los servicios.
+            </p>
+
+        {% elif servicios %}
+            <div class="lista-servicios">
+                {% for servicio in servicios %}
+                    <div class="servicio">
+                        <h4>{{ servicio.nombre }}</h4>
+                        <p>{{ servicio.descripcion }}</p>
+                        <p>Precio: {{ servicio.precio }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="mensaje-vacio">
+                No hay servicios disponibles en este momento.
+            </p>
+        {% endif %}
+    </section>
+{% endblock %}
