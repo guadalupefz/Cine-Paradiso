@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Funciones - Cine Paradiso{% endblock %}
+
+{% block content %}
+    <section class="funciones">
+        <h2>{{ pelicula.titulo }}</h2>
+
+        <h3>Funciones disponibles</h3>
+
+        {% if error %}
+            <p class="mensaje-error">
+                No se pudieron cargar las funciones.
+                Intentá nuevamente más tarde.
+            </p>
+
+        {% elif funciones %}
+            <div class="lista-funciones">
+                {% for funcion in funciones %}
+                    <div class="funcion">
+                        <p>Fecha: {{ funcion.fecha }}</p>
+                        <p>Horario: {{ funcion.horario }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+        {% else %}
+            <p class="mensaje-vacio">
+                No hay funciones disponibles para esta película.
+            </p>
+        {% endif %}
+
+        <a href="{{ url_for('index') }}">Volver a cartelera</a>
+    </section>
+{% endblock %}
