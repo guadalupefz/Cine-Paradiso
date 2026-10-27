@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Cartelera - Cine Paradiso{% endblock %}
+
+{% block content %}
+    <section>
+        <h2>Cartelera</h2>
+
+        <p class="introduccion">
+            Descubrí nuestras películas y elegí tu próxima función.
+        </p>
+
+        <div class="peliculas">
+            {% for pelicula in peliculas %}
+                <div class="pelicula">
+                    <img src="{{ pelicula.poster }}"
+                         alt="Póster de {{ pelicula.titulo }}">
+
+                    <h3>{{ pelicula.titulo }}</h3>
+
+                    <p>{{ pelicula.sinopsis }}</p>
+
+                    <p>
+                        Duración: {{ pelicula.duracion }} minutos
+                    </p>
+
+                    <p>
+                        Clasificación: {{ pelicula.clasificacion }}
+                    </p>
+                </div>
+            {% else %}
+                <p>No hay películas disponibles en este momento.</p>
+            {% endfor %}
+        </div>
+    </section>
+{% endblock %}
