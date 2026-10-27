@@ -103,7 +103,46 @@ footer {
     text-align: left;
 }
 
-/* Efecto al pasar el cursor */
+/* Efecto al pasar el cursor por una película */
 .pelicula:hover {
     background-color: #fff8e8;
+}
+
+/* Pantallas de funciones, butacas y servicios */
+.funciones,
+.butacas,
+.servicios {
+    text-align: center;
+}
+
+/* Contenedores de las listas */
+.lista-funciones,
+.lista-butacas,
+.lista-servicios {
+    text-align: center;
+}
+
+/* Elementos de cada lista */
+.funcion,
+.butaca,
+.servicio {
+    display: inline-block;
+    margin: 15px;
+    padding: 15px;
+    background-color: white;
+    border: 2px solid #c90000;
+    border-radius: 10px;
+    vertical-align: top;
+}
+
+/* Mensajes de error */
+.mensaje-error {
+    color: #c90000;
+    text-align: center;
+}
+
+/* Mensajes de estado vacío */
+.mensaje-vacio {
+    text-align: center;
+    padding: 20px;
 }
