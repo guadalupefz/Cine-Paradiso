@@ -20,3 +20,5 @@ Las sucursales contienen salas, y cada sala tiene butacas. Las funciones vincula
 
 ## Restricciones importantes
 Se utilizan claves primarias (PK) para identificar los registros y claves foráneas (FK) para relacionar las tablas. También se establecen restricciones `UNIQUE` en los campos que no deben repetirse, como el correo electrónico del usuario, el nombre del género y el código QR de cada entrada. En las butacas, se evita repetir la misma combinación de sala, fila y número. Asimismo, una butaca no puede venderse más de una vez para una misma función. Las compras canceladas conservan su información histórica mediante cambios de estado, sin eliminar registros del sistema.
+
+Algunas entidades utilizarán un campo activo para implementar bajas lógicas y conservar el historial de información. Esta estrategia se aplicará principalmente a usuarios, películas, salas y servicios adicionales, evitando eliminar registros que puedan estar asociados a compras, entradas o estadísticas históricas.
