@@ -1,0 +1,33 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Cine Paradiso{% endblock %}</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+    <header>
+        <a href="{{ url_for('index') }}" class="logo">
+            <h1>Cine Paradiso</h1>
+        </a>
+
+        <nav aria-label="Navegación principal">
+            <a href="{{ url_for('cartelera') }}">Cartelera</a>
+            <a href="{{ url_for('comprar') }}">Comprar</a>
+            <a href="{{ url_for('login') }}">Iniciar sesión</a>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; Cine Paradiso</p>
+    </footer>
+</body>
+</html>
