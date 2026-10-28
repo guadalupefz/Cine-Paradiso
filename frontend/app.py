@@ -24,8 +24,8 @@ def ver_funciones():
     )
 
 
-@app.route("/butacas")
-def ver_butacas():
+@app.route("/butacas/<int:id_funcion>")
+def ver_butacas(id_funcion):
     pelicula = {"titulo": "Nombre de la película"}
     butacas = []
     error = False
@@ -34,7 +34,8 @@ def ver_butacas():
         "butacas.html",
         pelicula=pelicula,
         butacas=butacas,
-        error=error
+        error=error,
+        id_funcion=id_funcion
     )
 
 
