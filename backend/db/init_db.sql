@@ -86,6 +86,7 @@ CREATE TABLE compra_servicio (
     id_compra INT NOT NULL,
     id_servicio INT NOT NULL,
     cantidad INT NOT NULL,
+    precio_unitario DECIMAL(10,2) NOT NULL, -- la sección 2.12 de las hipótesis ya establece que se conserve el precio cobrado, para que los cambios posteriores no alteren compras anteriores.
     PRIMARY KEY (id_compra, id_servicio),
     FOREIGN KEY (id_compra) REFERENCES compra(id_compra),
     FOREIGN KEY (id_servicio) REFERENCES servicio_adicional(id_servicio)
