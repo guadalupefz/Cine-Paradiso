@@ -19,6 +19,16 @@ CREATE TABLE sala (
     FOREIGN KEY (id_local) REFERENCES local(id_local)
 );
 
+-- Creación de tabla butaca
+CREATE TABLE butaca (
+    id_butaca INT AUTO_INCREMENT PRIMARY KEY,
+    id_sala INT NOT NULL,
+    fila VARCHAR(5) NOT NULL,
+    numero INT NOT NULL,
+    UNIQUE (id_sala, fila, numero),
+    FOREIGN KEY (id_sala) REFERENCES sala(id_sala)
+);
+
 -- Creacion de tabla usuario
 CREATE TABLE usuario (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
@@ -61,17 +71,18 @@ CREATE TABLE compra (
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
 );
 
--- Creacion de tabla entrada
+-- Creación de tabla entrada
 CREATE TABLE entrada (
     id_entrada INT AUTO_INCREMENT PRIMARY KEY,
     id_compra INT NOT NULL,
     id_funcion INT NOT NULL,
-    codigo_butaca VARCHAR(10) NOT NULL,
+    id_butaca INT NOT NULL,
     qr_token VARCHAR(255) NOT NULL UNIQUE,
     fecha_hora_validacion DATETIME,
-    UNIQUE (id_funcion, codigo_butaca),
+    UNIQUE (id_funcion, id_butaca),
     FOREIGN KEY (id_compra) REFERENCES compra(id_compra),
-    FOREIGN KEY (id_funcion) REFERENCES funcion(id_funcion)
+    FOREIGN KEY (id_funcion) REFERENCES funcion(id_funcion),
+    FOREIGN KEY (id_butaca) REFERENCES butaca(id_butaca)
 );
 
 -- Creacion de tabla servicio_adicional
@@ -86,6 +97,7 @@ CREATE TABLE compra_servicio (
     id_compra INT NOT NULL,
     id_servicio INT NOT NULL,
     cantidad INT NOT NULL,
+    precio_unitario DECIMAL(10,2) NOT NULL, -- la sección 2.12 de las hipótesis ya establece que se conserve el precio cobrado, para que los cambios posteriores no alteren compras anteriores.
     PRIMARY KEY (id_compra, id_servicio),
     FOREIGN KEY (id_compra) REFERENCES compra(id_compra),
     FOREIGN KEY (id_servicio) REFERENCES servicio_adicional(id_servicio)
