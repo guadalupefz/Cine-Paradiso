@@ -45,9 +45,9 @@ CREATE TABLE pelicula (
     titulo VARCHAR(150) NOT NULL,
     sinopsis TEXT,
     poster VARCHAR (355),
-    duracion_minutos VARCHAR (20) NOT NULL,
+    duracion_minutos INT NOT NULL,
     clasificacion VARCHAR(20),
-    genero VARCHAR(50),
+    genero VARCHAR(50)
 );
 
 -- Creacion de tabla funcion
