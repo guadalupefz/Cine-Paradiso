@@ -1,10 +1,11 @@
 from flask import Flask
 from src.routes.butacas import mis_rutas
-
+from src.routes.estadisticas import rutas_estadisticas
 
 app = Flask(__name__)
 
 app.register_blueprint(mis_rutas, url_prefix='/api')
+app.register_blueprint(rutas_estadisticas, url_prefix='/api')
 
 
 @app.route('/')
