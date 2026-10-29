@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Butacas - Cine Paradiso{% endblock %}
+{% block title %}Selección de butacas - Cine Paradiso{% endblock %}
 
 {% block content %}
     <section class="butacas">
@@ -18,17 +18,21 @@
             <div class="lista-butacas">
                 {% for butaca in butacas %}
                     <div class="butaca">
-                        <p>Butaca {{ butaca.numero }}</p>
-                        <p>{{ butaca.estado }}</p>
+                        <p>Butaca: {{ butaca.numero }}</p>
+                        <p>Estado: {{ butaca.estado }}</p>
                     </div>
                 {% endfor %}
             </div>
+
         {% else %}
             <p class="mensaje-vacio">
-                No hay información de butacas disponible.
+                No hay butacas disponibles para mostrar.
             </p>
         {% endif %}
-        <a href="{{ url_for('ver_servicios') }}">Continuar</a>
-        <a href="{{ url_for('index') }}">Volver a cartelera</a>
+
+        <a href="{{ url_for('ver_funciones') }}">
+            Volver a funciones
+        </a>
     </section>
 {% endblock %}
+
