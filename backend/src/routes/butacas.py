@@ -2,7 +2,8 @@ from flask import Blueprint, jsonify
 
 mis_rutas = Blueprint('butacas', __name__)
 
-@mis_rutas.route('/funciones/<int:id_funcion>/butacas')
+
+@mis_rutas.route('/funciones/<int:id_funcion>/butacas', methods=['GET'])
 def consultar_butacas(id_funcion):
     if id_funcion <= 0:
         return jsonify({
@@ -11,9 +12,7 @@ def consultar_butacas(id_funcion):
 
     return jsonify({
         "id_funcion": id_funcion,
-        "butacas": [],
-        "mensaje": (
-            "La consulta real requiere definir "
-            "como se almacenan las butacas de cada sala."
-        )
+        "butacas_vendidas": [],
+        "mensaje": "Consulta preparada. Falta conectar la base de datos."
     }), 200
+
