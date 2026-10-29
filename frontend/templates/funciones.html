@@ -20,6 +20,13 @@
                     <div class="funcion">
                         <p>Fecha: {{ funcion.fecha }}</p>
                         <p>Horario: {{ funcion.horario }}</p>
+
+                        <a href="{{ url_for(
+                            'ver_butacas',
+                            id_funcion=funcion.id_funcion
+                        ) }}">
+                            Seleccionar butacas
+                        </a>
                     </div>
                 {% endfor %}
             </div>
@@ -29,7 +36,7 @@
                 No hay funciones disponibles para esta película.
             </p>
         {% endif %}
-        <a href="{{ url_for('ver_butacas') }}">Seleccionar butacas</a>
+
         <a href="{{ url_for('index') }}">Volver a cartelera</a>
     </section>
 {% endblock %}
