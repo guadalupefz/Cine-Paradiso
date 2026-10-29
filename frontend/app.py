@@ -39,6 +39,7 @@ def ver_butacas(id_funcion):
     )
 
 
+
 @app.route("/servicios")
 def ver_servicios():
     servicios = []
