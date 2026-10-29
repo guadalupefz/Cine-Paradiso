@@ -44,10 +44,10 @@ CREATE TABLE pelicula (
     id_pelicula INT AUTO_INCREMENT PRIMARY KEY,
     titulo VARCHAR(150) NOT NULL,
     sinopsis TEXT,
-    duracion_minutos INT NOT NULL,
+    poster VARCHAR (355),
+    duracion_minutos VARCHAR (20) NOT NULL,
     clasificacion VARCHAR(20),
     genero VARCHAR(50),
-    id_externo_api VARCHAR(100) UNIQUE
 );
 
 -- Creacion de tabla funcion
