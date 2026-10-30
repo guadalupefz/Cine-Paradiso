@@ -3,61 +3,57 @@
 {% block title %}Servicios adicionales - Cine Paradiso{% endblock %}
 
 {% block content %}
-    <section class="servicios">
-        <h2>Tu compra</h2>
+<section class="servicios">
+    <h2>Servicios adicionales</h2>
 
-        <p class="introduccion">
-            Elegí los servicios adicionales que quieras agregar.
+    <p class="introduccion">
+        Elegí los servicios adicionales que quieras agregar a tu compra.
+    </p>
+
+    {% if error %}
+        <p class="mensaje-error" role="alert">
+            No se pudieron cargar los servicios. Intentá nuevamente más tarde.
         </p>
 
-        {% if error %}
-            <p class="mensaje-error" role="alert">
-                No se pudieron cargar los servicios.
-                Intentá nuevamente más tarde.
-            </p>
+    {% elif servicios %}
+        <form action="{{ url_for('ver_servicios') }}" method="post">
+            <div class="lista-servicios">
+                {% for servicio in servicios %}
+                    <article class="servicio">
+                        <h3>{{ servicio.nombre }}</h3>
 
-        {% elif servicios %}
-            <form action="#" method="post">
-                <div class="lista-servicios">
-                    {% for servicio in servicios %}
-                        <article class="servicio">
-                            <h3>{{ servicio.nombre }}</h3>
+                        <p>{{ servicio.descripcion }}</p>
 
-                            <p>{{ servicio.descripcion }}</p>
+                        <p>Precio: ${{ servicio.precio }}</p>
 
-                            <p>
-                                Precio: ${{ servicio.precio }}
-                            </p>
+                        <label>
+                            <input
+                                type="checkbox"
+                                name="servicios"
+                                value="{{ servicio.id_servicio }}"
+                            >
+                            Agregar a mi compra
+                        </label>
+                    </article>
+                {% endfor %}
+            </div>
 
-                            <label>
-                                <input
-                                    type="checkbox"
-                                    name="servicios"
-                                    value="{{ servicio.id_servicio }}"
-                                >
-                                Agregar a mi compra
-                            </label>
-                        </article>
-                    {% endfor %}
-                </div>
+            <button type="submit" disabled>
+                Continuar con la compra
+            </button>
 
-                <button type="submit" disabled>
-                    Continuar con la compra
-                </button>
-
-                <p class="mensaje-vacio">
-                    La confirmación de la compra estará disponible
-                    cuando se integre el backend.
-                </p>
-            </form>
-
-        {% else %}
             <p class="mensaje-vacio">
-                No hay servicios adicionales disponibles en este momento.
+                La confirmación de la compra estará disponible cuando se integre el backend.
             </p>
-        {% endif %}
+        </form>
 
-        <a href="{{ url_for('index') }}">Volver a cartelera</a>
-    </section>
+    {% else %}
+        <p class="mensaje-vacio">
+            No hay servicios adicionales disponibles en este momento.
+        </p>
+    {% endif %}
+
+    <a href="{{ url_for('index') }}">Volver a cartelera</a>
+</section>
 {% endblock %}
 
