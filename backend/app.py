@@ -14,6 +14,7 @@ app.register_blueprint(rutas_estadisticas, url_prefix='/api')
 app.register_blueprint(auth_bp, url_prefix='/api')
 app.register_blueprint(peliculas_bp, url_prefix='/api')
 app.register_blueprint(funciones_bp, url_prefix='/api')
+app.register_blueprint(locales_bp, url_prefix='/api')
 
 
 @app.route('/')
