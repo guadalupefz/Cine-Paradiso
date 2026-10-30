@@ -18,8 +18,20 @@
             <div class="lista-funciones">
                 {% for funcion in funciones %}
                     <div class="funcion">
-                        <p>Fecha: {{ funcion.fecha }}</p>
-                        <p>Horario: {{ funcion.horario }}</p>
+                        <h4>{{ pelicula.titulo }}</h4>
+
+                        <p>
+                            Fecha y hora:
+                            {{ funcion.fecha_hora_inicio }}
+                        </p>
+
+                        <p>
+                            Sala: {{ funcion.sala_nombre }}
+                        </p>
+
+                        <p>
+                            Precio base: ${{ funcion.precio_base }}
+                        </p>
 
                         <a href="{{ url_for(
                             'ver_butacas',
