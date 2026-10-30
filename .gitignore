@@ -1,4 +1,5 @@
 # --- ENTORNOS VIRTUALES Y CACHÉ ---
+.env
 env/
 venv/
 .env/
