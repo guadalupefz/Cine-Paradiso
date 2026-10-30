@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from src.validators.auth_validator import validar_datos_registro
-from src.services.auth_service import registrar_nuevo_cliente
+from src.services.auth_service import registrar_usuario
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -12,7 +12,7 @@ def registro():
     if errores_val:
         return jsonify({'errors': errores_val}), 400
     
-    usuario, errores_srv = registrar_nuevo_cliente(
+    usuario, errores_srv = registrar_usuario(
         nombre=data.get('nombre', '').strip(),
         apellido=data.get('apellido', '').strip(),
         email=data.get('email', '').strip().lower(),
