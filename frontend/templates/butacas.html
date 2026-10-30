@@ -1,15 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %}Butacas - Cine Paradiso{% endblock %}
+{% block title %}Selección de butacas - Cine Paradiso{% endblock %}
 
 {% block content %}
     <section class="butacas">
         <h2>{{ pelicula.titulo }}</h2>
 
+        <p class="introduccion">
+            Función seleccionada: {{ id_funcion }}
+        </p>
+
         <h3>Seleccioná tus butacas</h3>
 
+        <p class="referencia-butacas">
+            <span class="estado-disponible">Disponible</span>
+            <span class="estado-ocupada">Ocupada</span>
+        </p>
+
         {% if error %}
-            <p class="mensaje-error">
+            <p class="mensaje-error" role="alert">
                 No se pudieron cargar las butacas.
                 Intentá nuevamente más tarde.
             </p>
@@ -17,18 +26,41 @@
         {% elif butacas %}
             <div class="lista-butacas">
                 {% for butaca in butacas %}
-                    <div class="butaca">
-                        <p>Butaca {{ butaca.numero }}</p>
-                        <p>{{ butaca.estado }}</p>
-                    </div>
+                    <article class="butaca
+                        {% if butaca.estado == 'disponible' %}
+                            butaca-disponible
+                        {% elif butaca.estado == 'ocupada' %}
+                            butaca-ocupada
+                        {% endif %}">
+
+                        <h4>Butaca {{ butaca.fila }}{{ butaca.numero }}</h4>
+
+                        {% if butaca.estado == 'disponible' %}
+                            <p class="estado-disponible">
+                                Disponible
+                            </p>
+                        {% elif butaca.estado == 'ocupada' %}
+                            <p class="estado-ocupada">
+                                Ocupada
+                            </p>
+                        {% else %}
+                            <p>
+                                Estado: {{ butaca.estado }}
+                            </p>
+                        {% endif %}
+                    </article>
                 {% endfor %}
             </div>
+
         {% else %}
             <p class="mensaje-vacio">
-                No hay información de butacas disponible.
+                No hay butacas disponibles para mostrar.
             </p>
         {% endif %}
-        <a href="{{ url_for('ver_servicios') }}">Continuar</a>
-        <a href="{{ url_for('index') }}">Volver a cartelera</a>
+
+        <a href="{{ url_for('ver_funciones') }}">
+            Volver a funciones
+        </a>
     </section>
 {% endblock %}
+
