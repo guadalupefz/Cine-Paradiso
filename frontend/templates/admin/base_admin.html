@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Administrador - Cine Paradiso{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+    <div class="barra_superior">
+        <h1>Cine Paradiso</h1>
+    </div>
+    <div class="contenedor_admin">
+        <div class="menu_admin">
+            <a href="">Resumen</a>
+            <a href="">Películas</a>
+            <a href="">Funciones</a>
+            <a href="">Servicios</a>
+            <a href="">Validar QR</a>
+        </div>
+        <div class="contenido_admin">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
+</html>
