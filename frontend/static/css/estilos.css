@@ -147,6 +147,7 @@ footer {
     padding: 20px;
 }
 
+
 /* Selección visual de butacas */
 .lista-butacas {
     display: grid;
@@ -252,8 +253,31 @@ button.butaca:focus-visible {
     margin: 20px 0;
 }
 
-.butaca.seleccionada {
-    border-color: #174ea6;
-    background-color: #dbeafe;
-    color: #174ea6;
+
+.menu_admin {
+    width: 250px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
+
+.contenido_admin {
+    flex: 1;
+    padding: 20px;
+    min-width: 0;
+    background-color: #fff8e8;
+}
+
+
+.barra_superior {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 2px solid #fff16a;
+}
+
+.contenedor_admin {
+    display: flex;
+}
+
+
