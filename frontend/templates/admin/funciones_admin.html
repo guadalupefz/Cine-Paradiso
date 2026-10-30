@@ -1,0 +1,42 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Funciones{% endblock %}
+
+{% block content %}
+
+<h2>Gestión de funciones</h2>
+
+<form action="">
+    <div class="campo_formulario">
+        <label for="pelicula">Película</label>
+        <input type="number" id="pelicula" name="pelicula_id">
+    </div>
+
+    <div class="campo_formulario">
+        <label for="sala">Sala</label>
+        <input type="number" id="sala" name="sala_id">
+    </div>
+
+    <div class="campo_formulario">
+        <label for="fecha_hora">fecha y hora</label>
+        <input type="datetime-local" id="fecha_hora" name="fecha_hora">
+    </div>
+
+
+    <button type="submit">crear funcion</button>
+</form>
+
+<h2>Funciones programadas</h2>
+
+<div class="lista-funciones">
+    {% for funcion in funciones %}
+        <div class="funcion">
+            <p>{{ funcion.pelicula }}</p>
+            <p>{{ funcion.fecha_hora }}</p>
+        </div>
+    {% else %}
+        <p>no hay funciones</p>
+    {% endfor %}
+</div>
+
+{% endblock %}
