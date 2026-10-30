@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 BACKEND_URL = "http://localhost:5001/api"
 
@@ -12,6 +12,8 @@ def index():
 
 @app.route("/funciones")
 def ver_funciones():
+    id_pelicula = request.args.get("id_pelicula", type=int)
+
     pelicula = {"titulo": "Nombre de la película"}
     funciones = []
     error = False
@@ -20,7 +22,8 @@ def ver_funciones():
         "funciones.html",
         pelicula=pelicula,
         funciones=funciones,
-        error=error
+        error=error,
+        id_pelicula=id_pelicula
     )
 
 
