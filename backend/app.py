@@ -5,6 +5,7 @@ from src.routes.estadisticas import rutas_estadisticas
 from src.routes.auth_routes import auth_bp
 from src.routes.peliculas_routes import peliculas_bp
 from src.routes.funciones_routes import funciones_bp
+from src.routes.locales_routes import locales_bp
 
 app = Flask(__name__)
 
