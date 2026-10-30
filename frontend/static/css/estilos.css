@@ -146,3 +146,114 @@ footer {
     text-align: center;
     padding: 20px;
 }
+
+/* Selección visual de butacas */
+.lista-butacas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
+    gap: 12px;
+    max-width: 600px;
+    margin: 25px auto;
+}
+
+.butaca {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 55px;
+    margin: 0;
+    padding: 8px;
+    border: 2px solid #16803c;
+    border-radius: 8px;
+    background-color: #e6f7eb;
+    color: #171111;
+    text-align: center;
+}
+
+.butaca p {
+    margin: 4px 0;
+    overflow-wrap: anywhere;
+}
+
+.butaca.disponible {
+    border-color: #16803c;
+    background-color: #e6f7eb;
+}
+
+.butaca.ocupada {
+    border-color: #b42318;
+    background-color: #fde8e7;
+    color: #8c1d18;
+}
+
+.butaca.seleccionada {
+    border-color: #174ea6;
+    background-color: #dbeafe;
+    color: #174ea6;
+}
+
+.leyenda-butacas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    margin: 20px auto;
+}
+
+.leyenda-butacas span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.leyenda-butacas .indicador {
+    width: 16px;
+    height: 16px;
+    border: 2px solid;
+    border-radius: 4px;
+}
+
+.indicador.disponible {
+    border-color: #16803c;
+    background-color: #e6f7eb;
+}
+
+.indicador.ocupada {
+    border-color: #b42318;
+    background-color: #fde8e7;
+}
+
+.indicador.seleccionada {
+    border-color: #174ea6;
+    background-color: #dbeafe;
+}
+
+/* Interacción con las butacas */
+button.butaca {
+    width: 100%;
+    font-family: inherit;
+    font-size: inherit;
+    cursor: pointer;
+}
+
+button.butaca:disabled {
+    cursor: not-allowed;
+    opacity: 0.75;
+}
+
+button.butaca:focus-visible {
+    outline: 3px solid #174ea6;
+    outline-offset: 3px;
+}
+
+.contador {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.butaca.seleccionada {
+    border-color: #174ea6;
+    background-color: #dbeafe;
+    color: #174ea6;
+}

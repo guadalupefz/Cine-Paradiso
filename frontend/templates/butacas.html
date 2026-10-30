@@ -3,37 +3,137 @@
 {% block title %}Selección de butacas - Cine Paradiso{% endblock %}
 
 {% block content %}
-    <section class="butacas">
-        <h2>{{ pelicula.titulo }}</h2>
-        <p>Función seleccionada: {{ id_funcion }}</p>
+<section class="butacas">
+    <h2>{{ pelicula.titulo }}</h2>
+    <p>Función seleccionada: {{ id_funcion }}</p>
 
-        <h3>Seleccioná tus butacas</h3>
+    <h3>Seleccioná tus butacas</h3>
 
-        {% if error %}
-            <p class="mensaje-error">
-                No se pudieron cargar las butacas.
-                Intentá nuevamente más tarde.
+    {% if error %}
+        <p class="mensaje-error">
+            No se pudieron cargar las butacas.
+            Intentá nuevamente más tarde.
+        </p>
+
+    {% elif butacas %}
+        <div class="leyenda-butacas">
+            <span>
+                <span class="indicador disponible"></span>
+                Disponible
+            </span>
+            <span>
+                <span class="indicador ocupada"></span>
+                Ocupada
+            </span>
+            <span>
+                <span class="indicador seleccionada"></span>
+                Seleccionada
+            </span>
+        </div>
+
+        <p class="contador">
+            Butacas seleccionadas:
+            <strong id="cantidad-seleccionadas" aria-live="polite">0</strong>
+        </p>
+
+        <div class="lista-butacas">
+            {% for butaca in butacas %}
+                {% set estado = butaca.estado|lower %}
+                {% set ocupada = estado in ['ocupada', 'ocupado', 'reservada', 'reservado', 'no disponible'] %}
+
+                <button
+                    type="button"
+                    class="butaca {% if ocupada %}ocupada{% else %}disponible{% endif %}"
+                    {% if ocupada %}
+                        disabled
+                        aria-label="Butaca {{ butaca.numero }}, ocupada"
+                    {% else %}
+                        aria-pressed="false"
+                        aria-label="Butaca {{ butaca.numero }}, disponible"
+                    {% endif %}
+                >
+                    <span>{{ butaca.numero }}</span>
+                    <span>{{ butaca.estado }}</span>
+                </button>
+            {% endfor %}
+        </div>
+
+        <div class="continuar-compra">
+            <button type="button" id="continuar-compra" disabled>
+                Continuar con la compra
+            </button>
+
+            <p id="mensaje-seleccion" aria-live="polite">
+                Seleccioná al menos una butaca para continuar.
             </p>
+        </div>
 
-        {% elif butacas %}
-            <div class="lista-butacas">
-                {% for butaca in butacas %}
-                    <div class="butaca">
-                        <p>Butaca: {{ butaca.numero }}</p>
-                        <p>Estado: {{ butaca.estado }}</p>
-                    </div>
-                {% endfor %}
-            </div>
+    {% else %}
+        <p class="mensaje-vacio">
+            No hay butacas disponibles para mostrar.
+        </p>
+    {% endif %}
 
-        {% else %}
-            <p class="mensaje-vacio">
-                No hay butacas disponibles para mostrar.
-            </p>
-        {% endif %}
+    <a href="{{ url_for('ver_funciones') }}">
+        Volver a funciones
+    </a>
+</section>
 
-        <a href="{{ url_for('ver_funciones') }}">
-            Volver a funciones
-        </a>
-    </section>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const butacas = document.querySelectorAll(".butaca.disponible");
+    const contador = document.getElementById("cantidad-seleccionadas");
+    const continuar = document.getElementById("continuar-compra");
+    const mensaje = document.getElementById("mensaje-seleccion");
+
+    if (!contador || !continuar || !mensaje) {
+        return;
+    }
+
+    function obtenerSeleccionadas() {
+        return Array.from(
+            document.querySelectorAll(".butaca.seleccionada")
+        ).map(function (butaca) {
+            return butaca.querySelector("span").textContent.trim();
+        });
+    }
+
+    function actualizarSeleccion() {
+        const seleccionadas = obtenerSeleccionadas();
+
+        contador.textContent = seleccionadas.length;
+        continuar.disabled = seleccionadas.length === 0;
+
+        mensaje.textContent = seleccionadas.length === 0
+            ? "Seleccioná al menos una butaca para continuar."
+            : "Seleccionaste " + seleccionadas.length + " butaca(s).";
+    }
+
+    butacas.forEach(function (butaca) {
+        butaca.addEventListener("click", function () {
+            const seleccionada = this.classList.toggle("seleccionada");
+
+            this.setAttribute("aria-pressed", String(seleccionada));
+            actualizarSeleccion();
+        });
+    });
+
+    continuar.addEventListener("click", function () {
+        const seleccionadas = obtenerSeleccionadas();
+
+        if (seleccionadas.length === 0) {
+            return;
+        }
+
+        const parametros = new URLSearchParams({
+            id_funcion: "{{ id_funcion }}",
+            butacas: seleccionadas.join(",")
+        });
+
+        window.location.href = "/compra?" + parametros.toString();
+    });
+
+    actualizarSeleccion();
+});
+</script>
 {% endblock %}
-
