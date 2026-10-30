@@ -194,3 +194,58 @@ footer {
         margin: 6px;
     }
 }
+
+/* Referencia visual de los estados de las butacas */
+.referencia-butacas {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.estado-disponible,
+.estado-ocupada {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.estado-disponible {
+    color: #155724;
+    background-color: #d4edda;
+}
+
+.estado-ocupada {
+    color: #721c24;
+    background-color: #f8d7da;
+}
+
+.butaca {
+    min-width: 130px;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.butaca-disponible {
+    border: 2px solid #287a43;
+}
+
+.butaca-ocupada {
+    border: 2px solid #b02a37;
+    opacity: 0.8;
+}
+
+.butaca h4 {
+    margin-top: 4px;
+}
+
+@media (max-width: 480px) {
+    .butaca {
+        width: 100%;
+        max-width: 280px;
+    }
+}
+
