@@ -3,35 +3,42 @@
 {% block title %}Cartelera - Cine Paradiso{% endblock %}
 
 {% block content %}
-    <section>
-        <h2>Cartelera</h2>
+<section class="cartelera">
+    <h2>Cartelera</h2>
 
-        <p class="introduccion">
-            Descubrí nuestras películas y elegí tu próxima función.
-        </p>
+    <p class="introduccion">
+        Descubrí nuestras películas y elegí tu próxima función.
+    </p>
 
-        <div class="peliculas">
-            {% for pelicula in peliculas %}
-                <div class="pelicula">
-                    <img src="{{ pelicula.poster }}"
-                         alt="Póster de {{ pelicula.titulo }}">
+    <div class="peliculas">
+        {% for pelicula in peliculas %}
+            <div class="pelicula">
+                <img
+                    src="{{ pelicula.poster }}"
+                    alt="Póster de {{ pelicula.titulo }}"
+                >
 
-                    <h3>{{ pelicula.titulo }}</h3>
+                <h3>{{ pelicula.titulo }}</h3>
 
-                    <p>{{ pelicula.sinopsis }}</p>
+                <p>{{ pelicula.sinopsis }}</p>
 
-                    <p>
-                        Duración: {{ pelicula.duracion }} minutos
-                    </p>
+                <p>
+                    Duración: {{ pelicula.duracion_minutos }} minutos
+                </p>
 
-                    <p>
-                        Clasificación: {{ pelicula.clasificacion }}
-                    </p>
-                    <a href="{{ url_for('ver_funciones') }}">Ver funciones</a>
-                </div>
-            {% else %}
-                <p>No hay películas disponibles en este momento.</p>
-            {% endfor %}
-        </div>
-    </section>
+                <p>
+                    Clasificación: {{ pelicula.clasificacion }}
+                </p>
+
+                <a href="{{ url_for('ver_funciones', id_pelicula=pelicula.id_pelicula) }}">
+                    Ver funciones
+                </a>
+            </div>
+        {% else %}
+            <p class="mensaje-vacio">
+                No hay películas disponibles en este momento.
+            </p>
+        {% endfor %}
+    </div>
+</section>
 {% endblock %}
