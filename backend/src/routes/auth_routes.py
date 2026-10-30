@@ -6,24 +6,37 @@ auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/auth/registro', methods=['POST'])
 def registro():
-    data = request.get_json() or {}
+    try:
+        data = request.get_json() or {}
 
-    errores_val = validar_datos_registro(data)
-    if errores_val:
-        return jsonify({'errors': errores_val}), 400
+        errores_val = validar_datos_registro(data)
+        if errores_val:
+            return jsonify({'errors': errores_val}), 400
     
-    usuario, errores_srv = registrar_usuario(
-        nombre=data.get('nombre', '').strip(),
-        apellido=data.get('apellido', '').strip(),
-        email=data.get('email', '').strip().lower(),
-        password=data.get('password', '')
-    )
+        usuario, errores_srv = registrar_usuario(
+            nombre=data.get('nombre', '').strip(),
+            apellido=data.get('apellido', '').strip(),
+            email=data.get('email', '').strip().lower(),
+            password=data.get('password', '')
+        )
 
-    if errores_srv:
-        return jsonify({'errors': errores_srv}), 409
+        if errores_srv:
+            return jsonify({'errors': errores_srv}), 409
     
-    return jsonify({
-        'message': 'Usuario registrado exitosamente.',
-        'usuario': usuario
-    }), 201
+        return jsonify({
+            'message': 'Usuario registrado exitosamente.',
+            'usuario': usuario
+        }), 201
 
+    except Exception as e: 
+        return (
+            jsonify({
+                'errors': [{
+                    'code': 'ERROR_SERVIDOR',
+                    'message': 'Ocurrió un error interno en el servidor.',
+                    'level': 'error',
+                    'description': str(e),
+                }] 
+            }), 
+            500,
+        )
