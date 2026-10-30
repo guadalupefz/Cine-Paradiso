@@ -1,0 +1,63 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Servicios{% endblock %}
+
+{% block content %}
+
+<h2>Gestión de servicios</h2>
+
+<form action="">
+    <div class="campo_formulario">
+        <label for="nombre">Nombre del servicio</label>
+        <input type="text" id="nombre" name="nombre">
+    </div>
+
+    <div class="campo_formulario">
+        <label for="precio">Precio</label>
+        <input type="number" id="precio" name="precio">
+    </div>
+
+    <button type="submit">Guardar servicio</button>
+
+</form>
+
+<h2>Servicios</h2>
+
+<div class="lista-servicios">
+    {% for servicio in servicios %}
+        <div class="servicio">
+            <p>{{ servicio.nombre }} - ${{ servicio.precio }}</p>
+
+            <a href="">Modificar</a>
+
+            <form method="post">
+                <input type="hidden" name="servicio_id" value="{{ servicio.id }}">
+                <button type="submit">dar de baja</button>
+            </form>
+        </div>
+    {% endfor %}
+</div>
+
+{% if servicio_editar %}
+
+    <h2>Modificar servicio</h2>
+
+    <form method="post">
+        <input type="hidden" name="servicio_id" value="{{ servicio_editar.id }}">
+
+        <div class="campo_formulario">
+            <label for="nombre_editar">Nombre del servicio</label>
+            <input type="text" id="nombre_editar" name="nombre" value="{{ servicio_editar.nombre }}">
+        </div>
+
+        <div class="campo_formulario">
+            <label for="precio_editar">Precio</label>
+            <input type="number" id="precio_editar" name="precio" value="{{ servicio_editar.precio }}">
+        </div>
+
+        <button type="submit">Guardar cambios</button>
+    </form>
+{% endif %}
+
+{% endblock %}
+
