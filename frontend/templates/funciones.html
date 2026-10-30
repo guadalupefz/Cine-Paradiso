@@ -3,52 +3,39 @@
 {% block title %}Funciones - Cine Paradiso{% endblock %}
 
 {% block content %}
-    <section class="funciones">
-        <h2>{{ pelicula.titulo }}</h2>
+<section class="funciones">
+    <h2>{{ pelicula.titulo }}</h2>
+    <h3>Funciones disponibles</h3>
 
-        <h3>Funciones disponibles</h3>
+    {% if error %}
+        <p class="mensaje-error" role="alert">
+            No se pudieron cargar las funciones. Intentá nuevamente más tarde.
+        </p>
 
-        {% if error %}
-            <p class="mensaje-error">
-                No se pudieron cargar las funciones.
-                Intentá nuevamente más tarde.
-            </p>
+    {% elif funciones %}
+        <div class="lista-funciones">
+            {% for funcion in funciones %}
+                <div class="funcion">
+                    <h4>{{ pelicula.titulo }}</h4>
 
-        {% elif funciones %}
-            <div class="lista-funciones">
-                {% for funcion in funciones %}
-                    <div class="funcion">
-                        <h4>{{ pelicula.titulo }}</h4>
+                    <p>Fecha y hora: {{ funcion.fecha_hora_inicio }}</p>
+                    <p>Sala: {{ funcion.sala_nombre }}</p>
+                    <p>Precio base: ${{ funcion.precio_base }}</p>
 
-                        <p>
-                            Fecha y hora:
-                            {{ funcion.fecha_hora_inicio }}
-                        </p>
+                    <a href="{{ url_for('ver_butacas', id_funcion=funcion.id_funcion, id_pelicula=id_pelicula) }}">
+                        Seleccionar butacas
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
 
-                        <p>
-                            Sala: {{ funcion.sala_nombre }}
-                        </p>
+    {% else %}
+        <p class="mensaje-vacio">
+            No hay funciones disponibles para esta película.
+        </p>
+    {% endif %}
 
-                        <p>
-                            Precio base: ${{ funcion.precio_base }}
-                        </p>
-
-                        <a href="{{ url_for(
-                            'ver_butacas',
-                            id_funcion=funcion.id_funcion
-                        ) }}">
-                            Seleccionar butacas
-                        </a>
-                    </div>
-                {% endfor %}
-            </div>
-
-        {% else %}
-            <p class="mensaje-vacio">
-                No hay funciones disponibles para esta película.
-            </p>
-        {% endif %}
-
-        <a href="{{ url_for('index') }}">Volver a cartelera</a>
-    </section>
+    <a href="{{ url_for('index') }}">Volver a cartelera</a>
+</section>
 {% endblock %}
+
