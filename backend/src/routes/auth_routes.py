@@ -7,7 +7,16 @@ auth_bp = Blueprint('auth', __name__)
 @auth_bp.route('/auth/registro', methods=['POST'])
 def registro():
     try:
-        data = request.get_json() or {}
+        data = request.get_json(silent=True)
+
+        if data is None:
+            return jsonify({
+                'errors': [{
+                    'code': 'JSON_INVALIDO',
+                    'message': 'El cuerpo de la petición debe ser un JSON válido.',
+                    'level': 'error'
+                }]
+            }), 400
 
         errores_val = validar_datos_registro(data)
         if errores_val:
@@ -28,7 +37,7 @@ def registro():
             'usuario': usuario
         }), 201
 
-    except Exception as e: 
+    except Exception as e:
         return (
             jsonify({
                 'errors': [{
