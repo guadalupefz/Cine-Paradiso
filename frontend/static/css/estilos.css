@@ -248,4 +248,38 @@ footer {
         max-width: 280px;
     }
 }
+/* Ajustes finales para las pantallas del recorrido del cliente */
+.pelicula img {
+    display: block;
+    object-fit: cover;
+}
 
+.funcion,
+.servicio {
+    width: 250px;
+    max-width: 100%;
+}
+
+.lista-funciones,
+.lista-servicios {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+}
+
+@media (max-width: 768px) {
+    .funcion,
+    .servicio {
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .introduccion {
+        font-size: 16px;
+    }
+
+    .pelicula img {
+        height: 260px;
+    }
+}
