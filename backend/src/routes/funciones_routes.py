@@ -5,9 +5,39 @@ import mysql.connector
 from flask import Blueprint, jsonify, request
 
 from src.db import get_connection
-from src.repositories.peliculas_locales_funciones import modificar_funcion
+from src.repositories.peliculas_locales_funciones import (
+    modificar_funcion, obtener_funciones)
 
 funciones_bp = Blueprint("funciones", __name__)
+
+
+@funciones_bp.route("/funciones", methods=["GET"])
+def listar_funciones():
+    conn = None
+
+    try:
+        conn = get_connection()
+
+        with conn.cursor(dictionary=True) as cursor:
+            funciones = obtener_funciones(cursor)
+
+        return jsonify({"funciones": funciones}), 200
+
+    except mysql.connector.Error:
+        return jsonify({
+            "error": "ERROR_BASE_DATOS",
+            "mensaje": "No se pudieron consultar las funciones."
+        }), 500
+
+    except Exception:
+        return jsonify({
+            "error": "ERROR_SERVIDOR",
+            "mensaje": "Ocurrió un error interno en el servidor."
+        }), 500
+
+    finally:
+        if conn is not None:
+            conn.close()
 
 
 @funciones_bp.route("/funciones/<int:id_funcion>", methods=["PUT"])
