@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 BACKEND_URL = "http://localhost:5001/api"
 
@@ -26,6 +26,7 @@ def ver_funciones():
 
 @app.route("/butacas/<int:id_funcion>")
 def ver_butacas(id_funcion):
+    id_pelicula = request.args.get("id_pelicula", type=int)
     pelicula = {"titulo": "Nombre de la película"}
     butacas = []
     error = False
@@ -35,9 +36,9 @@ def ver_butacas(id_funcion):
         pelicula=pelicula,
         butacas=butacas,
         error=error,
-        id_funcion=id_funcion
+        id_funcion=id_funcion,
+        id_pelicula=id_pelicula
     )
-
 
 @app.route("/servicios")
 def ver_servicios():
