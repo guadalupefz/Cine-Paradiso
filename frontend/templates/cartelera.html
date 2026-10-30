@@ -27,7 +27,9 @@
                     <p>
                         Clasificación: {{ pelicula.clasificacion }}
                     </p>
-                    <a href="{{ url_for('ver_funciones') }}">Ver funciones</a>
+                    <a href="{{ url_for('ver_funciones', id_pelicula=pelicula.id_pelicula) }}">
+                        Ver funciones
+                    </a>
                 </div>
             {% else %}
                 <p>No hay películas disponibles en este momento.</p>
