@@ -6,7 +6,7 @@ from flask import Blueprint, jsonify, request
 
 from backend.db.db import get_connection
 from backend.src.repositories.funciones_repository import (
-    modificar_funcion, obtener_funciones, crear_funcion)
+    modificar_funcion, obtener_funciones, crear_funcion, obtener_cartelera)
 
 funciones_bp = Blueprint("funciones", __name__)
 
