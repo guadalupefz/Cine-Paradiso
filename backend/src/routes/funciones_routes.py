@@ -5,8 +5,8 @@ import mysql.connector
 from flask import Blueprint, jsonify, request
 
 from backend.db.db import get_connection
-from backend.src.repositories.funciones import (modificar_funcion, obtener_funciones
-)
+from backend.src.repositories.funciones_repository import (
+    modificar_funcion, obtener_funciones, crear_funcion)
 
 funciones_bp = Blueprint("funciones", __name__)
 
