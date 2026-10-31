@@ -1,5 +1,5 @@
 from werkzeug.security import generate_password_hash
-from src.repositories.auth_repository import obtener_usuario_por_email, crear_usuario
+from backend.src.repositories.auth_repository import obtener_usuario_por_email, crear_usuario
 
 def registrar_usuario(nombre, apellido, email, password):
     

@@ -1,8 +1,8 @@
 import mysql.connector
 from flask import Blueprint, jsonify
 
-from src.db import get_connection
-from src.repositories.salas_repository import obtener_salas_por_local
+from backend.db.db import get_connection
+from backend.src.repositories.salas_repository import obtener_salas_por_local
 
 salas_bp = Blueprint("salas", __name__)
 

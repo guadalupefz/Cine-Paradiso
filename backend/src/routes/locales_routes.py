@@ -1,8 +1,8 @@
 import mysql.connector
 from flask import Blueprint, jsonify
 
-from src.db import get_connection
-from src.repositories.locales_repository import obtener_locales
+from backend.db.db import get_connection
+from backend.src.repositories.locales_repository import obtener_locales
 
 locales_bp = Blueprint("locales", __name__)
 

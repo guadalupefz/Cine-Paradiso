@@ -1,8 +1,8 @@
 import mysql.connector
 from flask import Blueprint, jsonify
 
-from src.db import get_connection
-from src.repositories.butacas_repository import obtener_butacas_por_funcion
+from backend.db.db import get_connection
+from backend.src.repositories.butacas_repository import obtener_butacas_por_funcion
 
 mis_rutas = Blueprint('butacas', __name__)
 

@@ -4,11 +4,10 @@ from decimal import Decimal, InvalidOperation
 import mysql.connector
 from flask import Blueprint, jsonify, request
 
-from src.db import get_connection
-from src.services.funciones import (listar_funciones_servicio,
-                                    crear_funcion_servicio)
-from src.repositories.funciones import modificar_funcion
-from src.validators.funciones import validar_crear_funcion
+from backend.db.db import get_connection
+from backend.src.services.funciones import (listar_funciones_servicio, crear_funcion_servicio)
+from backend.src.repositories.funciones import modificar_funcion
+from backend.src.validators.funciones import validar_crear_funcion
 
 funciones_bp = Blueprint("funciones", __name__)
 

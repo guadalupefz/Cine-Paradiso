@@ -1,4 +1,4 @@
-from src.db import get_connection
+from backend.db.db import get_connection
 
 def obtener_usuario_por_email(email):
     conn = get_connection()
