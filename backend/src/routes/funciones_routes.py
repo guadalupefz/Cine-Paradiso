@@ -39,7 +39,34 @@ def listar_funciones():
         if conn is not None:
             conn.close()
 
+@funciones_bp.route("/cartelera", methods=["GET"])
+def consultar_cartelera():
+    conn = None
 
+    try:
+        conn = get_connection()
+
+        with conn.cursor(dictionary=True) as cursor:
+            cartelera = obtener_cartelera(cursor)
+
+        return jsonify({"cartelera": cartelera}), 200
+
+    except mysql.connector.Error:
+        return jsonify({
+            "error": "ERROR_BASE_DATOS",
+            "mensaje": "No se pudo consultar la cartelera."
+        }), 500
+
+    except Exception:
+        return jsonify({
+            "error": "ERROR_SERVIDOR",
+            "mensaje": "Ocurrió un error interno en el servidor."
+        }), 500
+
+    finally:
+        if conn is not None:
+            conn.close()
+            
 @funciones_bp.route("/funciones/<int:id_funcion>", methods=["PUT"])
 def actualizar_funcion(id_funcion):
     if id_funcion <= 0:
