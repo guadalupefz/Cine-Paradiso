@@ -15,12 +15,10 @@ def obtener_cartelera(cursor):
     cursor.execute(query)
     return cursor.fetchall()
 
-
-# Listar todas las funciones
+# Listar todas las funciones disponibles
 def obtener_funciones(cursor):
     query = """
-        SELECT f.id_funcion, f.fecha_hora_inicio, f.precio_base,
-               p.titulo, s.nombre AS sala_nombre
+        SELECT f.id_funcion, f.fecha_hora_inicio, f.precio_base, p.titulo, s.nombre as sala_nombre
         FROM funcion f
         JOIN pelicula p ON f.id_pelicula = p.id_pelicula
         JOIN sala s ON f.id_sala = s.id_sala
@@ -28,24 +26,18 @@ def obtener_funciones(cursor):
     cursor.execute(query)
     return cursor.fetchall()
 
-
-# Crear una nueva función
+# Crear una nueva función (Administrador)
 def crear_funcion(cursor, id_pelicula, id_sala, fecha_hora_inicio, precio_base):
-    query = """
-        INSERT INTO funcion (id_pelicula, id_sala, fecha_hora_inicio, precio_base)
-        VALUES (%s, %s, %s, %s)
-    """
+    query = "INSERT INTO funcion (id_pelicula, id_sala, fecha_hora_inicio, precio_base) VALUES (%s, %s, %s, %s)"
     cursor.execute(query, (id_pelicula, id_sala, fecha_hora_inicio, precio_base))
-    return cursor.lastrowid
+    return cursor.lastrowid   #Devuelve el ultimo id creado
 
-
-# Modificar una función existente
+# Modificar una función existente (Administrador)
 def modificar_funcion(cursor, funcion_id, id_pelicula, id_sala, fecha_hora_inicio, precio_base):
     query = """
-        UPDATE funcion
-        SET id_pelicula = %s, id_sala = %s,
-            fecha_hora_inicio = %s, precio_base = %s
+        UPDATE funcion 
+        SET id_pelicula = %s, id_sala = %s, fecha_hora_inicio = %s, precio_base = %s
         WHERE id_funcion = %s
     """
     cursor.execute(query, (id_pelicula, id_sala, fecha_hora_inicio, precio_base, funcion_id))
-    return cursor.rowcount
+    return cursor.rowcount   #Devuelve la cantidad de filas modificadas
