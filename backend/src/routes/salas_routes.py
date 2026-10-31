@@ -2,9 +2,7 @@ import mysql.connector
 from flask import Blueprint, jsonify
 
 from src.db import get_connection
-from src.repositories.peliculas_locales_funciones import (
-    obtener_salas_por_local,
-)
+from src.repositories.salas_repository import obtener_salas_por_local
 
 salas_bp = Blueprint("salas", __name__)
 
