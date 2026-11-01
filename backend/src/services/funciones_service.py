@@ -1,6 +1,5 @@
 from backend.db.db import get_connection
-from backend.src.repositories.funciones_repository import (obtener_funciones, crear_funcion
-)
+from backend.src.repositories.funciones_repository import (obtener_funciones, crear_funcion)
 
 #Devuelve lista de diccionarios
 def listar_funciones_servicio():

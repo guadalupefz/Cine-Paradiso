@@ -2,42 +2,55 @@ from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
 import mysql.connector
+from mysql.connector import Error as MySQLError
 from flask import Blueprint, jsonify, request
 
 from backend.db.db import get_connection
+from backend.src.services.funciones_service import (listar_funciones_servicio,
+                                                    crear_funcion_servicio)
 from backend.src.repositories.funciones_repository import (
-    modificar_funcion, obtener_funciones, crear_funcion, obtener_cartelera)
+    modificar_funcion, obtener_funciones, obtener_cartelera)
+from backend.src.validators.funciones_validator import validar_crear_funcion
 
 funciones_bp = Blueprint("funciones", __name__)
 
+@funciones_bp.route('/funciones', methods=['GET'])
+def listar_funciones_route():
+    try: 
 
-@funciones_bp.route("/funciones", methods=["GET"])
-def listar_funciones():
-    conn = None
+        funciones = listar_funciones_servicio()
+        return jsonify(funciones), 200
+        
+    except Exception as e:
+        return jsonify({"error": "Error interno del servidor", 'detalles' : str(e)}), 500
+
+@funciones_bp.route('/funciones', methods=['POST'])
+def crear_funcion_route():
+    
+    data = request.get_json()
+    error = validar_crear_funcion(data)
+   
+    if error:
+        return jsonify({'error': error}), 400
 
     try:
-        conn = get_connection()
-
-        with conn.cursor(dictionary=True) as cursor:
-            funciones = obtener_funciones(cursor)
-
-        return jsonify({"funciones": funciones}), 200
-
-    except mysql.connector.Error:
+        id_funcion = crear_funcion_servicio(data)
+        
         return jsonify({
-            "error": "ERROR_BASE_DATOS",
-            "mensaje": "No se pudieron consultar las funciones."
-        }), 500
+            'mensaje': 'Función creada exitosamente',
+            'id_funcion': id_funcion
+        }), 201
 
-    except Exception:
-        return jsonify({
-            "error": "ERROR_SERVIDOR",
-            "mensaje": "Ocurrió un error interno en el servidor."
-        }), 500
+    except MySQLError as err:
+        if err.errno == 1452:
+            return jsonify({
+                "error": "Error de integridad referencial",
+                "detalle": "La película o la sala especificada no existe en la base de datos."
+            }), 400
 
-    finally:
-        if conn is not None:
-            conn.close()
+    except Exception as e:
+        return jsonify({'error': 'Ocurrió un error al crear la función en la base de datos.', 
+                        'detalles' : str(e)}), 500
 
 @funciones_bp.route("/cartelera", methods=["GET"])
 def consultar_cartelera():
