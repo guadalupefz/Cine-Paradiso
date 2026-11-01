@@ -94,17 +94,7 @@ def validar_qr():
             "id_entrada": entrada["id_entrada"]
         }), 200
 
-    #except mysql.connector.Error:
-    #    if conn is not None:
-    #        conn.rollback()
-
-    #    return jsonify({
-    #        "error": "ERROR_BASE_DATOS",
-    #        "mensaje": "no se pudo validar la entrada"
-    #    }), 500
-
     except mysql.connector.Error as error:
-        print("Error de MySQL:", error)
 
         if conn is not None:
             conn.rollback()
