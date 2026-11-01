@@ -73,6 +73,12 @@ def consultar_estadisticas_ventas(id_usuario):
             "mensaje": "No se pudieron consultar las estadísticas de ventas."
         }), 500
 
+    except Exception:
+        return jsonify({
+            "error": "ERROR_SERVIDOR",
+            "mensaje": "Ocurrió un error interno al consultar las estadísticas."
+        }), 500
+
     finally:
         if conn is not None and conn.is_connected():
             conn.close()
@@ -113,6 +119,15 @@ def consultar_estadisticas_ocupacion(id_usuario):
             "mensaje": "No se pudieron consultar las estadísticas de ocupación."
         }), 500
 
+    except Exception:
+        return jsonify({
+            "error": "ERROR_SERVIDOR",
+            "mensaje": "Ocurrió un error interno al consultar las estadísticas."
+        }), 500
+
     finally:
         if conn is not None and conn.is_connected():
             conn.close()
+
+
+
