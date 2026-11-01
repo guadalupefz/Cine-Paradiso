@@ -7,6 +7,7 @@ from src.routes.peliculas import peliculas_bp
 #from src.routes.locales_routes import locales_bp
 #from src.routes.salas_routes import salas_bp
 #from src.routes.compras_routes import compras_bp
+from src.routes.estadisticas_routes import estadisticas_bp
 
 app = Flask(__name__)
 
@@ -17,6 +18,7 @@ app.register_blueprint(peliculas_bp, url_prefix='/api')
 #app.register_blueprint(locales_bp, url_prefix='/api')
 #app.register_blueprint(salas_bp, url_prefix='/api')
 #app.register_blueprint(compras_bp, url_prefix='/api')
+app.register_blueprint(estadisticas_bp, url_prefix="/api")
 
 
 @app.route('/')
