@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request
 
+import requests
+
 BACKEND_URL = "http://localhost:5001/api"
 
 app = Flask(__name__)
@@ -77,11 +79,23 @@ def ver_servicios():
 
 @app.route("/admin/validar-qr", methods=["GET", "POST"])
 def validar_qr():
+    resultado = None
+
     if request.method == "POST":
         qr_token = request.form.get("qr_token")
+        id_funcion = request.form.get("id_funcion", type=int)
 
-    return render_template("admin/validar_qr.html")
+        respuesta = requests.post(
+            f"{BACKEND_URL}/qr/validar",
+            json={
+                "qr_token": qr_token,
+                "id_funcion": id_funcion
+            }
+        )
 
+        resultado = respuesta.json()
+
+    return render_template("admin/validar_qr.html", resultado=resultado)
     
 
 if __name__ == "__main__":

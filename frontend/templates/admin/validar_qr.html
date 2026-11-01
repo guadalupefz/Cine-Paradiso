@@ -1,20 +1,27 @@
 {% extends "admin/base_admin.html" %}
 
-
 {% block title %}validar qr{% endblock %}
 
 {% block content %}
 
 <h2>validar qr</h2>
 
-<form action="">
+<form method="POST">
     <div class="campo_formulario">
         <label for="qr_token">Codigo de entrada</label>
         <input type="text" id="qr_token" name="qr_token">
     </div>
+
+    <div class="campo_formulario">
+        <label for="id_funcion">ID de funcion</label>
+        <input type="number" id="id_funcion" name="id_funcion">
+    </div>
+
     <button type="submit">validar qr</button>
 </form>
 
-
+{% if resultado %}
+<p>{{ resultado.mensaje }}</p>
+{% endif %}
 
 {% endblock %}

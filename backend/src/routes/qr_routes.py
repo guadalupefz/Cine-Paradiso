@@ -1,0 +1,119 @@
+from flask import Blueprint, request, jsonify
+
+from src.validators.qr_validator import validar_datos_qr
+
+import mysql.connector
+
+from db.db import get_connection
+
+from src.repositories.qr_repository import (
+    validar_entrada,
+    marcar_entrada_usada
+)
+
+from src.services.qr_service import (
+    entrada_utilizada,
+    compra_confirmada,
+    funcion_correcta,
+    horario_correcto
+)
+
+qr_bp = Blueprint("qr", __name__)
+
+
+@qr_bp.route("/qr/validar", methods=["POST"])
+def validar_qr():
+    datos = request.get_json(silent=True)
+    valido, mensaje = validar_datos_qr(datos)
+    if not valido:
+        return jsonify({
+            "error": "QR_INVALIDO",
+            "mensaje": mensaje
+        }), 400
+    
+    qr_token = datos.get("qr_token").strip()
+
+    id_funcion = datos.get("id_funcion")
+
+    conn = None
+
+    try:
+        conn = get_connection()
+        conn.autocommit = False
+
+        with conn.cursor(dictionary=True) as cursor:
+            entrada = validar_entrada(cursor, qr_token)
+
+            if entrada is None:
+                return jsonify({
+                    "error": "QR_NO_ENCONTRADO",
+                    "mensaje": "No existe una entrada con ese qr"
+                }), 404
+
+            if entrada_utilizada(entrada):
+                conn.rollback()
+                return jsonify({
+                    "error": "QR_YA_UTILIZADO",
+                    "mensaje": "esta entrada ya se uso"
+                }), 409
+
+            if not compra_confirmada(entrada):
+                return jsonify({
+                    "error": "COMPRA_NO_CONFIRMADA",
+                    "mensaje": "la compra no está confirmada"
+                }), 409
+
+            if not funcion_correcta(entrada, id_funcion):
+                return jsonify({
+                    "error": "FUNCION_INCORRECTA",
+                    "mensaje": "la entrada no corresponde a esta funcion"
+                }), 409
+
+            if not horario_correcto(entrada):
+                return jsonify({
+                    "error": "HORARIO_INCORRECTO",
+                    "mensaje": "la entrada está fuera del horario permitido"
+                }), 409
+
+            filas_actualizadas = marcar_entrada_usada(
+                cursor, entrada["id_entrada"]
+            )
+
+            if filas_actualizadas != 1:
+                conn.rollback()
+                return jsonify({
+                    "error": "QR_NO_ACTUALIZADO",
+                    "mensaje": "no se pudo hacer el ingreso"
+                }), 409
+        
+        conn.commit()
+
+        return jsonify({
+            "valida": True,
+            "mensaje": "Entrada validada correctamente.",
+            "id_entrada": entrada["id_entrada"]
+        }), 200
+
+    #except mysql.connector.Error:
+    #    if conn is not None:
+    #        conn.rollback()
+
+    #    return jsonify({
+    #        "error": "ERROR_BASE_DATOS",
+    #        "mensaje": "no se pudo validar la entrada"
+    #    }), 500
+
+    except mysql.connector.Error as error:
+        print("Error de MySQL:", error)
+
+        if conn is not None:
+            conn.rollback()
+
+        return jsonify({
+            "error": "ERROR_BASE_DATOS",
+            "mensaje": "No se pudo validar la entrada."
+        }), 500
+
+    finally:
+        if conn is not None:
+            conn.close()
