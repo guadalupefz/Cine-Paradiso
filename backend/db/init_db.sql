@@ -43,11 +43,11 @@ CREATE TABLE usuario (
 CREATE TABLE pelicula (
     id_pelicula INT AUTO_INCREMENT PRIMARY KEY,
     titulo VARCHAR(150) NOT NULL,
-    sinopsis TEXT,
-    poster VARCHAR (355),
-    duracion_minutos INT NOT NULL,
-    clasificacion VARCHAR(20),
-    genero VARCHAR(50)
+    sinopsis TEXT NOT NULL,
+    poster VARCHAR (100) NOT NULL,
+    duracion_minutos VARCHAR (20) NOT NULL,
+    clasificacion VARCHAR(20) NOT NULL,
+    genero VARCHAR(50) NOT NULL
 );
 
 -- Creacion de tabla funcion
