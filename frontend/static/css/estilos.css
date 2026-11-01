@@ -326,3 +326,206 @@ button.butaca:focus-visible {
 }
 
 
+/* B19: presentación de las pantallas del recorrido cliente */
+
+/* Enlaces y acciones principales */
+main a {
+    color: #a60000;
+}
+
+main a:hover {
+    color: #760000;
+}
+
+main a:focus-visible,
+main button:focus-visible {
+    outline: 3px solid #174ea6;
+    outline-offset: 3px;
+}
+
+.boton,
+.funcion a,
+.continuar-compra button {
+    display: inline-block;
+    padding: 10px 16px;
+    margin-top: 10px;
+    border: 0;
+    border-radius: 6px;
+    background-color: #c90000;
+    color: white;
+    font-family: inherit;
+    font-size: 16px;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.boton:hover,
+.funcion a:hover,
+.continuar-compra button:hover:not(:disabled) {
+    background-color: #8f0000;
+    color: white;
+}
+
+.continuar-compra button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Imágenes de películas */
+.pelicula img {
+    display: block;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+/* Información que puede faltar */
+.poster-sin-imagen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 180px;
+    padding: 10px;
+    background-color: #eee;
+    color: #444;
+    overflow-wrap: anywhere;
+}
+
+.dato-no-disponible {
+    color: #555;
+    font-style: italic;
+}
+
+/* Funciones disponibles */
+.lista-funciones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    gap: 16px;
+    max-width: 900px;
+    margin: 20px auto;
+}
+
+.funcion {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.funcion p {
+    margin: 8px 0;
+}
+
+/* Servicios adicionales */
+.lista-servicios {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    gap: 16px;
+    max-width: 900px;
+    margin: 20px auto;
+}
+
+.servicio {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.servicio h4 {
+    color: #c90000;
+}
+
+/* Mensajes de estado */
+.estado-vacio,
+.mensaje-vacio,
+.mensaje-error {
+    box-sizing: border-box;
+    max-width: 700px;
+    margin: 20px auto;
+    padding: 16px;
+    border-radius: 8px;
+    overflow-wrap: anywhere;
+}
+
+.estado-vacio,
+.mensaje-vacio {
+    background-color: #fff;
+    border: 1px solid #d6b9a5;
+}
+
+.mensaje-error {
+    background-color: #fde8e7;
+    border: 1px solid #b42318;
+    color: #8c1d18;
+}
+
+/* Resumen de compra */
+.compra {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.compra ul {
+    padding-left: 24px;
+}
+
+.compra li {
+    margin: 8px 0;
+    overflow-wrap: anywhere;
+}
+
+/* B19: adaptación de las pantallas a celulares */
+@media (max-width: 600px) {
+    .introduccion {
+        font-size: 16px;
+    }
+
+    .peliculas {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .pelicula {
+        max-width: 100%;
+    }
+
+    .pelicula img {
+        height: auto;
+        max-height: 360px;
+        object-fit: contain;
+    }
+
+    .lista-funciones,
+    .lista-servicios {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .funcion,
+    .servicio {
+        min-width: 0;
+    }
+
+    .lista-butacas {
+        grid-template-columns: repeat(auto-fit, minmax(42px, 1fr));
+        gap: 8px;
+    }
+
+    .butaca {
+        padding: 6px 3px;
+        overflow-wrap: anywhere;
+    }
+
+    .leyenda-butacas {
+        gap: 10px;
+        font-size: 14px;
+    }
+
+    .boton,
+    .funcion a,
+    .continuar-compra button {
+        box-sizing: border-box;
+        max-width: 100%;
+    }
+}

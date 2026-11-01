@@ -21,13 +21,14 @@
                         <p>Fecha: {{ funcion.fecha }}</p>
                         <p>Horario: {{ funcion.horario }}</p>
 
-                        <a href="{{ url_for(
-                            'ver_butacas',
-                            id_funcion=funcion.id_funcion
+                       <a href="{{ url_for(
+                        'ver_butacas',
+                        id_funcion=funcion.id_funcion,
+                        id_pelicula=id_pelicula
                         ) }}">
                             Seleccionar butacas
-                        </a>
-                    </div>
+                    </a>
+                </div>
                 {% endfor %}
             </div>
 
