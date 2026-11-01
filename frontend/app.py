@@ -75,5 +75,14 @@ def ver_servicios():
     )
 
 
+@app.route("/admin/validar-qr", methods=["GET", "POST"])
+def validar_qr():
+    if request.method == "POST":
+        qr_token = request.form.get("qr_token")
+
+    return render_template("admin/validar_qr.html")
+
+    
+
 if __name__ == "__main__":
     app.run(port=8080, debug=True)
