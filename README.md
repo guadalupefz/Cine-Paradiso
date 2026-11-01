@@ -21,14 +21,54 @@ Además, contará con un backoffice para administrar la información del cine.
 ```
 ## INSTALACION Y CONFIGURACION
 ```
-Seguí estos pasos para configurar el entorno de desarrollo en tu máquina local que posea el sistema operativo Linux:
+Siga estos pasos para configurar el entorno de desarrollo en su máquina local que posea el sistema operativo Linux:
 ```
 ### CLONAR EL REPOSITORIO
 ```bash
 git clone https://github.com
-cd tu-repositorio
+cd su-repositorio
 ```
 
+### CONFIGURACION DE CREDENCIALES Y ENTORNO
+
+```
+Para poner en marcha el proyecto, necesita configurar las variables de entorno adquiriendo una clave para la API externa de películas y generando una clave secreta para la seguridad de los tokens (JWT).
+```
+
+#### OBTENCION DE LA API KEY DE OMDb
+```
+
+Esta clave es necesaria para consumir el listado de películas.
+1. Ingrese al sitio web oficial de OMDb API.(http://omdbapi.com'). Registrese.
+2. Haga clic en la opción API Key en el menú superior derecho.
+3. Seleccione el tipo de cuenta FREE (gratuita, permite hasta 1,000 solicitudes diarias).
+4. Complete el formulario con su correo electrónico y los datos solicitados.
+5. Recibirá un correo de confirmación con tu clave de API. Cópiela así "OMDB_API_KEY"="SU_CLAVE_API"
+```
+#### GENERACION DEL SECRET KEY PARA JWT
+```
+Para habilitar los mecanismos de seguridad y autenticación de la API, necesitas generar una clave secreta robusta:
+ 1 ingrese el comando "openssl rand -base64 32" en la terminal de linux. Le va a generar una clave.-
+ 2 Guarde esa clave en "JWT_SECRET_KEY" en un archivo .env en su proyecto.-
+```
+
+### VARIABLES DE ENTORNO
+```
+ Cree un archivo `.env` en la raíz del proyecto basándose en el siguiente archivo `.env.example`:
+```
+
+```bash
+
+  .env
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=contraseña_base_datos
+DB_NAME=cine_paradiso
+DB_PORT=3306
+JWT_SECRET_KEY = SU_TOKEN_JWT
+OMDB_API_KEY =  SU_API_KEY
+```
+---
 ### INSTALAR DEPENDENCIAS
 
 ```bash
@@ -36,27 +76,15 @@ Ejecutar: bash setup.sh.
 Nota  El script tiene un comando sudo apt-get update, por lo que solicitará la contraseña del usuario.       
 
 ```
-### VARIABLES DE ENTORNO
 
-```bash
-Crea un archivo `.env` en la raíz del proyecto basándote en el archivo `.env.example`:
-
-  .env
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=contraseña_base_datos
-DB_NAME=nombre_base_datos
-DB_PORT=3306
-```
----
 ### EJECUTAR SCRIPT DE BASE DE DATOS
 ```
- Ejecutar int_db.sql que se encuentra en la carpeta backend/db.
+ Ejecute int_db.sql que se encuentra en la carpeta backend/db.
 
 ```
 ###  USO / EJECUCION
 
-Para iniciar el servidor en modo de desarrollo, ejecutá:
+Para iniciar el servidor en modo de desarrollo, ejecute:
 
 ```
  source .venv/bin/activate para activar el entorno virtual.
