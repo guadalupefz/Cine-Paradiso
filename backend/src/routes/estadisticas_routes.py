@@ -3,7 +3,7 @@ from datetime import datetime
 import mysql.connector
 from flask import Blueprint, jsonify, request
 
-from db.db import get_connection
+from conexion_db import get_connection
 from seguridad import admin_required
 from src.repositories.estadisticas_repository import (
     obtener_ventas_por_genero,
