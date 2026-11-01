@@ -280,4 +280,49 @@ button.butaca:focus-visible {
     display: flex;
 }
 
+/* Adaptación a celulares y pantallas pequeñas */
+@media (max-width: 600px) {
+    header {
+        padding: 15px 10px;
+    }
+
+    nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    nav a {
+        margin: 0;
+    }
+
+    main {
+        box-sizing: border-box;
+        width: 95%;
+        margin: 15px auto;
+        padding: 12px;
+    }
+
+    h2 {
+        font-size: 24px;
+    }
+
+    .pelicula {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 300px;
+        margin: 10px auto;
+    }
+
+    .contenedor_admin {
+        flex-direction: column;
+    }
+
+    .menu_admin {
+        box-sizing: border-box;
+        width: 100%;
+    }
+}
+
 
