@@ -34,8 +34,13 @@ def crear_funcion_servicio(data):
         if not peli:
             raise ValueError("La película especificada no existe.")
             
-        duracion_str = "".join(filter(str.isdigit, str(peli["duracion_minutos"])))
-        duracion_minutos = int(duracion_str) if duracion_str else 120
+        try:
+            duracion_minutos = int(peli["duracion_minutos"])
+        except (TypeError, ValueError):
+            raise ValueError("La duración de la película no es válida.")
+
+        if duracion_minutos <= 0:
+            raise ValueError("La duración de la película debe ser positiva.")
 
         if verificar_solapamiento_sala(cursor, id_sala, fecha_hora_inicio, duracion_minutos):
             raise ValueError("La sala ya se encuentra ocupada en ese rango horario por otra función.")

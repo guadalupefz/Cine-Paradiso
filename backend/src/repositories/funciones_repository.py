@@ -80,8 +80,13 @@ def verificar_solapamiento_sala(cursor, id_sala, fecha_hora_inicio, duracion_nue
     
     for func in funciones_existentes:
         inicio_existente = func["fecha_hora_inicio"]
-        duracion_str = "".join(filter(str.isdigit, str(func["duracion_minutos"])))
-        duracion_existente = int(duracion_str) if duracion_str else 120 
+        try:
+            duracion_existente = int(func["duracion_minutos"])
+        except (TypeError, ValueError):
+            raise ValueError("La duración de una película existente no es válida.")
+
+        if duracion_existente <= 0:
+            raise ValueError("La duración de una película existente debe ser positiva.")
         fin_existente = inicio_existente + timedelta(minutes=duracion_existente)
         
         if inicio_nueva < fin_existente and fin_nueva > inicio_existente:
