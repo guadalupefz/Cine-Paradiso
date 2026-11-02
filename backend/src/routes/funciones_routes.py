@@ -1,5 +1,6 @@
+
 from backend.seguridad import admin_required
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
 import mysql.connector
@@ -7,53 +8,63 @@ from mysql.connector import Error as MySQLError
 from flask import Blueprint, jsonify, request
 
 from backend.db.db import get_connection
-from backend.src.services.funciones_service import (listar_funciones_servicio, crear_funcion_servicio)
-from backend.src.repositories.funciones_repository import (modificar_funcion, obtener_funciones, obtener_cartelera, contar_entradas_por_funcion,
-    verificar_solapamiento_sala)
+from backend.src.services.funciones_service import (
+    listar_funciones_servicio,
+    crear_funcion_servicio,
+)
+from backend.src.repositories.funciones_repository import (
+    modificar_funcion,
+    obtener_cartelera,
+    contar_entradas_por_funcion,
+    verificar_solapamiento_sala,
+)
 from backend.src.validators.funciones_validator import validar_crear_funcion
 
 funciones_bp = Blueprint("funciones", __name__)
 
-@funciones_bp.route('/funciones', methods=['GET'])
+
+@funciones_bp.route("/funciones", methods=["GET"])
 def listar_funciones_route():
     try:
-
         funciones = listar_funciones_servicio()
         return jsonify(funciones), 200
+    except Exception:
+        return jsonify({"error": "Error interno del servidor"}), 500
 
-    except Exception as e:
-        return jsonify({"error": "Error interno del servidor", 'detalles' : str(e)}), 500
 
-@funciones_bp.route('/funciones', methods=['POST'])
+@funciones_bp.route("/funciones", methods=["POST"])
 @admin_required
 def crear_funcion_route(id_usuario):
-
     data = request.get_json()
     error = validar_crear_funcion(data)
 
     if error:
-        return jsonify({'error': error}), 400
+        return jsonify({"error": error}), 400
 
     try:
         id_funcion = crear_funcion_servicio(data)
-
         return jsonify({
-            'mensaje': 'Función creada exitosamente',
-            'id_funcion': id_funcion
+            "mensaje": "Función creada exitosamente",
+            "id_funcion": id_funcion,
         }), 201
 
     except MySQLError as err:
         if err.errno == 1452:
             return jsonify({
                 "error": "Error de integridad referencial",
-                "detalle": "La película o la sala especificada no existe en la base de datos."
+                "detalle": "La película o la sala especificada no existe en la base de datos.",
             }), 400
 
         return jsonify({"error": "No se pudo crear la función"}), 500
 
-    except Exception as e:
-        return jsonify({'error': 'Ocurrió un error al crear la función en la base de datos.',
-                        'detalles' : str(e)}), 500
+    except ValueError as err:
+        return jsonify({"error": str(err)}), 400
+
+    except Exception:
+        return jsonify({
+            "error": "Ocurrió un error al crear la función en la base de datos."
+        }), 500
+
 
 @funciones_bp.route("/cartelera", methods=["GET"])
 def consultar_cartelera():
@@ -67,22 +78,22 @@ def consultar_cartelera():
 
         return jsonify({"cartelera": cartelera}), 200
 
-
     except mysql.connector.Error:
         return jsonify({
             "error": "ERROR_BASE_DATOS",
-            "mensaje": "No se pudo consultar la cartelera."
+            "mensaje": "No se pudo consultar la cartelera.",
         }), 500
 
     except Exception:
         return jsonify({
             "error": "ERROR_SERVIDOR",
-            "mensaje": "Ocurrió un error interno en el servidor."
+            "mensaje": "Ocurrió un error interno en el servidor.",
         }), 500
 
     finally:
         if conn is not None:
             conn.close()
+
 
 @funciones_bp.route("/funciones/<int:id_funcion>", methods=["PUT"])
 @admin_required
@@ -90,7 +101,7 @@ def actualizar_funcion(id_usuario, id_funcion):
     if id_funcion <= 0:
         return jsonify({
             "error": "ID_FUNCION_INVALIDO",
-            "mensaje": "El ID debe ser positivo."
+            "mensaje": "El ID debe ser positivo.",
         }), 400
 
     data = request.get_json(silent=True)
@@ -98,14 +109,14 @@ def actualizar_funcion(id_usuario, id_funcion):
     if not isinstance(data, dict):
         return jsonify({
             "error": "JSON_INVALIDO",
-            "mensaje": "Se requiere un cuerpo JSON válido."
+            "mensaje": "Se requiere un cuerpo JSON válido.",
         }), 400
 
     campos = [
         "id_pelicula",
         "id_sala",
         "fecha_hora_inicio",
-        "precio_base"
+        "precio_base",
     ]
 
     faltantes = [campo for campo in campos if campo not in data]
@@ -113,7 +124,7 @@ def actualizar_funcion(id_usuario, id_funcion):
     if faltantes:
         return jsonify({
             "error": "DATOS_INCOMPLETOS",
-            "campos_faltantes": faltantes
+            "campos_faltantes": faltantes,
         }), 400
 
     try:
@@ -148,7 +159,7 @@ def actualizar_funcion(id_usuario, id_funcion):
                 "Verificá los IDs, la fecha y el precio. "
                 "El precio debe ser no negativo y tener "
                 "como máximo dos decimales."
-            )
+            ),
         }), 400
 
     conn = None
@@ -156,57 +167,97 @@ def actualizar_funcion(id_usuario, id_funcion):
     try:
         conn = get_connection()
 
-        with conn.cursor() as cursor:
+        # Se usa cursor de diccionario para acceder a las columnas por nombre.
+        with conn.cursor(dictionary=True) as cursor:
             cursor.execute(
-                "SELECT id_funcion FROM funcion WHERE id_funcion = %s",
-                (id_funcion,)
+                """
+                SELECT id_funcion, id_sala, fecha_hora_inicio
+                FROM funcion
+                WHERE id_funcion = %s
+                """,
+                (id_funcion,),
             )
 
-            if cursor.fetchone() is None:
+            funcion_actual = cursor.fetchone()
+
+            if funcion_actual is None:
                 return jsonify({
                     "error": "FUNCION_NO_ENCONTRADA",
-                    "mensaje": "No existe una función con ese ID."
+                    "mensaje": "No existe una función con ese ID.",
                 }), 404
 
             cursor.execute(
                 "SELECT id_pelicula FROM pelicula WHERE id_pelicula = %s",
-                (id_pelicula,)
+                (id_pelicula,),
             )
 
             if cursor.fetchone() is None:
                 return jsonify({
                     "error": "PELICULA_NO_ENCONTRADA",
-                    "mensaje": "No existe la película indicada."
+                    "mensaje": "No existe la película indicada.",
                 }), 400
 
             cursor.execute(
                 "SELECT id_sala FROM sala WHERE id_sala = %s",
-                (id_sala,)
+                (id_sala,),
             )
 
             if cursor.fetchone() is None:
                 return jsonify({
                     "error": "SALA_NO_ENCONTRADA",
-                    "mensaje": "No existe la sala indicada."
+                    "mensaje": "No existe la sala indicada.",
                 }), 400
-            
-            entradas_vendidas = contar_entradas_por_funcion(cursor, id_funcion)
+
+            entradas_vendidas = contar_entradas_por_funcion(
+                cursor, id_funcion
+            )
+
+            horario_actual = funcion_actual["fecha_hora_inicio"]
+            horario_nuevo = fecha_hora.strftime("%Y-%m-%d %H:%M:%S")
+
             if entradas_vendidas > 0:
-                if id_sala != funcion_actual["id_sala"] or fecha_hora.strftime("%Y-%m-%d %H:%M:%S") != str(funcion_actual["fecha_hora_inicio"]):
+                if (
+                    id_sala != funcion_actual["id_sala"]
+                    or horario_nuevo != horario_actual.strftime(
+                        "%Y-%m-%d %H:%M:%S"
+                    )
+                ):
                     return jsonify({
                         "error": "RESTRICCION_VENTAS",
-                        "mensaje": "No se puede modificar la sala ni el horario porque ya existen entradas vendidas para esta función."
+                        "mensaje": (
+                            "No se puede modificar la sala ni el horario "
+                            "porque ya existen entradas vendidas para esta función."
+                        ),
                     }), 400
 
-            cursor.execute("SELECT duracion_minutos FROM pelicula WHERE id_pelicula = %s", (id_pelicula,))
+            cursor.execute(
+                """
+                SELECT duracion_minutos
+                FROM pelicula
+                WHERE id_pelicula = %s
+                """,
+                (id_pelicula,),
+            )
+
             peli = cursor.fetchone()
-            duracion_str = "".join(filter(str.isdigit, str(peli["duracion_minutos"])))
+            duracion_str = "".join(
+                filter(str.isdigit, str(peli["duracion_minutos"]))
+            )
             duracion_minutos = int(duracion_str) if duracion_str else 120
 
-            if verificar_solapamiento_sala(cursor, id_sala, fecha_hora, duracion_minutos, id_funcion_excluir=id_funcion):
+            if verificar_solapamiento_sala(
+                cursor,
+                id_sala,
+                fecha_hora,
+                duracion_minutos,
+                id_funcion_excluir=id_funcion,
+            ):
                 return jsonify({
                     "error": "SOLAPAMIENTO_HORARIO",
-                    "mensaje": "La sala ya se encuentra ocupada en ese rango horario por otra función."
+                    "mensaje": (
+                        "La sala ya se encuentra ocupada en ese rango "
+                        "horario por otra función."
+                    ),
                 }), 400
 
             modificar_funcion(
@@ -214,15 +265,15 @@ def actualizar_funcion(id_usuario, id_funcion):
                 id_funcion,
                 id_pelicula,
                 id_sala,
-                fecha_hora.strftime("%Y-%m-%d %H:%M:%S"),
-                precio
+                horario_nuevo,
+                precio,
             )
 
         conn.commit()
 
         return jsonify({
             "mensaje": "Función modificada correctamente.",
-            "id_funcion": id_funcion
+            "id_funcion": id_funcion,
         }), 200
 
     except mysql.connector.IntegrityError:
@@ -231,7 +282,7 @@ def actualizar_funcion(id_usuario, id_funcion):
 
         return jsonify({
             "error": "RESTRICCION_BASE_DATOS",
-            "mensaje": "Los datos incumplen una restricción de la base de datos."
+            "mensaje": "Los datos incumplen una restricción de la base de datos.",
         }), 400
 
     except mysql.connector.Error:
@@ -240,7 +291,7 @@ def actualizar_funcion(id_usuario, id_funcion):
 
         return jsonify({
             "error": "ERROR_BASE_DATOS",
-            "mensaje": "No se pudo modificar la función."
+            "mensaje": "No se pudo modificar la función.",
         }), 500
 
     except Exception:
@@ -249,7 +300,7 @@ def actualizar_funcion(id_usuario, id_funcion):
 
         return jsonify({
             "error": "ERROR_SERVIDOR",
-            "mensaje": "Ocurrió un error interno en el servidor."
+            "mensaje": "Ocurrió un error interno en el servidor.",
         }), 500
 
     finally:
