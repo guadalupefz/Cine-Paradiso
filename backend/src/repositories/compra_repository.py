@@ -104,3 +104,39 @@ def obtener_compra_de_usuario(cursor, id_compra, id_usuario):
     """
     cursor.execute(consulta, (id_compra, id_usuario))
     return cursor.fetchone()
+
+def obtener_datos_comprobante(cursor, id_compra, id_usuario):
+    query = """
+        SELECT compra.id_compra, compra.fecha_hora,compra.total, compra.estado,
+            usuario.nombre, usuario.apellido, usuario.email
+        FROM compra
+        JOIN usuario ON compra.id_usuario = usuario.id_usuario
+        WHERE compra.id_compra = %s
+          AND compra.id_usuario = %s
+    """
+
+    cursor.execute(query, (id_compra, id_usuario))
+
+    return cursor.fetchone()
+
+def obtener_entradas_comprobante(cursor, id_compra):
+    query = """
+        SELECT entrada.id_entrada, entrada.id_butaca,
+            butaca.fila, butaca.numero,
+            funcion.fecha_hora_inicio,
+            pelicula.titulo AS pelicula,
+            sala.nombre AS sala,
+            local.nombre AS local, local.direccion
+        FROM entrada
+        JOIN funcion ON entrada.id_funcion = funcion.id_funcion
+        JOIN pelicula ON funcion.id_pelicula = pelicula.id_pelicula
+        JOIN butaca ON entrada.id_butaca = butaca.id_butaca
+        JOIN sala ON funcion.id_sala = sala.id_sala
+        JOIN local ON sala.id_local = local.id_local
+        WHERE entrada.id_compra = %s
+        ORDER BY entrada.id_entrada
+    """
+
+    cursor.execute(query, (id_compra,))
+
+    return cursor.fetchall()

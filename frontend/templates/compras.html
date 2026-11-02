@@ -23,6 +23,10 @@
                 >
             </div>
         {% endfor %}
+
+        <a href="{{ url_for('ver_comprobante', id_compra=compra.id_compra) }}">
+            Ver comprobante
+        </a>
     </article>
 {% else %}
     <p>No tenés compras registradas.</p>

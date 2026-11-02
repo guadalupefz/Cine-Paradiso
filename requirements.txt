@@ -29,3 +29,4 @@ Werkzeug==3.0.1
 wrapt==2.5.2
 qrcode[pil]==8.2
 Pillow==13.0.0
+Flask-Mail==0.10.0

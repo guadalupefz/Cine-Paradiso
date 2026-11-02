@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}Comprobante de compra{% endblock %}
+
+{% block content %}
+
+<h2>Comprobante de compra {{ comprobante.compra.id_compra }}</h2>
+
+<article class="tarjeta-admin">
+
+    <h3>datos de la compra</h3>
+
+    <p>cliente: {{ comprobante.compra.nombre }} {{ comprobante.compra.apellido }}</p>
+    <p>email: {{ comprobante.compra.email }}</p>
+    <p>fecha: {{ comprobante.compra.fecha_hora }}</p>
+    <p>estado: {{ comprobante.compra.estado }}</p>
+    <p>total: ${{ comprobante.compra.total }}</p>
+
+</article>
+
+<h3>entradas</h3>
+
+{% for entrada in comprobante.entradas %}
+
+<article class="tarjeta-admin">
+
+    <p>pelicula: {{ entrada.pelicula }}</p>
+    <p>función: {{ entrada.fecha_hora_inicio }}</p>
+    <p>cine: {{ entrada.local }}</p>
+    <p>dirección: {{ entrada.direccion }}</p>
+    <p>sala: {{ entrada.sala }}</p>
+    <p>butaca: {{ entrada.fila }}{{ entrada.numero }}</p>
+
+    {% if comprobante.compra.estado in ["aprobada", "confirmada"] %}
+    <img src="{{ url_for('ver_qr_cliente', id_entrada=entrada.id_entrada) }}" alt="QR de la entrada" class="imagen_qr">
+    {% endif %}
+
+</article>
+
+{% endfor %}
+
+<h3>servicios adicionales</h3>
+
+{% for servicio in comprobante.servicios %}
+<p>{{ servicio.nombre }} - Cantidad: {{ servicio.cantidad }} - ${{ servicio.subtotal }}</p>
+{% else %}
+<p>no se compraron servicios adicionales</p>
+{% endfor %}
+
+<a href="{{ url_for('mis_compras') }}">volver a mis compras</a>
+
+{% endblock %}

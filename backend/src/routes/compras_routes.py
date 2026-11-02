@@ -7,6 +7,8 @@ from backend.src.repositories.compra_repository import obtener_compras_por_usuar
 from backend.src.validators.compra_validator import validar_datos_compra
 from backend.src.services.compra_service import realizar_compra
 
+from backend.src.services.comprobante_service import obtener_comprobante
+
 compras_bp = Blueprint("compras", __name__)
 
 
@@ -113,3 +115,23 @@ def listar_entradas(id_usuario, id_compra):
 
     finally:
         conn.close()
+
+
+@compras_bp.get("/compras/<int:id_compra>/comprobante")
+@cualquier_logueado
+def consultar_comprobante(id_usuario, id_compra):
+
+    try:
+        comprobante = obtener_comprobante(id_compra, id_usuario)
+
+        if comprobante is None:
+            return jsonify({
+                "mensaje": "compra no encontrada"
+            }), 404
+
+        return jsonify(comprobante), 200
+
+    except mysql.connector.Error:
+        return jsonify({
+            "mensaje": "no se pudo obtener el comprobante"
+        }), 500

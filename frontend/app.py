@@ -178,7 +178,7 @@ def mis_compras():
     compras = lista(datos, "compras")
 
     for compra in compras:
-        
+
         entradas, estado_entradas = llamar_backend(
             "GET",
             f"/compras/{compra['id_compra']}/entradas"
@@ -304,6 +304,23 @@ def ver_qr_cliente(id_entrada):
         abort(respuesta.status_code)
 
     return Response(respuesta.content, mimetype="image/png")
+
+@app.get("/compras/<int:id_compra>/comprobante")
+@requiere_usuario
+def ver_comprobante(id_compra):
+
+    comprobante, estado = llamar_backend(
+        "GET",
+        f"/compras/{id_compra}/comprobante"
+    )
+
+    if estado != 200:
+        abort(estado)
+
+    return render_template(
+        "comprobante.html",
+        comprobante=comprobante
+    )
 
 
 if __name__ == "__main__":

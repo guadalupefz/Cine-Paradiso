@@ -22,6 +22,7 @@ from backend.src.routes.servicios_routes import servicios_bp
 from backend.src.routes.estadisticas_routes import estadisticas_bp
 from backend.src.routes.qr_routes import qr_bp
 from backend.src.routes.reservas_routes import reservas_bp
+from backend.src.services.correo_service import mail
 
 app = Flask(__name__, static_folder="static")
 app.config.update(
@@ -33,6 +34,17 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=timedelta(hours=2),
     MAX_CONTENT_LENGTH=1024 * 1024,
 )
+
+app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER")
+app.config["MAIL_PORT"] = int(os.getenv("MAIL_PORT", 587))
+app.config["MAIL_USE_TLS"] = os.getenv("MAIL_USE_TLS", "True") == "True"
+app.config["MAIL_USE_SSL"] = os.getenv("MAIL_USE_SSL", "False") == "True"
+app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
+app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER")
+
+mail.init_app(app)
+
 for blueprint in (auth_bp, mis_rutas, peliculas_externas_bp, peliculas_bp, funciones_bp, locales_bp, salas_bp, compras_bp, servicios_bp, estadisticas_bp, qr_bp, reservas_bp):
     app.register_blueprint(blueprint, url_prefix="/api")
 
