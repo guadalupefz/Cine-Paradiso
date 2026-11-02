@@ -1,5 +1,5 @@
 from backend.seguridad import admin_required
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
 
 import mysql.connector
@@ -8,7 +8,8 @@ from flask import Blueprint, jsonify, request
 
 from backend.db.db import get_connection
 from backend.src.services.funciones_service import (listar_funciones_servicio, crear_funcion_servicio)
-from backend.src.repositories.funciones_repository import (modificar_funcion, obtener_funciones, obtener_cartelera)
+from backend.src.repositories.funciones_repository import (modificar_funcion, obtener_funciones, obtener_cartelera, contar_entradas_por_funcion,
+    verificar_solapamiento_sala)
 from backend.src.validators.funciones_validator import validar_crear_funcion
 
 funciones_bp = Blueprint("funciones", __name__)
@@ -187,6 +188,25 @@ def actualizar_funcion(id_usuario, id_funcion):
                 return jsonify({
                     "error": "SALA_NO_ENCONTRADA",
                     "mensaje": "No existe la sala indicada."
+                }), 400
+            
+            entradas_vendidas = contar_entradas_por_funcion(cursor, id_funcion)
+            if entradas_vendidas > 0:
+                if id_sala != funcion_actual["id_sala"] or fecha_hora.strftime("%Y-%m-%d %H:%M:%S") != str(funcion_actual["fecha_hora_inicio"]):
+                    return jsonify({
+                        "error": "RESTRICCION_VENTAS",
+                        "mensaje": "No se puede modificar la sala ni el horario porque ya existen entradas vendidas para esta función."
+                    }), 400
+
+            cursor.execute("SELECT duracion_minutos FROM pelicula WHERE id_pelicula = %s", (id_pelicula,))
+            peli = cursor.fetchone()
+            duracion_str = "".join(filter(str.isdigit, str(peli["duracion_minutos"])))
+            duracion_minutos = int(duracion_str) if duracion_str else 120
+
+            if verificar_solapamiento_sala(cursor, id_sala, fecha_hora, duracion_minutos, id_funcion_excluir=id_funcion):
+                return jsonify({
+                    "error": "SOLAPAMIENTO_HORARIO",
+                    "mensaje": "La sala ya se encuentra ocupada en ese rango horario por otra función."
                 }), 400
 
             modificar_funcion(

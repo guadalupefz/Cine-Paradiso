@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 # Consultar la cartelera vigente
 def obtener_cartelera(cursor):
     query = """
@@ -41,3 +43,48 @@ def modificar_funcion(cursor, funcion_id, id_pelicula, id_sala, fecha_hora_inici
     """
     cursor.execute(query, (id_pelicula, id_sala, fecha_hora_inicio, precio_base, funcion_id))
     return cursor.rowcount   #Devuelve la cantidad de filas modificadas
+
+# Verificar entradas vendidas para una función
+def contar_entradas_por_funcion(cursor, id_funcion):
+    query = "SELECT COUNT(*) as total FROM entrada WHERE id_funcion = %s"
+    cursor.execute(query, (id_funcion,))
+    resultado = cursor.fetchone()
+    return resultado["total"] if isinstance(resultado, dict) else resultado[0]
+
+# Comprobar solapamiento de horarios en una sala
+def verificar_solapamiento_sala(cursor, id_sala, fecha_hora_inicio, duracion_nueva_minutos, id_funcion_excluir=None):
+    
+    query = """
+        SELECT f.id_funcion, f.fecha_hora_inicio, p.duracion_minutos
+        FROM funcion f
+        JOIN pelicula p ON f.id_pelicula = p.id_pelicula
+        WHERE f.id_sala = %s
+    """
+    params = [id_sala]
+    
+    if id_funcion_excluir:
+        query += " AND f.id_funcion != %s"
+        params.append(id_funcion_excluir)
+        
+    cursor.execute(query, tuple(params))
+    funciones_existentes = cursor.fetchall()
+    
+    from datetime import datetime, timedelta
+    
+    if isinstance(fecha_hora_inicio, str):
+        inicio_nueva = datetime.fromisoformat(fecha_hora_inicio.replace(" ", "T"))
+    else:
+        inicio_nueva = fecha_hora_inicio
+        
+    fin_nueva = inicio_nueva + timedelta(minutes=int(duracion_nueva_minutos))
+    
+    for func in funciones_existentes:
+        inicio_existente = func["fecha_hora_inicio"]
+        duracion_str = "".join(filter(str.isdigit, str(func["duracion_minutos"])))
+        duracion_existente = int(duracion_str) if duracion_str else 120 
+        fin_existente = inicio_existente + timedelta(minutes=duracion_existente)
+        
+        if inicio_nueva < fin_existente and fin_nueva > inicio_existente:
+            return True # Hay choque de horarios
+            
+    return False # No hay solapamiento
