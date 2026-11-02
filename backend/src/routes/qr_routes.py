@@ -1,22 +1,25 @@
-from backend.seguridad import admin_required
-from flask import Blueprint, request, jsonify
+from io import BytesIO
+
+import mysql.connector
+from flask import Blueprint, request, jsonify, send_file
+
+from backend.seguridad import admin_required, cualquier_logueado
+from backend.db.db import get_connection
 
 from backend.src.validators.qr_validator import validar_datos_qr
 
-import mysql.connector
-
-from backend.db.db import get_connection
-
 from backend.src.repositories.qr_repository import (
     validar_entrada,
-    marcar_entrada_usada
+    marcar_entrada_usada,
+    obtener_entrada_para_qr
 )
 
 from backend.src.services.qr_service import (
     entrada_utilizada,
     compra_confirmada,
     funcion_correcta,
-    horario_correcto
+    horario_correcto,
+    generar_qr
 )
 
 qr_bp = Blueprint("qr", __name__)
@@ -109,3 +112,29 @@ def validar_qr(id_usuario):
     finally:
         if conn is not None:
             conn.close()
+
+
+
+
+
+@qr_bp.route("/qr/<int:id_entrada>", methods=["GET"])
+@cualquier_logueado
+def ver_qr(id_usuario, id_entrada):
+    conn = get_connection()
+
+    try:
+        with conn.cursor(dictionary=True) as cursor:
+            entrada = obtener_entrada_para_qr(cursor, id_entrada, id_usuario)
+    finally:
+        conn.close()
+
+    if entrada is None:
+        return jsonify({"mensaje": "no se encontró la entrada"}), 404
+
+    imagen = generar_qr(entrada["qr_token"])
+
+    archivo = BytesIO()
+    imagen.save(archivo, format="PNG")
+    archivo.seek(0)
+
+    return send_file(archivo, mimetype="image/png")

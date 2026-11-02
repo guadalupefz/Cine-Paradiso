@@ -9,6 +9,8 @@ import requests
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, session, redirect, url_for, flash, g, abort
 
+from flask import Response
+
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 BACKEND_URL = os.environ.get("BACKEND_URL", "http://127.0.0.1:5001/api").rstrip("/")
 BACKEND_ORIGEN = BACKEND_URL.rsplit("/api", 1)[0]
@@ -169,9 +171,23 @@ def ver_servicios():
 @requiere_usuario
 def mis_compras():
     datos, estado = llamar_backend("GET", "/compras")
+
     if estado != 200:
         flash(mensaje_error(datos), "error")
-    return render_template("compras.html", compras=lista(datos,"compras"))
+
+    compras = lista(datos, "compras")
+
+    for compra in compras:
+        
+        entradas, estado_entradas = llamar_backend(
+            "GET",
+            f"/compras/{compra['id_compra']}/entradas"
+        )
+
+        compra["entradas"] = lista(entradas, "entradas") if estado_entradas == 200 else []
+
+    return render_template("compras.html", compras=compras)
+
 
 @app.get("/admin")
 @requiere_admin
@@ -272,6 +288,23 @@ def validar_qr():
         resultado, estado = llamar_backend("POST", "/qr/validar", json={"qr_token":request.form.get("qr_token", ""),"id_funcion":request.form.get("id_funcion",type=int)})
         flash(mensaje_error(resultado),"ok" if estado == 200 else "error")
     return render_template("admin/validar_qr.html", resultado=resultado)
+
+
+@app.get("/entradas/<int:id_entrada>/qr")
+@requiere_usuario
+def ver_qr_cliente(id_entrada):
+
+    respuesta = requests.get(
+        f"{BACKEND_URL}/qr/{id_entrada}",
+        cookies={"cine_backend": session.get("backend_cookie", "")},
+        timeout=10
+    )
+
+    if respuesta.status_code != 200:
+        abort(respuesta.status_code)
+
+    return Response(respuesta.content, mimetype="image/png")
+
 
 if __name__ == "__main__":
     app.run("127.0.0.1",port=8080,debug=os.environ.get("FLASK_DEBUG") == "1")

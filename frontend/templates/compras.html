@@ -1,1 +1,31 @@
-{% extends "base.html" %}{% block content %}<h2>Mis compras</h2>{% for compra in compras %}<article class="tarjeta-admin"><h3>Compra {{ compra.id_compra }}</h3><p>{{ compra.fecha_hora }} · {{ compra.estado }}</p><p>Total: ${{ compra.total }}</p></article>{% else %}<p>No tenés compras registradas.</p>{% endfor %}{% endblock %}
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Mis compras</h2>
+
+{% for compra in compras %}
+    <article class="tarjeta-admin">
+        <h3>Compra {{ compra.id_compra }}</h3>
+        <p>{{ compra.fecha_hora }} · {{ compra.estado }}</p>
+        <p>Total: ${{ compra.total }}</p>
+
+        {% for entrada in compra.entradas %}
+            <div>
+                <p>entrada {{ entrada.id_entrada }}</p>
+                <p>funcion: {{ entrada.id_funcion }}</p>
+                <p>butaca: {{ entrada.id_butaca }}</p>
+
+                <img
+                    src="{{ url_for('ver_qr_cliente', id_entrada=entrada.id_entrada) }}"
+                    alt="QR de la entrada {{ entrada.id_entrada }}"
+                    class="imagen_qr"
+                >
+            </div>
+        {% endfor %}
+    </article>
+{% else %}
+    <p>No tenés compras registradas.</p>
+{% endfor %}
+
+{% endblock %}

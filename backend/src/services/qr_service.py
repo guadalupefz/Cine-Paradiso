@@ -1,5 +1,7 @@
 from datetime import datetime, timedelta
 
+import qrcode
+
 def entrada_utilizada(entrada):
 
     if entrada["fecha_hora_validacion"] is not None:
@@ -34,3 +36,7 @@ def horario_correcto(entrada):
         return True
 
     return False
+
+
+def generar_qr(qr_token):
+    return qrcode.make(qr_token)

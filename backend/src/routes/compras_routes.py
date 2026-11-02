@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 import mysql.connector
 from backend.db.db import get_connection
 from backend.seguridad import cualquier_logueado
-from backend.src.repositories.compra_repository import obtener_compras_por_usuario, obtener_servicios_de_compra, obtener_compra_de_usuario
+from backend.src.repositories.compra_repository import obtener_compras_por_usuario, obtener_servicios_de_compra, obtener_compra_de_usuario, obtener_entradas_por_compra
 
 from backend.src.validators.compra_validator import validar_datos_compra
 from backend.src.services.compra_service import realizar_compra
@@ -86,3 +86,30 @@ def listar_servicios_de_compra(id_usuario, id_compra):
         return jsonify({"error": "No se pudieron consultar los servicios"}), 500
 
     return jsonify(servicios), 200
+
+
+@compras_bp.get("/compras/<int:id_compra>/entradas")
+@cualquier_logueado
+def listar_entradas(id_usuario, id_compra):
+    conn = get_connection()
+
+    try:
+        with conn.cursor(dictionary=True) as cursor:
+            compra = obtener_compra_de_usuario(cursor, id_compra, id_usuario)
+
+            if compra is None:
+                return jsonify({"mensaje": "compra no encontrada"}), 404
+
+            entradas = obtener_entradas_por_compra(cursor, id_compra)
+
+        return jsonify([
+            {
+                "id_entrada": entrada["id_entrada"],
+                "id_funcion": entrada["id_funcion"],
+                "id_butaca": entrada["id_butaca"]
+            }
+            for entrada in entradas
+        ]), 200
+
+    finally:
+        conn.close()
