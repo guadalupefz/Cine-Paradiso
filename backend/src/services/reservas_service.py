@@ -20,7 +20,6 @@ def crear_reserva(id_usuario: int, id_funcion: int, lista_id_butacas: list):
         conn.start_transaction()
 
         with conn.cursor(dictionary=True) as cursor:
-            # Verificar existencia de la función y obtener precio base
             precio_base = obtener_precio_base_funcion(cursor, id_funcion)
             if precio_base is None:
                 conn.rollback()
@@ -30,10 +29,8 @@ def crear_reserva(id_usuario: int, id_funcion: int, lista_id_butacas: list):
                     "status_code": 404
                 }
             
-            # Limpiar automáticamente reservas caducadas previas (>15 min)
             limpiar_reservas_expiradas(cursor, id_funcion, lista_id_butacas)
 
-            # Bloqueo pesimista (FOR UPDATE) y detección de conflictos
             ocupadas = obtener_butacas_ocupadas_con_bloqueo(cursor, id_funcion, lista_id_butacas)
             if ocupadas:
                 conn.rollback()
@@ -44,16 +41,12 @@ def crear_reserva(id_usuario: int, id_funcion: int, lista_id_butacas: list):
                     "status_code": 409
                 }
             
-            # Cálculo automático del importe total en el Backend
             total_calculado = Decimal(str(precio_base)) * len(lista_id_butacas)
 
-            # Insertar encabezado en 'compra' (estado 'pendiente')
             id_compra = crear_compra_pendiente(cursor, id_usuario, total_calculado)
 
-            # Crear los registros correspondientes en 'entrada'
             crear_entradas_reserva(cursor, id_compra, id_funcion, lista_id_butacas)
             
-            # Confirmación atómica de la transacción
             conn.commit()
             fecha_vencimiento = datetime.now() + timedelta(minutes=TIEMPO_EXPIRACION_MINUTOS)
             reserva = {
