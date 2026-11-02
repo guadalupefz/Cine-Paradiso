@@ -141,13 +141,21 @@ def crear_reserva(id_usuario: int, id_funcion: int,
         if conn is not None:
             conn.rollback()
 
+        # Si MySQL detecta una butaca duplicada para la misma función
+        if e.errno == 1062 and "entrada.id_funcion" in str(e):
+            return None, {
+                "error": "BUTACAS_OCUPADAS",
+                "mensaje": "Una o más butacas seleccionadas ya están reservadas o vendidas.",
+                "status_code": 409
+            }
+
         return None, {
             "error": "ERROR_BASE_DATOS",
             "mensaje": "Error en la base de datos al procesar la reserva.",
-            "description": str(e),
             "status_code": 500
         }
 
     finally:
         if conn is not None:
             conn.close()
+    
