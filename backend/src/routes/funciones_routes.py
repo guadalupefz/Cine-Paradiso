@@ -240,10 +240,19 @@ def actualizar_funcion(id_usuario, id_funcion):
             )
 
             peli = cursor.fetchone()
-            duracion_str = "".join(
-                filter(str.isdigit, str(peli["duracion_minutos"]))
-            )
-            duracion_minutos = int(duracion_str) if duracion_str else 120
+            try:
+                duracion_minutos = int(peli["duracion_minutos"])
+            except (TypeError, ValueError):
+                return jsonify({
+                    "error": "DURACION_INVALIDA",
+                    "mensaje": "La duración de la película no es válida.",
+                }), 400
+
+            if duracion_minutos <= 0:
+                return jsonify({
+                    "error": "DURACION_INVALIDA",
+                    "mensaje": "La duración debe ser positiva.",
+                }), 400
 
             if verificar_solapamiento_sala(
                 cursor,
