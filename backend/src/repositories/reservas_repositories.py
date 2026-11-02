@@ -3,9 +3,6 @@ from decimal import Decimal
 
 def obtener_butacas_ocupadas_con_bloqueo(cursor, id_funcion: int, lista_id_butacas: list):
 
-    # Consulta con bloqueo FOR UPDATE las butacas vendidas ('confirmada')
-    # o con reservas vigentes en menos de 15 minutos ('pendiente').
-
     format_strings = ','.join(['%s'] * len(lista_id_butacas))
     query = f"""
         SELECT e.id_butaca
@@ -25,9 +22,6 @@ def obtener_butacas_ocupadas_con_bloqueo(cursor, id_funcion: int, lista_id_butac
     return [fila['id_butaca'] for fila in filas]
 
 def limpiar_reservas_expiradas(cursor, id_funcion: int, lista_id_butacas: list):
-
-    # Pasa a 'expirada' las compras pendientes antiguas y elimina sus entradas
-    # para liberar la restricción UNIQUE (id_funcion, id_butaca).
 
     format_strings = ','.join(['%s'] * len(lista_id_butacas))
 
