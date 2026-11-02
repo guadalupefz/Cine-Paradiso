@@ -25,14 +25,11 @@ app.config.update(
 )
 
 def llamar_backend(metodo, ruta, **argumentos):
-    cookies = {}
-    if session.get("backend_cookie"):
-        cookies["cine_backend"] = session["backend_cookie"]
+    cabeceras = {}
+    if session.get("backend_token"):
+        cabeceras["Authorization"] = "Bearer " + session["backend_token"]
     try:
-        respuesta = requests.request(metodo, BACKEND_URL + ruta, cookies=cookies, timeout=15, **argumentos)
-        nueva_cookie = respuesta.cookies.get("cine_backend")
-        if nueva_cookie:
-            session["backend_cookie"] = nueva_cookie
+        respuesta = requests.request(metodo, BACKEND_URL + ruta, headers=cabeceras, timeout=15, **argumentos)
         try:
             datos = respuesta.json()
         except ValueError:
@@ -55,12 +52,12 @@ def lista(datos, clave):
 def usuario_actual():
     if not hasattr(g, "usuario"):
         g.usuario = None
-        if session.get("backend_cookie"):
+        if session.get("backend_token"):
             datos, estado = llamar_backend("GET", "/usuarios/me")
             if estado == 200:
                 g.usuario = datos
             elif estado in (401, 403):
-                session.pop("backend_cookie", None)
+                session.pop("backend_token", None)
     return g.usuario
 
 def requiere_usuario(funcion):
@@ -108,6 +105,8 @@ def login():
     if request.method == "POST":
         datos, estado = llamar_backend("POST", "/auth/login", json={"email": request.form.get("email", ""), "password": request.form.get("password", "")})
         if estado == 200:
+            session.pop("backend_cookie", None)
+            session["backend_token"] = datos["access_token"]
             flash("Sesión iniciada.", "ok")
             usuario = datos.get("usuario", {})
             return redirect(url_for("admin_resumen" if usuario.get("rol", "").casefold() == "administrador" else "index"))
@@ -116,7 +115,10 @@ def login():
 
 @app.post("/logout")
 def logout():
-    llamar_backend("POST", "/auth/logout")
+    datos, estado = llamar_backend("POST", "/auth/logout")
+    if estado not in (200, 401):
+        flash("No se pudo cerrar la sesión en el servidor. Intentá nuevamente.", "error")
+        return redirect(url_for("index"))
     session.clear()
     return redirect(url_for("index"))
 
@@ -296,7 +298,7 @@ def ver_qr_cliente(id_entrada):
 
     respuesta = requests.get(
         f"{BACKEND_URL}/qr/{id_entrada}",
-        cookies={"cine_backend": session.get("backend_cookie", "")},
+        headers={"Authorization": "Bearer " + session.get("backend_token", "")},
         timeout=10
     )
 

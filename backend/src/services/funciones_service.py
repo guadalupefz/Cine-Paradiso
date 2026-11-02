@@ -1,4 +1,5 @@
 from backend.db.db import get_connection
+from backend.src.validators.duracion_validator import minutos_de_duracion
 from backend.src.repositories.funciones_repository import (obtener_funciones, 
                                                            crear_funcion, 
                                                            contar_entradas_por_funcion, 
@@ -35,7 +36,7 @@ def crear_funcion_servicio(data):
             raise ValueError("La película especificada no existe.")
             
         try:
-            duracion_minutos = int(peli["duracion_minutos"])
+            duracion_minutos = minutos_de_duracion(peli["duracion_minutos"])
         except (TypeError, ValueError):
             raise ValueError("La duración de la película no es válida.")
 

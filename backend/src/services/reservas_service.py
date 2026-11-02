@@ -5,6 +5,7 @@ import mysql.connector
 from backend.db.db import get_connection
 
 from backend.src.repositories.servicios_repository import obtener_servicio
+from backend.src.repositories.compra_repository import obtener_butacas_de_funcion
 
 from backend.src.repositories.reservas_repositories import (obtener_butacas_ocupadas_con_bloqueo,
     limpiar_reservas_expiradas, obtener_precio_base_funcion, crear_compra_pendiente,
@@ -36,6 +37,18 @@ def crear_reserva(id_usuario: int, id_funcion: int,
                     "error": "FUNCION_NO_ENCONTRADA",
                     "mensaje": "La función especificada no existe.",
                     "status_code": 404
+                }
+
+            # La funcion ya esta bloqueada: las reservas de esta funcion se
+            # resuelven en orden, incluso cuando todavia no existe una entrada.
+            butacas_sala = obtener_butacas_de_funcion(cursor, id_funcion)
+            ids_validos = {butaca["id_butaca"] for butaca in butacas_sala}
+            if any(id_butaca not in ids_validos for id_butaca in lista_id_butacas):
+                conn.rollback()
+                return None, {
+                    "error": "BUTACAS_INVALIDAS",
+                    "mensaje": "Una o más butacas no pertenecen a la sala de esta función.",
+                    "status_code": 400,
                 }
 
             # Limpiar reservas vencidas
@@ -147,6 +160,13 @@ def crear_reserva(id_usuario: int, id_funcion: int,
                 "error": "BUTACAS_OCUPADAS",
                 "mensaje": "Una o más butacas seleccionadas ya están reservadas o vendidas.",
                 "status_code": 409
+            }
+
+        if e.errno in (1205, 1213):
+            return None, {
+                "error": "CONFLICTO_RESERVA",
+                "mensaje": "Otra operación está modificando la reserva. Volvé a intentar.",
+                "status_code": 409,
             }
 
         return None, {

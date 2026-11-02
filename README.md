@@ -32,7 +32,13 @@ bash init.sh
 
 Completar `.env` desde `.env.example`, crear/cargar MySQL y activar `.venv`.
 El backend se inicia con `python -m backend.app` y el frontend con `python frontend/app.py`.
-La autenticación integrada utiliza sesiones de Flask; no requiere generar tokens JWT.
+La autenticación de la API utiliza Flask-JWT-Extended. El frontend envía el token desde Python. Ver [preparación y migración JWT](docs/propuesta-jwt-y-correcciones.md) antes de iniciar con una base existente.
+
+## CONEXIÓN Y AYUDANTES SQL
+
+`backend/db/db.py` contiene `get_connection`. `backend/db/__init__.py` exporta
+`ejecutar_buscar`, `ejecutar_buscar_uno` y `ejecutar_guardar`.
+Importarlos desde `backend.db`; no hace falta otro archivo `backend/db.py`.
 
 ## GRUPO TP final IDS
 ```

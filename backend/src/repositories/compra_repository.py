@@ -3,6 +3,7 @@ def obtener_funcion(cursor, id_funcion):
         SELECT id_funcion, id_sala, precio_base
         FROM funcion
         WHERE id_funcion = %s
+        FOR UPDATE
     """
     cursor.execute(query, (id_funcion,))
     return cursor.fetchone()
@@ -32,6 +33,7 @@ def obtener_butacas_ocupadas(cursor, id_funcion):
         SELECT id_butaca
         FROM entrada
         WHERE id_funcion = %s
+        FOR UPDATE
     """
     cursor.execute(query, (id_funcion,))
     return cursor.fetchall()

@@ -33,7 +33,7 @@ def validar_datos_reserva(id_funcion: int, data: dict):
                 "field": "butacas"
             })
         else:
-            if len(butacas) != len(set(butacas)):
+            if all(type(id_b) is int and id_b > 0 for id_b in butacas) and len(butacas) != len(set(butacas)):
                 errores.append({
                     "code": "BUTACAS_REPETIDAS",
                     "message": "No se pueden seleccionar butacas repetidas.",

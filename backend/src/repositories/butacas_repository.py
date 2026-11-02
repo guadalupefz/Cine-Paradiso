@@ -6,7 +6,8 @@ def obtener_butacas_por_funcion(cursor, id_funcion):
             b.fila,
             b.numero,
             CASE
-                WHEN e.id_entrada IS NOT NULL THEN 'ocupada'
+                WHEN c.estado IN ('aprobada', 'confirmada') THEN 'ocupada'
+                WHEN c.estado = 'pendiente' AND c.fecha_hora > NOW() - INTERVAL 15 MINUTE THEN 'reservada'
                 ELSE 'disponible'
             END AS estado
         FROM funcion f
@@ -15,6 +16,7 @@ def obtener_butacas_por_funcion(cursor, id_funcion):
         LEFT JOIN entrada e
             ON e.id_funcion = f.id_funcion
             AND e.id_butaca = b.id_butaca
+        LEFT JOIN compra c ON c.id_compra = e.id_compra
         WHERE f.id_funcion = %s
         ORDER BY b.fila, b.numero
     """

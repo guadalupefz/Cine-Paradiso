@@ -1,4 +1,6 @@
 from flask import Blueprint, request, jsonify, session
+from flask_jwt_extended import create_access_token, get_jwt, jwt_required
+from backend.autenticacion import revocar_token
 import mysql.connector
 from werkzeug.security import check_password_hash
 from backend.db.db import get_connection
@@ -78,12 +80,16 @@ def login():
     if usuario is None or not check_password_hash(usuario["password_hash"], password):
         return jsonify({"error": "Credenciales inválidas"}), 401
     session.clear()
-    session["id_usuario"] = usuario["id_usuario"]
+    token = create_access_token(identity=str(usuario["id_usuario"]))
     publico = {clave: valor for clave, valor in usuario.items() if clave != "password_hash"}
-    return jsonify({"mensaje": "Sesión iniciada", "usuario": publico}), 200
+    respuesta = jsonify({"mensaje": "Sesión iniciada", "usuario": publico, "access_token": token, "token_type": "Bearer", "expires_in": 7200})
+    respuesta.headers["Cache-Control"] = "no-store"
+    return respuesta, 200
 
 @auth_bp.post("/auth/logout")
+@jwt_required()
 def logout():
+    revocar_token(get_jwt())
     session.clear()
     return jsonify({"mensaje": "Sesión cerrada"}), 200
 

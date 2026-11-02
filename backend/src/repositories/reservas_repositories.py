@@ -11,7 +11,7 @@ def obtener_butacas_ocupadas_con_bloqueo(cursor, id_funcion: int, lista_id_butac
         WHERE e.id_funcion = %s
             AND e.id_butaca IN ({format_strings})
             AND (
-                c.estado = 'confirmada'
+                c.estado IN ('aprobada', 'confirmada')
                 OR (c.estado = 'pendiente' AND c.fecha_hora > NOW() - INTERVAL 15 MINUTE)
             )
         FOR UPDATE;
@@ -30,23 +30,21 @@ def limpiar_reservas_expiradas(cursor, id_funcion: int, lista_id_butacas: list):
         INNER JOIN entrada e ON e.id_compra = c.id_compra
         SET c.estado = 'expirada'
         WHERE e.id_funcion = %s
-            AND e.id_butaca IN ({format_strings})
             AND c.estado = 'pendiente'
             AND c.fecha_hora <= NOW() - INTERVAL 15 MINUTE;
     """
-    cursor.execute(query_upd, [id_funcion] + list(lista_id_butacas))
+    cursor.execute(query_upd, (id_funcion,))
 
     query_del = f"""
         DELETE e FROM entrada e
         INNER JOIN compra c ON c.id_compra = e.id_compra
         WHERE e.id_funcion = %s
-            AND e.id_butaca IN ({format_strings})
             AND c.estado = 'expirada';
     """
-    cursor.execute(query_del, [id_funcion] + list(lista_id_butacas))
+    cursor.execute(query_del, (id_funcion,))
 
 def obtener_precio_base_funcion(cursor, id_funcion: int):
-    query = "SELECT precio_base FROM funcion WHERE id_funcion = %s;"
+    query = "SELECT precio_base FROM funcion WHERE id_funcion = %s FOR UPDATE;"
     cursor.execute(query, (id_funcion,))
     res = cursor.fetchone()
     return res['precio_base'] if res else None

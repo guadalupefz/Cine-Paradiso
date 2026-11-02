@@ -10,7 +10,7 @@ cp .env.example .env
 python3 -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-Completar `.env`: datos de MySQL y `SECRET_KEY` con el valor generado. `FRONTEND_SECRET_KEY` puede tener otra clave; si queda vacía se deriva una clave distinta para el frontend. No publicar `.env`. Si MySQL está en Windows y Python en WSL, usar la dirección del anfitrión y una cuenta habilitada desde WSL; no abrir el puerto a toda la red.
+Completar `.env`: datos de MySQL y `SECRET_KEY` con el valor generado. Antes de usar JWT con una base existente, ejecutar la migración indicada en [propuesta-jwt-y-correcciones.md](propuesta-jwt-y-correcciones.md). `FRONTEND_SECRET_KEY` puede tener otra clave; si queda vacía se deriva una clave distinta para el frontend. No publicar `.env`. Si MySQL está en Windows y Python en WSL, usar la dirección del anfitrión y una cuenta habilitada desde WSL; no abrir el puerto a toda la red.
 
 Con el esquema vacío, ejecutar `backend/db/init_db.sql` y después `backend/db/datos_prueba.sql` desde el cliente MySQL. La carga es de una sola ejecución: no es una migración y no debe repetirse sobre datos existentes. El script de creación selecciona `cine_paradiso`; si se usa otra base, adaptar una copia y `DB_NAME`.
 
@@ -34,10 +34,12 @@ Frontend: http://127.0.0.1:8080. Backend: http://127.0.0.1:5001/api. El registro
 - `backend/src/repositories`: SQL explícito parametrizado.
 - `backend/src/services`: reglas y coordinación de operaciones del grupo.
 - `backend/src/routes`: validación HTTP, llamadas, respuestas y permisos.
-- `backend/seguridad.py`: decoradores `admin_required` y `cualquier_logueado`; verifican sesión y consultan el rol vigente en MySQL.
+- `backend/seguridad.py`: decoradores `admin_required` y `cualquier_logueado`; verifican JWT y consultan el rol vigente en MySQL.
 - `frontend/app.py`: formularios HTML/Jinja y comunicación con backend mediante `requests`, con timeout.
 
-Se mantiene una única autenticación por sesión Flask. Login guarda `session["id_usuario"]`; `GET /api/usuarios/me` devuelve el perfil sin hash. No se debe enviar `Authorization: Bearer` esperando que sustituya esta sesión. La cookie del backend se conserva por usuario en la sesión del frontend y se reenvía desde Python: no hay una sesión HTTP global compartida entre usuarios. Las cookies de ambas apps tienen nombres diferentes.
+La API utiliza Flask-JWT-Extended. Login conserva la verificación del hash y devuelve access_token. Las rutas reciben Authorization: Bearer <access_token>; logout lo revoca en MySQL. GET /api/usuarios/me devuelve el perfil sin hash. El frontend conserva el token por usuario en su sesión Flask y lo reenvía desde Python. La cookie antigua del backend deja de autenticar: iniciar sesión nuevamente.
+
+Ver [propuesta JWT y correcciones](propuesta-jwt-y-correcciones.md) para preparar la tabla de revocación y revisar el contrato antes de publicar.
 
 401 significa falta de autenticación;403, rol insuficiente;404 también oculta compras ajenas. Los formularios del frontend incluyen un token CSRF. Con HTTPS habilitar `COOKIE_SECURE=1`; no activar debug en una entrega desplegada.
 
@@ -60,9 +62,7 @@ La API externa requiere `OMDB_API_KEY`; si no está configurada, el panel inform
 python -m unittest discover -s backend/tests -v
 ```
 
-20 regresiones de permisos, validación, sesión, privacidad, cierres y rollback pasan con MySQL simulado. También se ejecutaron nueve escenarios de integración con un servidor MySQL8.4 separado: esquema/carga real, registro/login, lectura de compras, alta-edición-baja de servicios, tablas/rutas del grupo, acceso cliente/admin y creación/modificación de películas/funciones mediante frontend→requests→backend→MySQL.
-
-Se comprobó en Chromium el login administrativo, alta-edición-baja de servicios, logout y páginas de películas/funciones/servicios a390px sin desborde horizontal. Las pruebas no reemplazan la revisión del flujo de reserva, compra, correo y cancelación de los otros módulos.
+La propuesta actual pasa 60 pruebas de regresión y trece escenarios de integración con MySQL 8.4 aislado. Incluye verificación de JWT, revocación persistente, roles, privacidad, reservas concurrentes, vencimiento y formularios administrativos. El detalle y los límites están en propuesta-jwt-y-correcciones.md.
 
 ## Pendientes del conjunto
 
