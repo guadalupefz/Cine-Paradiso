@@ -1,6 +1,7 @@
 
 import uuid
 from decimal import Decimal
+from datetime import datetime, timedelta
 
 from backend.db.db import get_connection
 from backend.src.repositories.compra_repository import (
@@ -9,7 +10,9 @@ from backend.src.repositories.compra_repository import (
     obtener_butacas_de_funcion,
     obtener_butacas_ocupadas,
     crear_compra,
-    crear_entrada
+    crear_entrada,
+    obtener_compra_por_id,
+    obtener_entradas_por_compra
 )
 
 from backend.src.services.comprobante_service import obtener_comprobante
@@ -25,6 +28,7 @@ def realizar_compra(id_usuario, id_funcion, ids_butacas):
 
         if usuario is None:
             raise ValueError("El usuario no existe.")
+
         funcion = obtener_funcion(cursor, id_funcion)
 
         if funcion is None:
@@ -104,6 +108,104 @@ def realizar_compra(id_usuario, id_funcion, ids_butacas):
         enviar_mail_compra(comprobante, entradas)
 
     except Exception as error:
-        print(f"no se pudo enviar el correo: {error}")
+        print(f"No se pudo enviar el correo: {error}")
 
     return resultado
+
+
+def confirmar_compra(id_usuario, id_compra):
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        conn.start_transaction()
+
+        cursor.execute(
+            """
+            SELECT id_compra, id_usuario, fecha_hora, total, estado,
+                   (fecha_hora + INTERVAL 15 MINUTE > NOW()) AS vigente
+            FROM compra
+            WHERE id_compra = %s
+            FOR UPDATE
+            """,
+            (id_compra,)
+        )
+
+        compra = cursor.fetchone()
+
+        if compra is None:
+            raise ValueError("La compra no existe.")
+
+        if compra["id_usuario"] != id_usuario:
+            raise ValueError("La compra no pertenece a este usuario.")
+
+        if compra["estado"] != "pendiente":
+            raise ValueError("La compra no está pendiente de confirmación.")
+
+        if not compra["vigente"]:
+            cursor.execute(
+                """
+                UPDATE compra
+                SET estado = 'expirada'
+                WHERE id_compra = %s
+                """,
+                (id_compra,)
+            )
+            conn.commit()
+            raise ValueError(
+                "La reserva venció. Debe realizar una nueva reserva."
+            )
+
+        entradas = obtener_entradas_por_compra(cursor, id_compra)
+
+        if not entradas:
+            raise ValueError("La compra no tiene entradas asociadas.")
+
+        cursor.execute(
+            """
+            UPDATE compra
+            SET estado = 'aprobada'
+            WHERE id_compra = %s AND estado = 'pendiente'
+            """,
+            (id_compra,)
+        )
+
+        if cursor.rowcount != 1:
+            raise ValueError("No se pudo confirmar la compra.")
+
+        entradas_confirmadas = []
+
+        for entrada in entradas:
+            qr_token = str(uuid.uuid4())
+
+            cursor.execute(
+                """
+                UPDATE entrada
+                SET qr_token = %s
+                WHERE id_entrada = %s
+                """,
+                (qr_token, entrada["id_entrada"])
+            )
+
+            entradas_confirmadas.append({
+                "id_entrada": entrada["id_entrada"],
+                "id_butaca": entrada["id_butaca"],
+                "qr_token": qr_token
+            })
+
+        conn.commit()
+
+        return {
+            "id_compra": id_compra,
+            "total": str(compra["total"]),
+            "estado": "aprobada",
+            "entradas": entradas_confirmadas
+        }
+
+    except Exception:
+        conn.rollback()
+        raise
+
+    finally:
+        cursor.close()
+        conn.close()

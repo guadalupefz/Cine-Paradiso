@@ -1,0 +1,242 @@
+import unittest
+from unittest.mock import MagicMock, patch
+
+from backend.app import app
+from backend import seguridad
+from backend.src.routes import funciones_routes as funciones
+from backend.src.routes import peliculas_routes as peliculas
+
+
+class TestB08(unittest.TestCase):
+
+    def setUp(self):
+        app.config.update(TESTING=True, SECRET_KEY="clave-test")
+        self.client = app.test_client()
+
+        # Simular la conexión que verifica los permisos de administrador.
+        self.cn_seg = MagicMock()
+        self.cur_seg = self.cn_seg.cursor.return_value
+        self.cur_seg.__enter__.return_value = self.cur_seg
+        self.cur_seg.fetchone.return_value = {
+            "id_usuario": 8,
+            "rol": "administrador",
+        }
+
+        self.parche_seg = patch.object(
+            seguridad, "get_connection", return_value=self.cn_seg
+        )
+        self.parche_seg.start()
+        self.addCleanup(self.parche_seg.stop)
+
+        with self.client.session_transaction() as sesion:
+            sesion["id_usuario"] = 8
+
+    def base(self, modulo):
+        cn = MagicMock()
+        cur = cn.cursor.return_value
+        cur.__enter__.return_value = cur
+        cur.__exit__.return_value = False
+        cur.fetchone.return_value = None
+        cur.lastrowid = 37
+
+        parche = patch.object(modulo, "get_connection", return_value=cn)
+        parche.start()
+        self.addCleanup(parche.stop)
+
+        return cn, cur
+
+    def pelicula_valida(self):
+        return {
+            "titulo": "Pelicula de prueba",
+            "sinopsis": "Sinopsis de prueba",
+            "poster": "poster.jpg",
+            "duracion_minutos": 120,
+            "clasificacion": "ATP",
+            "genero": "Drama",
+        }
+
+    def funcion_valida(self):
+        return {
+            "id_pelicula": 1,
+            "id_sala": 1,
+            "fecha_hora_inicio": "2030-05-10T18:00:00",
+            "precio_base": "5000.00",
+        }
+
+    # PELÍCULAS
+
+    def test_listar_peliculas(self):
+        with patch.object(
+            peliculas, "obtener_peliculas", return_value=[]
+        ):
+            cn, _ = self.base(peliculas)
+            respuesta = self.client.get("/api/peliculas")
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertEqual(respuesta.json, {"peliculas": []})
+        cn.close.assert_called_once()
+
+    def test_crear_pelicula_correctamente(self):
+        cn, cur = self.base(peliculas)
+
+        respuesta = self.client.post(
+            "/api/peliculas", json=self.pelicula_valida()
+        )
+
+        self.assertEqual(respuesta.status_code, 201)
+        self.assertEqual(respuesta.json["id_pelicula"], 37)
+        cn.commit.assert_called_once()
+        cn.rollback.assert_not_called()
+        self.assertEqual(
+            cur.execute.call_args_list[0].args[1],
+            ("Pelicula de prueba",),
+        )
+        cn.close.assert_called_once()
+
+    def test_pelicula_invalida_no_se_guarda(self):
+        datos = self.pelicula_valida()
+        datos["duracion_minutos"] = True
+
+        with patch.object(peliculas, "get_connection") as abrir:
+            respuesta = self.client.post("/api/peliculas", json=datos)
+
+        self.assertEqual(respuesta.status_code, 400)
+        abrir.assert_not_called()
+
+    def test_pelicula_duplicada_devuelve_409(self):
+        cn, cur = self.base(peliculas)
+        cur.fetchone.return_value = {"id_pelicula": 5}
+
+        respuesta = self.client.post(
+            "/api/peliculas", json=self.pelicula_valida()
+        )
+
+        self.assertEqual(respuesta.status_code, 409)
+        cn.commit.assert_not_called()
+        cn.close.assert_called_once()
+
+    def test_modificar_pelicula_inexistente_devuelve_404(self):
+        cn, cur = self.base(peliculas)
+        cur.fetchone.return_value = None
+
+        respuesta = self.client.put(
+            "/api/peliculas/999", json=self.pelicula_valida()
+        )
+
+        self.assertEqual(respuesta.status_code, 404)
+        cn.commit.assert_not_called()
+        cn.close.assert_called_once()
+
+    # FUNCIONES
+
+    def test_listar_funciones(self):
+        with patch.object(
+            funciones,
+            "listar_funciones_servicio",
+            return_value=[],
+        ):
+            respuesta = self.client.get("/api/funciones")
+
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertEqual(respuesta.json, [])
+
+    def test_crear_funcion_correctamente(self):
+        with patch.object(
+            funciones, "crear_funcion_servicio", return_value=37
+        ) as crear:
+            respuesta = self.client.post(
+                "/api/funciones", json=self.funcion_valida()
+            )
+
+        self.assertEqual(respuesta.status_code, 201)
+        self.assertEqual(respuesta.json["id_funcion"], 37)
+        crear.assert_called_once_with(self.funcion_valida())
+
+    def test_crear_funcion_con_datos_invalidos(self):
+        datos = self.funcion_valida()
+        datos["precio_base"] = "-10"
+
+        with patch.object(
+            funciones, "crear_funcion_servicio"
+        ) as crear:
+            respuesta = self.client.post("/api/funciones", json=datos)
+
+        self.assertEqual(respuesta.status_code, 400)
+        crear.assert_not_called()
+
+    def test_crear_funcion_con_pelicula_inexistente(self):
+        with patch.object(
+            funciones,
+            "crear_funcion_servicio",
+            side_effect=ValueError("La película especificada no existe."),
+        ):
+            respuesta = self.client.post(
+                "/api/funciones", json=self.funcion_valida()
+            )
+
+        self.assertEqual(respuesta.status_code, 400)
+
+    def test_modificar_funcion_con_datos_incompletos(self):
+        respuesta = self.client.put(
+            "/api/funciones/1",
+            json={"id_pelicula": 1},
+        )
+
+        self.assertEqual(respuesta.status_code, 400)
+
+    def test_usuario_sin_sesion_no_puede_crear_pelicula(self):
+        with self.client.session_transaction() as sesion:
+            sesion.clear()
+
+        with patch.object(seguridad, "get_connection") as abrir:
+            respuesta = self.client.post(
+                "/api/peliculas", json=self.pelicula_valida()
+            )
+
+        self.assertEqual(respuesta.status_code, 401)
+        abrir.assert_not_called()
+
+
+    def test_usuario_sin_sesion_no_puede_crear_funcion(self):
+        with self.client.session_transaction() as sesion:
+            sesion.clear()
+
+        with patch.object(seguridad, "get_connection") as abrir:
+            respuesta = self.client.post(
+                "/api/funciones",
+                json=self.funcion_valida(),
+            )
+
+        self.assertEqual(respuesta.status_code, 401)
+        abrir.assert_not_called()
+
+    def test_usuario_sin_sesion_no_puede_modificar_funcion(self):
+        with self.client.session_transaction() as sesion:
+            sesion.clear()
+
+        with patch.object(seguridad, "get_connection") as abrir:
+            respuesta = self.client.put(
+                "/api/funciones/1",
+                json=self.funcion_valida(),
+            )
+
+        self.assertEqual(respuesta.status_code, 401)
+        abrir.assert_not_called()
+
+    def test_modificar_funcion_inexistente_devuelve_404(self):
+        cn, cur = self.base(funciones)
+        cur.fetchone.return_value = None
+
+        respuesta = self.client.put(
+            "/api/funciones/999",
+            json=self.funcion_valida(),
+        )
+
+        self.assertEqual(respuesta.status_code, 404)
+        cn.commit.assert_not_called()
+        cn.close.assert_called_once()
+
+
+if __name__ == "__main__":
+    unittest.main()
+    

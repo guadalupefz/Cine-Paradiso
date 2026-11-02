@@ -24,6 +24,7 @@ from backend.src.routes.qr_routes import qr_bp
 from backend.src.routes.reservas_routes import reservas_bp
 from backend.src.services.correo_service import mail
 
+
 app = Flask(__name__, static_folder="static")
 app.config.update(
     SECRET_KEY=os.environ["SECRET_KEY"],

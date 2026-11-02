@@ -18,3 +18,4 @@ instance/
 .directory
 .vscode/
 *.swp
+cookies.txt

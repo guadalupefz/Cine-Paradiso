@@ -70,3 +70,17 @@ def crear_entradas_reserva(cursor, id_compra: int, id_funcion: int, lista_id_but
         VALUES (%s, %s, %s, %s);
     """
     cursor.executemany(query, datos)
+
+def agregar_servicio_a_compra(
+    cursor, id_compra, id_servicio, cantidad, precio_unitario
+):
+    query = """
+        INSERT INTO compra_servicio
+            (id_compra, id_servicio, cantidad, precio_unitario)
+        VALUES (%s, %s, %s, %s)
+    """
+
+    cursor.execute(
+        query,
+        (id_compra, id_servicio, cantidad, precio_unitario)
+    )
