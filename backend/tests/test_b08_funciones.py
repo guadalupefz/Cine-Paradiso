@@ -352,6 +352,34 @@ class TestB08(unittest.TestCase):
         self.assertFalse(se_solapan)
 
 
+    def test_modificar_funcion_con_entradas_vendidas_rechaza_cambio_de_horario(self):
+        from datetime import datetime
+
+        cn, cur = self.base(funciones)
+        cur.fetchone.side_effect = [
+            {
+                "id_funcion": 1,
+                "id_sala": 1,
+                "fecha_hora_inicio": datetime(2030, 5, 10, 18, 0),
+            },
+            {"id_pelicula": 1},
+            {"id_sala": 1},
+        ]
+
+        datos = self.funcion_valida()
+        datos["fecha_hora_inicio"] = "2030-05-10T20:00:00"
+
+        with patch.object(
+            funciones, "contar_entradas_por_funcion", return_value=5
+        ), patch.object(funciones, "modificar_funcion") as modificar:
+            respuesta = self.client.put("/api/funciones/1", json=datos)
+
+        self.assertEqual(respuesta.status_code, 400)
+        self.assertEqual(respuesta.json["error"], "RESTRICCION_VENTAS")
+        modificar.assert_not_called()
+        cn.commit.assert_not_called()
+        cn.close.assert_called_once()
+
+
 if __name__ == "__main__":
     unittest.main()
-    
