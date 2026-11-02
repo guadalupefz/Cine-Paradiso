@@ -1,35 +1,11 @@
-{% extends "admin/base_admin.html" %}
-
-
-{% block title %}Películas{% endblock %}
-
-
-{% block content %}
-
-<h2>Gestión de películas</h2>
-
-<form action="">
-
-    <div class="campo_formulario">
-        <label for="titulo">Título de la película</label>
-        <input type="text" id="titulo" name="titulo">
-    </div>
-
-    <div class="campo_formulario">
-        <label for="duracion">Duración</label>
-        <input type="number" id="duracion" name="duracion">
-    </div>
-
-    <label for="sinopsis">Sinopsis</label>
-    <input type="text" id="sinopsis" name="sinopsis">
-
-    <label for="genero">Género</label>
-    <input type="text" id="genero" name="genero">
-
-    <label for="poster">Póster</label>
-    <input type="file" id="poster" name="poster">
-
-    <button type="submit">Guardar película</button>
-
-</form>
-{% endblock %}
+{% extends "admin/base_admin.html" %}{% block title %}Películas - Administración{% endblock %}{% block content %}
+<h2>Gestión de películas</h2><section class="tarjeta-admin"><h3>Buscar en la API externa</h3><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label for="busqueda">Título</label><input id="busqueda" name="titulo" required><button name="accion" value="buscar">Consultar</button><button name="accion" value="importar">Importar al catálogo</button></form>{% if resultado_api and resultado_api.titulo %}<h4>{{ resultado_api.titulo }}</h4><p>{{ resultado_api.sinopsis }}</p><p>{{ resultado_api.duracion_minutos }}</p>{% endif %}</section>
+<section class="tarjeta-admin"><h3>{{ 'Modificar película' if pelicula_editar else 'Carga manual' }}</h3><p>Podés completar el catálogo aunque la API externa no esté disponible.</p><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="accion" value="{{ 'editar' if pelicula_editar else 'crear' }}">{% if pelicula_editar %}<input type="hidden" name="id_pelicula" value="{{ pelicula_editar.id_pelicula }}">{% endif %}
+<label for="titulo">Título</label><input id="titulo" name="titulo" maxlength="150" required value="{{ pelicula_editar.titulo if pelicula_editar else '' }}">
+<label for="duracion">Duración en minutos</label><input id="duracion" name="duracion_minutos" type="number" min="1" max="1440" required value="{{ (pelicula_editar.duracion_minutos|string).split(' ')[0] if pelicula_editar else '' }}">
+<label for="sinopsis">Sinopsis</label><textarea id="sinopsis" name="sinopsis" required>{{ pelicula_editar.sinopsis if pelicula_editar else '' }}</textarea>
+<label for="genero">Género</label><input id="genero" name="genero" maxlength="50" required value="{{ pelicula_editar.genero if pelicula_editar else '' }}">
+<label for="clasificacion">Clasificación</label><input id="clasificacion" name="clasificacion" maxlength="20" required value="{{ pelicula_editar.clasificacion if pelicula_editar else '' }}">
+<label for="poster">URL o ruta del póster</label><input id="poster" name="poster" maxlength="100" required value="{{ pelicula_editar.poster if pelicula_editar else '/static/img/default.svg' }}">
+<button type="submit">Guardar película</button>{% if pelicula_editar %}<a href="{{ url_for('admin_peliculas') }}">Cancelar edición</a>{% endif %}</form></section>
+<h3>Catálogo local</h3><div class="tabla-scroll"><table><thead><tr><th>Título</th><th>Duración</th><th>Clasificación</th><th></th></tr></thead><tbody>{% for pelicula in peliculas %}<tr><td>{{ pelicula.titulo }}</td><td>{{ pelicula.duracion_minutos }}</td><td>{{ pelicula.clasificacion }}</td><td><a href="{{ url_for('admin_peliculas',editar=pelicula.id_pelicula) }}">Modificar</a></td></tr>{% else %}<tr><td colspan="4">No hay películas cargadas.</td></tr>{% endfor %}</tbody></table></div>{% endblock %}

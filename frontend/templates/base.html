@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -16,12 +15,14 @@
         </a>
 
         <nav aria-label="Navegación principal">
+            {% if usuario_actual %}<a href="{{ url_for('mis_compras') }}">Mis compras</a>{% if usuario_actual.rol|lower == 'administrador' %}<a href="{{ url_for('admin_resumen') }}">Administración</a>{% endif %}<form class="form-inline" action="{{ url_for('logout') }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit">Cerrar sesión</button></form>{% else %}<a href="{{ url_for('login') }}">Iniciar sesión</a>{% endif %}
             <a href="{{ url_for('index') }}">Cartelera</a>
             <a href="{{ url_for('ver_servicios') }}">Servicios</a>
         </nav>
     </header>
 
     <main>
+        {% with mensajes=get_flashed_messages(with_categories=true) %}{% for categoria,mensaje in mensajes %}<p class="aviso {{ categoria }}" role="status">{{ mensaje }}</p>{% endfor %}{% endwith %}
         {% block content %}{% endblock %}
     </main>
 

@@ -1,16 +1,9 @@
-import os
-import datetime
+"""Autenticacion por sesion y permisos compartidos por el backend."""
 import time
 from functools import wraps
-from flask import Flask, jsonify, request
-import jwt
-from dotenv import load_dotenv
-
-
-load_dotenv()  
-SECRET_KEY = os.getenv('JWT_SECRET_KEY')
-
-
+import mysql.connector
+from flask import jsonify, session, request
+from backend.db.db import get_connection
 
 def crear_limitador():
     """
@@ -51,58 +44,50 @@ def crear_limitador():
                 return f(*args, **kwargs)
             return funcion_decorada
         return decorador
-    
+
     return configurar_limite
 
 # Inicializamos la fábrica de límites
 limitar = crear_limitador()
 
 
-# @limitar() 
+# @limitar()
 
-# @limitar(max_dia=1000, max_hora=300)  
+# @limitar(max_dia=1000, max_hora=300)
+
 
 
 
 def roles_required(allowed_roles):
-    def decorator(f):
-        @wraps(f)
+    roles = {rol.strip().casefold() for rol in allowed_roles}
+    def decorator(funcion):
+        @wraps(funcion)
         def decorated(*args, **kwargs):
-            
-            auth_header = request.headers.get('Authorization')
-            
-            # Modificación 1: Validación simple de existencia
-            if not auth_header:
-                return jsonify({'error': 'No autorizado', 'message': 'Token ausente'}), 401
-            
-            partes = auth_header.split()
-            
-            # Modificación 2: Validación inteligente del formato y de la palabra 'bearer'
-            if len(partes) != 2 or partes[0].lower() != 'bearer':
-                return jsonify({'error': 'No autorizado', 'message': 'Formato de token inválido. Debe ser: Bearer <token>'}), 401
-            
-            token = partes[1]
-            
+            id_usuario = session.get("id_usuario")
+            if type(id_usuario) is not int or id_usuario <= 0:
+                session.clear()
+                return jsonify({"error": "Debés iniciar sesión"}), 401
             try:
-                data = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
-                user_role = data.get('role')      
-                current_user = data.get('user_id')
-            except jwt.ExpiredSignatureError:
-                return jsonify({'error': 'No autorizado', 'message': 'El token ha expirado'}), 401
-            except jwt.InvalidTokenError:
-                # Modificación 3: Mensaje más descriptivo para el descarte de errores
-                return jsonify({'error': 'No autorizado', 'message': 'Token inválido o firma corrupta'}), 401
-            # Validación del Rol
-            if user_role not in allowed_roles:
-                return jsonify({'error': 'Prohibido', 'message': 'No tienes permisos para esta acción'}), 403
-
-            return f(current_user, *args, **kwargs)
+                conexion = get_connection()
+                try:
+                    with conexion.cursor(dictionary=True) as cursor:
+                        cursor.execute("SELECT id_usuario, rol FROM usuario WHERE id_usuario = %s", (id_usuario,))
+                        usuario = cursor.fetchone()
+                finally:
+                    conexion.close()
+            except mysql.connector.Error:
+                return jsonify({"error": "No se pudo verificar el acceso"}), 500
+            if usuario is None:
+                session.clear()
+                return jsonify({"error": "Debés iniciar sesión"}), 401
+            rol = usuario.get("rol")
+            if not isinstance(rol, str) or rol.strip().casefold() not in roles:
+                return jsonify({"error": "No tenés permisos para esta acción"}), 403
+            return funcion(id_usuario, *args, **kwargs)
         return decorated
     return decorator
 
-# Atajos limpios
-admin_required = roles_required(['administrador'])
-usuario_required = roles_required(['usuario'])
-cualquier_logueado = roles_required(['administrador', 'usuario'])
-
-
+admin_required = roles_required(["administrador"])
+cliente_required = roles_required(["cliente"])
+usuario_required = cliente_required
+cualquier_logueado = roles_required(["administrador", "cliente"])

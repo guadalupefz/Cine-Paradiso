@@ -18,7 +18,7 @@ def obtener_cartelera(cursor):
 # Listar todas las funciones disponibles
 def obtener_funciones(cursor):
     query = """
-        SELECT f.id_funcion, f.fecha_hora_inicio, f.precio_base, p.titulo, s.nombre as sala_nombre
+        SELECT f.id_funcion, f.id_pelicula, f.id_sala, f.fecha_hora_inicio, f.precio_base, p.titulo, s.nombre as sala_nombre
         FROM funcion f
         JOIN pelicula p ON f.id_pelicula = p.id_pelicula
         JOIN sala s ON f.id_sala = s.id_sala
@@ -35,7 +35,7 @@ def crear_funcion(cursor, id_pelicula, id_sala, fecha_hora_inicio, precio_base):
 # Modificar una función existente (Administrador)
 def modificar_funcion(cursor, funcion_id, id_pelicula, id_sala, fecha_hora_inicio, precio_base):
     query = """
-        UPDATE funcion 
+        UPDATE funcion
         SET id_pelicula = %s, id_sala = %s, fecha_hora_inicio = %s, precio_base = %s
         WHERE id_funcion = %s
     """

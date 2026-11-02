@@ -3,9 +3,9 @@ from datetime import datetime
 import mysql.connector
 from flask import Blueprint, jsonify, request
 
-from conexion_db import get_connection
-from seguridad import admin_required
-from src.repositories.estadisticas_repository import (
+from backend.db.db import get_connection
+from backend.seguridad import admin_required
+from backend.src.repositories.estadisticas_repository import (
     obtener_ventas_por_genero,
     obtener_ventas_por_franja,
     obtener_ocupacion_por_funcion,

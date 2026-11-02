@@ -1,3 +1,4 @@
+from backend.seguridad import admin_required
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
@@ -14,26 +15,27 @@ funciones_bp = Blueprint("funciones", __name__)
 
 @funciones_bp.route('/funciones', methods=['GET'])
 def listar_funciones_route():
-    try: 
+    try:
 
         funciones = listar_funciones_servicio()
         return jsonify(funciones), 200
-        
+
     except Exception as e:
         return jsonify({"error": "Error interno del servidor", 'detalles' : str(e)}), 500
 
 @funciones_bp.route('/funciones', methods=['POST'])
-def crear_funcion_route():
-    
+@admin_required
+def crear_funcion_route(id_usuario):
+
     data = request.get_json()
     error = validar_crear_funcion(data)
-   
+
     if error:
         return jsonify({'error': error}), 400
 
     try:
         id_funcion = crear_funcion_servicio(data)
-        
+
         return jsonify({
             'mensaje': 'Función creada exitosamente',
             'id_funcion': id_funcion
@@ -46,8 +48,10 @@ def crear_funcion_route():
                 "detalle": "La película o la sala especificada no existe en la base de datos."
             }), 400
 
+        return jsonify({"error": "No se pudo crear la función"}), 500
+
     except Exception as e:
-        return jsonify({'error': 'Ocurrió un error al crear la función en la base de datos.', 
+        return jsonify({'error': 'Ocurrió un error al crear la función en la base de datos.',
                         'detalles' : str(e)}), 500
 
 @funciones_bp.route("/cartelera", methods=["GET"])
@@ -62,7 +66,7 @@ def consultar_cartelera():
 
         return jsonify({"cartelera": cartelera}), 200
 
-    
+
     except mysql.connector.Error:
         return jsonify({
             "error": "ERROR_BASE_DATOS",
@@ -78,9 +82,10 @@ def consultar_cartelera():
     finally:
         if conn is not None:
             conn.close()
-            
+
 @funciones_bp.route("/funciones/<int:id_funcion>", methods=["PUT"])
-def actualizar_funcion(id_funcion):
+@admin_required
+def actualizar_funcion(id_usuario, id_funcion):
     if id_funcion <= 0:
         return jsonify({
             "error": "ID_FUNCION_INVALIDO",

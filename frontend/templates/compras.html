@@ -1,0 +1,1 @@
+{% extends "base.html" %}{% block content %}<h2>Mis compras</h2>{% for compra in compras %}<article class="tarjeta-admin"><h3>Compra {{ compra.id_compra }}</h3><p>{{ compra.fecha_hora }} · {{ compra.estado }}</p><p>Total: ${{ compra.total }}</p></article>{% else %}<p>No tenés compras registradas.</p>{% endfor %}{% endblock %}

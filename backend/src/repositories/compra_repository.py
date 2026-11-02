@@ -1,4 +1,3 @@
-
 def obtener_funcion(cursor, id_funcion):
     query = """
         SELECT id_funcion, id_sala, precio_base
@@ -75,3 +74,33 @@ def obtener_entradas_por_compra(cursor, id_compra):
     """
     cursor.execute(query, (id_compra,))
     return cursor.fetchall()
+
+
+def obtener_compras_por_usuario(cursor, id_usuario):
+    consulta = """
+        SELECT id_compra, fecha_hora, total, estado
+        FROM compra
+        WHERE id_usuario = %s
+    """
+    cursor.execute(consulta, (id_usuario,))
+    return cursor.fetchall()
+
+def obtener_servicios_de_compra(cursor, id_compra):
+    consulta = """
+        SELECT cs.id_servicio, sa.nombre, cs.cantidad, cs.precio_unitario, cs.cantidad * cs.precio_unitario AS subtotal
+        FROM compra_servicio AS cs
+        INNER JOIN servicio_adicional AS sa
+        ON cs.id_servicio = sa.id_servicio
+        WHERE cs.id_compra = %s
+    """
+    cursor.execute(consulta, (id_compra,))
+    return cursor.fetchall()
+
+def obtener_compra_de_usuario(cursor, id_compra, id_usuario):
+    consulta = """
+        SELECT id_compra, fecha_hora, total, estado
+        FROM compra
+        WHERE id_compra = %s AND id_usuario = %s
+    """
+    cursor.execute(consulta, (id_compra, id_usuario))
+    return cursor.fetchone()

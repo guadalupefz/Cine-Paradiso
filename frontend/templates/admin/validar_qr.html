@@ -6,7 +6,7 @@
 
 <h2>validar qr</h2>
 
-<form method="POST">
+<form method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <div class="campo_formulario">
         <label for="qr_token">Codigo de entrada</label>
         <input type="text" id="qr_token" name="qr_token">

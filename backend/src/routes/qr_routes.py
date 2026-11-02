@@ -1,17 +1,18 @@
+from backend.seguridad import admin_required
 from flask import Blueprint, request, jsonify
 
-from src.validators.qr_validator import validar_datos_qr
+from backend.src.validators.qr_validator import validar_datos_qr
 
 import mysql.connector
 
-from db.db import get_connection
+from backend.db.db import get_connection
 
-from src.repositories.qr_repository import (
+from backend.src.repositories.qr_repository import (
     validar_entrada,
     marcar_entrada_usada
 )
 
-from src.services.qr_service import (
+from backend.src.services.qr_service import (
     entrada_utilizada,
     compra_confirmada,
     funcion_correcta,
@@ -22,7 +23,8 @@ qr_bp = Blueprint("qr", __name__)
 
 
 @qr_bp.route("/qr/validar", methods=["POST"])
-def validar_qr():
+@admin_required
+def validar_qr(id_usuario):
     datos = request.get_json(silent=True)
     valido, mensaje = validar_datos_qr(datos)
     if not valido:
@@ -30,7 +32,7 @@ def validar_qr():
             "error": "QR_INVALIDO",
             "mensaje": mensaje
         }), 400
-    
+
     qr_token = datos.get("qr_token").strip()
 
     id_funcion = datos.get("id_funcion")
@@ -85,7 +87,7 @@ def validar_qr():
                     "error": "QR_NO_ACTUALIZADO",
                     "mensaje": "no se pudo hacer el ingreso"
                 }), 409
-        
+
         conn.commit()
 
         return jsonify({

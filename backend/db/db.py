@@ -1,15 +1,16 @@
-import os 
-import mysql.connector 
+import os
+from pathlib import Path
+import mysql.connector
 from dotenv import load_dotenv
-# Cargar las variables definidas en el archivo .env 
 
-load_dotenv()
-def get_connection(): 
-    # Establece y devuelve una conexión activa a la base de datos MySQL.
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
+
+def get_connection():
     return mysql.connector.connect(
-        host=os.getenv("DB_HOST", "localhost"),
-        port=int(os.getenv("DB_PORT", 3306)),
-        user=os.getenv("DB_USER", "root"),
-        password=os.getenv("DB_PASSWORD", ""),
-        database=os.getenv("DB_NAME", "cine_paradiso")
+        host=os.environ.get("DB_HOST", "127.0.0.1"),
+        port=int(os.environ.get("DB_PORT", "3306")),
+        user=os.environ["DB_USER"],
+        password=os.environ.get("DB_PASSWORD", ""),
+        database=os.environ.get("DB_NAME", "cine_paradiso"),
+        connection_timeout=5,
     )

@@ -26,3 +26,11 @@ def crear_usuario(nombre, apellido, email, password_hash, rol):
         raise
     finally:
         conn.close()
+
+def buscar_credenciales(cursor, email):
+    cursor.execute("SELECT id_usuario, nombre, apellido, email, password_hash, rol FROM usuario WHERE email = %s", (email,))
+    return cursor.fetchone()
+
+def obtener_perfil(cursor, id_usuario):
+    cursor.execute("SELECT id_usuario, nombre, apellido, email, rol FROM usuario WHERE id_usuario = %s", (id_usuario,))
+    return cursor.fetchone()

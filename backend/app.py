@@ -1,33 +1,43 @@
-
+import os
+import sys
+from pathlib import Path
+from datetime import timedelta
+from dotenv import load_dotenv
 from flask import Flask
 
-#from src.routes.butacas import mis_rutas
-#from src.routes.auth_routes import auth_bp
-from src.routes.peliculas import peliculas_bp
-#from src.routes.funciones_routes import funciones_bp
-#from src.routes.locales_routes import locales_bp
-#from src.routes.salas_routes import salas_bp
-#from src.routes.compras_routes import compras_bp
-from src.routes.estadisticas_routes import estadisticas_bp
-from src.routes.qr_routes import qr_bp
+RAIZ = Path(__file__).resolve().parents[1]
+if str(RAIZ) not in sys.path:
+    sys.path.insert(0, str(RAIZ))
+load_dotenv(RAIZ / ".env")
 
-app = Flask(__name__)
+from backend.src.routes.auth_routes import auth_bp
+from backend.src.routes.butacas import mis_rutas
+from backend.src.routes.peliculas import peliculas_bp as peliculas_externas_bp
+from backend.src.routes.peliculas_routes import peliculas_bp
+from backend.src.routes.funciones_routes import funciones_bp
+from backend.src.routes.locales_routes import locales_bp
+from backend.src.routes.salas_routes import salas_bp
+from backend.src.routes.compras_routes import compras_bp
+from backend.src.routes.servicios_routes import servicios_bp
+from backend.src.routes.estadisticas_routes import estadisticas_bp
+from backend.src.routes.qr_routes import qr_bp
 
-#app.register_blueprint(mis_rutas, url_prefix='/api')
-#app.register_blueprint(auth_bp, url_prefix='/api')
-app.register_blueprint(peliculas_bp, url_prefix='/api')
-#app.register_blueprint(funciones_bp, url_prefix='/api')
-#app.register_blueprint(locales_bp, url_prefix='/api')
-#app.register_blueprint(salas_bp, url_prefix='/api')
-#app.register_blueprint(compras_bp, url_prefix='/api')
-app.register_blueprint(estadisticas_bp, url_prefix="/api")
-app.register_blueprint(qr_bp, url_prefix="/api")
+app = Flask(__name__, static_folder="static")
+app.config.update(
+    SECRET_KEY=os.environ["SECRET_KEY"],
+    SESSION_COOKIE_NAME="cine_backend",
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=os.environ.get("COOKIE_SECURE", "0") == "1",
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=2),
+    MAX_CONTENT_LENGTH=1024 * 1024,
+)
+for blueprint in (auth_bp, mis_rutas, peliculas_externas_bp, peliculas_bp, funciones_bp, locales_bp, salas_bp, compras_bp, servicios_bp, estadisticas_bp, qr_bp):
+    app.register_blueprint(blueprint, url_prefix="/api")
 
-
-@app.route('/')
+@app.get("/")
 def index():
     return "Backend de Cine Paradiso"
 
-
-if __name__ == '__main__':
-    app.run("127.0.0.1", port=5001, debug=True)
+if __name__ == "__main__":
+    app.run("127.0.0.1", port=5001, debug=os.environ.get("FLASK_DEBUG") == "1")

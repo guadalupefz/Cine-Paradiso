@@ -529,3 +529,27 @@ main button:focus-visible {
         max-width: 100%;
     }
 }
+
+
+/* Formularios y tablas del panel, con la paleta del sitio. */
+.contenido_admin { min-width: 0; box-sizing: border-box; }
+.tarjeta-admin { background: #fff; border: 1px solid #d5bdb0; border-radius: 10px; padding: 20px; margin: 18px 0; }
+.tarjeta-admin form, .formulario-acceso form { display: grid; gap: 10px; }
+.tarjeta-admin input, .tarjeta-admin select, .tarjeta-admin textarea, .formulario-acceso input { width: 100%; min-width: 0; box-sizing: border-box; padding: 10px; border: 1px solid #846a61; border-radius: 5px; font: inherit; }
+.tarjeta-admin textarea { min-height: 100px; resize: vertical; }
+button { padding: 10px 16px; background: #a90000; color: white; border: 0; border-radius: 6px; cursor: pointer; font: inherit; }
+button:hover { background: #790000; }
+a { color: #8d1515; }
+.menu_admin a { color: #fff8e8; }
+.menu_admin form { margin-top: 20px; }
+.form-inline { display: inline-block !important; margin: 5px; }
+.tabla-scroll { overflow-x: auto; }
+.contenido_admin table { width: 100%; border-collapse: collapse; background: white; }
+.contenido_admin th, .contenido_admin td { padding: 12px; border-bottom: 1px solid #ddc9b5; text-align: left; }
+.contenido_admin th { background: #f2e2c8; }
+.aviso { padding: 12px; border-radius: 5px; border: 1px solid; overflow-wrap: anywhere; }
+.aviso.error { background: #fff0ef; color: #8a1212; }
+.aviso.ok { background: #eaf6e9; color: #215c27; }
+.formulario-acceso { max-width: 420px; margin: auto; padding: 15px; }
+.admin-leyenda { color: #fff8e8; }
+@media (max-width: 760px) { .contenedor_admin { display: block; } .menu_admin { width: auto; padding: 12px; } .menu_admin a { display: inline-block; margin: 5px 8px; } .contenido_admin { width: auto; margin: 10px; padding: 12px; } .tarjeta-admin { padding: 12px; } main { width: auto; margin: 12px; } }

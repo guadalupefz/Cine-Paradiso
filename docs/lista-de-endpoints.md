@@ -103,3 +103,18 @@
 - 403 Forbidden: Usuario sin permisos suficientes.
 - 404 Not Found: Recurso inexistente.
 - 500 Internal Server Error: Error interno del servidor.
+
+
+## Integración administrativa del hito 2
+
+- POST /api/auth/logout: cerrar la sesión actual.
+- GET /api/usuarios/me: perfil autenticado, sin contraseña ni hash.
+- GET /api/compras/{id}/servicios: detalle histórico de una compra del titular; compra ajena o inexistente404.
+- POST /api/servicios: alta de servicio, administrador; JSON nombre y precio como texto decimal.
+- PUT /api/servicios/{id}: modificar nombre/precio, administrador; no cambia detalles históricos.
+- DELETE /api/servicios/{id}: eliminar solo servicios sin compras;409 si tienen historial.
+- POST /api/peliculas y PUT /api/peliculas/{id}: carga/modificación manual, administrador.
+- GET /api/pelicula?titulo=...: consulta a OMDb para administración.
+- POST /api/pelicula?titulo=...: importación externa para administración.
+
+Los roles se verifican con una sesión Flask y el usuario vigente de MySQL. Ver docs/integracion-hito2.md para configuración, estados y evidencia de pruebas. No es necesario enviar JWT.
