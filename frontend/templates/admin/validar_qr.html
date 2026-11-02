@@ -5,7 +5,11 @@
 {% block content %}
 
 <h2>validar qr</h2>
-Escanear QR con camara
+<button type="button" id="btn-escanear">
+    Escanear QR con cámara
+</button>
+
+<div id="reader" style="width:300px; margin-top:15px;"></div>
 
 <form method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <div class="campo_formulario">
