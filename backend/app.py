@@ -3,12 +3,16 @@ import sys
 from pathlib import Path
 from datetime import timedelta
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, jsonify
+import mysql.connector
 
 RAIZ = Path(__file__).resolve().parents[1]
 if str(RAIZ) not in sys.path:
     sys.path.insert(0, str(RAIZ))
 load_dotenv(RAIZ / ".env")
+
+from backend.autenticacion import jwt
+
 
 from backend.src.routes.auth_routes import auth_bp
 from backend.src.routes.butacas import mis_rutas
@@ -34,6 +38,9 @@ app.config.update(
     SESSION_COOKIE_SECURE=os.environ.get("COOKIE_SECURE", "0") == "1",
     PERMANENT_SESSION_LIFETIME=timedelta(hours=2),
     MAX_CONTENT_LENGTH=1024 * 1024,
+    JWT_SECRET_KEY=os.environ.get("JWT_SECRET_KEY") or os.environ["SECRET_KEY"],
+    JWT_ACCESS_TOKEN_EXPIRES=timedelta(hours=2),
+    JWT_TOKEN_LOCATION=["headers"],
 )
 
 app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER")
@@ -45,6 +52,12 @@ app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
 app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER")
 
 mail.init_app(app)
+jwt.init_app(app)
+
+@app.errorhandler(mysql.connector.Error)
+def error_base_datos(error):
+    return jsonify({"error": "No se pudo acceder a la base de datos"}), 500
+
 
 for blueprint in (auth_bp, mis_rutas, peliculas_externas_bp, peliculas_bp, funciones_bp, locales_bp, salas_bp, compras_bp, servicios_bp, estadisticas_bp, qr_bp, reservas_bp):
     app.register_blueprint(blueprint, url_prefix="/api")

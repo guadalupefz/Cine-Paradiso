@@ -10,6 +10,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 os.environ.setdefault('SECRET_KEY', 'clave-ficticia-solo-para-pruebas')
 from backend.app import app
 from backend import seguridad
+from backend.autenticacion import jwt
+from flask_jwt_extended import create_access_token, decode_token
 from backend.src.routes import auth_routes as auth, compras_routes as compras, servicios_routes as servicios
 from mysql.connector import Error, IntegrityError
 from werkzeug.security import generate_password_hash
@@ -23,6 +25,13 @@ class AporteBackend(unittest.TestCase):
     def setUp(self):
         app.config.update(TESTING=True, SECRET_KEY='clave-ficticia-del-test')
         self.client = app.test_client()
+        self.revocados = set()
+        bloqueo = patch.object(jwt, '_token_in_blocklist_callback', side_effect=lambda cabecera, datos: datos['jti'] in self.revocados)
+        bloqueo.start()
+        self.addCleanup(bloqueo.stop)
+        revocar = patch.object(auth, 'revocar_token', side_effect=lambda datos: self.revocados.add(datos['jti']))
+        revocar.start()
+        self.addCleanup(revocar.stop)
         self.cn_seg = MagicMock()
         self.cur_seg = self.cn_seg.cursor.return_value
         self.cur_seg.__enter__.return_value = self.cur_seg
@@ -32,8 +41,9 @@ class AporteBackend(unittest.TestCase):
         self.addCleanup(parche.stop)
 
     def autenticar(self, rol='cliente', identificador=8):
-        with self.client.session_transaction() as s:
-            s['id_usuario'] = identificador
+        with app.app_context():
+            self.token = create_access_token(identity=str(identificador))
+        self.client.environ_base['HTTP_AUTHORIZATION'] = 'Bearer ' + self.token
         self.cur_seg.fetchone.return_value = {'id_usuario': identificador, 'rol': rol}
 
     def base(self, modulo, filas=None, fila=None):
@@ -99,15 +109,14 @@ class AporteBackend(unittest.TestCase):
         self.autenticar()
         self.cur_seg.fetchone.return_value = None
         self.assertEqual(self.client.get('/api/compras').status_code, 401)
-        with self.client.session_transaction() as s:
-            self.assertNotIn('id_usuario', s)
         self.assertCierre(self.cn_seg, self.cur_seg)
 
     def test_identificador_de_sesion_invalido(self):
-        for valor in [True, '8', 0, -1]:
+        for valor in [True, 8, '', 'abc', '0', '-1']:
             with self.subTest(valor=valor):
-                with self.client.session_transaction() as s:
-                    s['id_usuario'] = valor
+                with app.app_context():
+                    token = create_access_token(identity=valor)
+                self.client.environ_base['HTTP_AUTHORIZATION'] = 'Bearer ' + token
                 self.assertEqual(self.client.get('/api/compras').status_code, 401)
         self.cn_seg.cursor.assert_not_called()
 
@@ -153,8 +162,9 @@ class AporteBackend(unittest.TestCase):
         r = self.client.post('/api/auth/login', json={'email': ' x@example.com ', 'password': 'clave-ficticia'})
         self.assertEqual(r.status_code, 200)
         self.assertEqual(cur.execute.call_args.args[1], ('x@example.com',))
-        with self.client.session_transaction() as s:
-            self.assertEqual(dict(s), {'id_usuario': 8})
+        self.assertNotIn('password_hash', r.json['usuario'])
+        with app.app_context():
+            self.assertEqual(decode_token(r.json['access_token'])['sub'], '8')
         self.assertCierre(cn, cur)
 
     def test_login_inexistente_o_clave_incorrecta_401(self):

@@ -40,6 +40,11 @@ def registrar_compra(id_usuario):
             "mensaje": str(e)
         }), 400
 
+    except mysql.connector.Error as error:
+        if error.errno in (1062, 1205, 1213):
+            return jsonify({"error": "CONFLICTO_COMPRA", "mensaje": "La disponibilidad cambió. Volvé a consultar las butacas."}), 409
+        return jsonify({"error": "ERROR_BASE_DATOS", "mensaje": "No se pudo procesar la compra."}), 500
+
     except Exception:
         return jsonify({
             "error": "ERROR_SERVIDOR",

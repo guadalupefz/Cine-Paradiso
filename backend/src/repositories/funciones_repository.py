@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from backend.src.validators.duracion_validator import minutos_de_duracion
 
 # Consultar la cartelera vigente
 def obtener_cartelera(cursor):
@@ -69,8 +70,6 @@ def verificar_solapamiento_sala(cursor, id_sala, fecha_hora_inicio, duracion_nue
     cursor.execute(query, tuple(params))
     funciones_existentes = cursor.fetchall()
     
-    from datetime import datetime, timedelta
-    
     if isinstance(fecha_hora_inicio, str):
         inicio_nueva = datetime.fromisoformat(fecha_hora_inicio.replace(" ", "T"))
     else:
@@ -81,7 +80,7 @@ def verificar_solapamiento_sala(cursor, id_sala, fecha_hora_inicio, duracion_nue
     for func in funciones_existentes:
         inicio_existente = func["fecha_hora_inicio"]
         try:
-            duracion_existente = int(func["duracion_minutos"])
+            duracion_existente = minutos_de_duracion(func["duracion_minutos"])
         except (TypeError, ValueError):
             raise ValueError("La duración de una película existente no es válida.")
 

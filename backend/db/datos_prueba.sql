@@ -43,7 +43,7 @@ VALUES ('Luis', 'Prueba', 'luis.demo@example.com', @hash_prueba, 'cliente');
 -- Luis queda sin compras para comprobar aislamiento y listas vacias.
 
 INSERT INTO pelicula (titulo, sinopsis, poster, duracion_minutos, clasificacion, genero)
-VALUES ('Aventura de prueba', 'Pelicula ficticia para desarrollo.', '/static/img/default.svg', '108 min', '+13', 'Aventura');
+VALUES ('Aventura de prueba', 'Pelicula ficticia para desarrollo.', '/static/img/default.svg', '108', '+13', 'Aventura');
 SET @pelicula_prueba = LAST_INSERT_ID();
 -- Poster de demostracion servido por el backend.
 

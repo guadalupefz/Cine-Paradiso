@@ -4,6 +4,7 @@ from decimal import Decimal
 from datetime import datetime, timedelta
 
 from backend.db.db import get_connection
+from backend.src.repositories.reservas_repositories import limpiar_reservas_expiradas
 from backend.src.repositories.compra_repository import (
     obtener_funcion,
     obtener_usuario,
@@ -21,9 +22,10 @@ from backend.src.services.correo_service import enviar_mail_compra
 
 def realizar_compra(id_usuario, id_funcion, ids_butacas):
     conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = None
 
     try:
+        cursor = conn.cursor(dictionary=True)
         usuario = obtener_usuario(cursor, id_usuario)
 
         if usuario is None:
@@ -49,6 +51,7 @@ def realizar_compra(id_usuario, id_funcion, ids_butacas):
                     f"La butaca {id_butaca} no pertenece a la sala de esta función."
                 )
 
+        limpiar_reservas_expiradas(cursor, id_funcion, ids_butacas)
         butacas_ocupadas = obtener_butacas_ocupadas(cursor, id_funcion)
         ids_ocupados = {b["id_butaca"] for b in butacas_ocupadas}
 
@@ -99,7 +102,8 @@ def realizar_compra(id_usuario, id_funcion, ids_butacas):
         raise
 
     finally:
-        cursor.close()
+        if cursor is not None:
+            cursor.close()
         conn.close()
 
     try:
@@ -115,9 +119,10 @@ def realizar_compra(id_usuario, id_funcion, ids_butacas):
 
 def confirmar_compra(id_usuario, id_compra):
     conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = None
 
     try:
+        cursor = conn.cursor(dictionary=True)
         conn.start_transaction()
 
         cursor.execute(
@@ -207,7 +212,8 @@ def confirmar_compra(id_usuario, id_compra):
         raise
 
     finally:
-        cursor.close()
+        if cursor is not None:
+            cursor.close()
         conn.close()
 
     try:

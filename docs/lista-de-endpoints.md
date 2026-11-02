@@ -117,4 +117,4 @@
 - GET /api/pelicula?titulo=...: consulta a OMDb para administración.
 - POST /api/pelicula?titulo=...: importación externa para administración.
 
-Los roles se verifican con una sesión Flask y el usuario vigente de MySQL. Ver docs/integracion-hito2.md para configuración, estados y evidencia de pruebas. No es necesario enviar JWT.
+Las rutas autenticadas reciben Authorization: Bearer <access_token>, emitido por POST /api/auth/login. Los permisos se consultan en MySQL. POST /api/auth/logout revoca ese token. Ver docs/propuesta-jwt-y-correcciones.md para configuración y migración. El listado también contiene rutas planificadas: no implica que todas estén implementadas.

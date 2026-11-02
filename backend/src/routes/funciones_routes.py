@@ -1,5 +1,6 @@
 
 from backend.seguridad import admin_required
+from backend.src.validators.duracion_validator import minutos_de_duracion
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
@@ -171,7 +172,7 @@ def actualizar_funcion(id_usuario, id_funcion):
         with conn.cursor(dictionary=True) as cursor:
             cursor.execute(
                 """
-                SELECT id_funcion, id_sala, fecha_hora_inicio
+                SELECT id_funcion, id_pelicula, id_sala, fecha_hora_inicio
                 FROM funcion
                 WHERE id_funcion = %s
                 """,
@@ -217,7 +218,8 @@ def actualizar_funcion(id_usuario, id_funcion):
 
             if entradas_vendidas > 0:
                 if (
-                    id_sala != funcion_actual["id_sala"]
+                    id_pelicula != funcion_actual["id_pelicula"]
+                    or id_sala != funcion_actual["id_sala"]
                     or horario_nuevo != horario_actual.strftime(
                         "%Y-%m-%d %H:%M:%S"
                     )
@@ -225,7 +227,7 @@ def actualizar_funcion(id_usuario, id_funcion):
                     return jsonify({
                         "error": "RESTRICCION_VENTAS",
                         "mensaje": (
-                            "No se puede modificar la sala ni el horario "
+                            "No se puede modificar la película, la sala ni el horario "
                             "porque ya existen entradas vendidas para esta función."
                         ),
                     }), 400
@@ -241,7 +243,7 @@ def actualizar_funcion(id_usuario, id_funcion):
 
             peli = cursor.fetchone()
             try:
-                duracion_minutos = int(peli["duracion_minutos"])
+                duracion_minutos = minutos_de_duracion(peli["duracion_minutos"])
             except (TypeError, ValueError):
                 return jsonify({
                     "error": "DURACION_INVALIDA",

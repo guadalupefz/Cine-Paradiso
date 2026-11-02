@@ -1,8 +1,9 @@
-"""Autenticacion por sesion y permisos compartidos por el backend."""
+"""Autenticacion JWT y permisos consultados en la base de datos."""
 import time
 from functools import wraps
 import mysql.connector
-from flask import jsonify, session, request
+from flask import jsonify, request
+from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 from backend.db.db import get_connection
 
 def crear_limitador():
@@ -63,10 +64,11 @@ def roles_required(allowed_roles):
     def decorator(funcion):
         @wraps(funcion)
         def decorated(*args, **kwargs):
-            id_usuario = session.get("id_usuario")
-            if type(id_usuario) is not int or id_usuario <= 0:
-                session.clear()
-                return jsonify({"error": "Debés iniciar sesión"}), 401
+            verify_jwt_in_request()
+            identidad = get_jwt_identity()
+            if not isinstance(identidad, str) or not identidad.isascii() or not identidad.isdecimal() or int(identidad) <= 0:
+                return jsonify({"error": "La credencial no es válida"}), 401
+            id_usuario = int(identidad)
             try:
                 conexion = get_connection()
                 try:
@@ -78,7 +80,6 @@ def roles_required(allowed_roles):
             except mysql.connector.Error:
                 return jsonify({"error": "No se pudo verificar el acceso"}), 500
             if usuario is None:
-                session.clear()
                 return jsonify({"error": "Debés iniciar sesión"}), 401
             rol = usuario.get("rol")
             if not isinstance(rol, str) or rol.strip().casefold() not in roles:

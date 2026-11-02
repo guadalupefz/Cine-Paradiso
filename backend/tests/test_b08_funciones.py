@@ -3,6 +3,8 @@ from unittest.mock import MagicMock, patch
 
 from backend.app import app
 from backend import seguridad
+from backend.autenticacion import jwt
+from flask_jwt_extended import create_access_token
 from backend.src.routes import funciones_routes as funciones
 from backend.src.routes import peliculas_routes as peliculas
 
@@ -12,6 +14,9 @@ class TestB08(unittest.TestCase):
     def setUp(self):
         app.config.update(TESTING=True, SECRET_KEY="clave-test")
         self.client = app.test_client()
+        bloqueo = patch.object(jwt, '_token_in_blocklist_callback', return_value=False)
+        bloqueo.start()
+        self.addCleanup(bloqueo.stop)
 
         # Simular la conexión que verifica los permisos de administrador.
         self.cn_seg = MagicMock()
@@ -28,8 +33,9 @@ class TestB08(unittest.TestCase):
         self.parche_seg.start()
         self.addCleanup(self.parche_seg.stop)
 
-        with self.client.session_transaction() as sesion:
-            sesion["id_usuario"] = 8
+        with app.app_context():
+            token = create_access_token(identity="8")
+        self.client.environ_base["HTTP_AUTHORIZATION"] = "Bearer " + token
 
     def base(self, modulo):
         cn = MagicMock()
@@ -185,6 +191,7 @@ class TestB08(unittest.TestCase):
         self.assertEqual(respuesta.status_code, 400)
 
     def test_usuario_sin_sesion_no_puede_crear_pelicula(self):
+        self.client.environ_base.pop("HTTP_AUTHORIZATION", None)
         with self.client.session_transaction() as sesion:
             sesion.clear()
 
@@ -198,6 +205,7 @@ class TestB08(unittest.TestCase):
 
 
     def test_usuario_sin_sesion_no_puede_crear_funcion(self):
+        self.client.environ_base.pop("HTTP_AUTHORIZATION", None)
         with self.client.session_transaction() as sesion:
             sesion.clear()
 
@@ -211,6 +219,7 @@ class TestB08(unittest.TestCase):
         abrir.assert_not_called()
 
     def test_usuario_sin_sesion_no_puede_modificar_funcion(self):
+        self.client.environ_base.pop("HTTP_AUTHORIZATION", None)
         with self.client.session_transaction() as sesion:
             sesion.clear()
 
@@ -239,7 +248,7 @@ class TestB08(unittest.TestCase):
 
     def test_modificar_pelicula_correctamente(self):
         cn, cur = self.base(peliculas)
-        cur.fetchone.return_value = {"id_pelicula": 1}
+        cur.fetchone.return_value = (1, "120")
 
         respuesta = self.client.put(
             "/api/peliculas/1", json=self.pelicula_valida()
@@ -258,6 +267,7 @@ class TestB08(unittest.TestCase):
         cur.fetchone.side_effect = [
             {
                 "id_funcion": 1,
+                "id_pelicula": 1,
                 "id_sala": 1,
                 "fecha_hora_inicio": datetime(2030, 5, 10, 18, 0),
             },
@@ -288,6 +298,7 @@ class TestB08(unittest.TestCase):
         cur.fetchone.side_effect = [
             {
                 "id_funcion": 1,
+                "id_pelicula": 1,
                 "id_sala": 1,
                 "fecha_hora_inicio": datetime(2030, 5, 10, 18, 0),
             },
@@ -359,6 +370,7 @@ class TestB08(unittest.TestCase):
         cur.fetchone.side_effect = [
             {
                 "id_funcion": 1,
+                "id_pelicula": 1,
                 "id_sala": 1,
                 "fecha_hora_inicio": datetime(2030, 5, 10, 18, 0),
             },
