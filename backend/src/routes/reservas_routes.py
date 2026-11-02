@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
-from src.validators.reservas_validator import validar_datos_reserva
-from src.services.reservas_service import crear_reserva
+from backend.src.validators.reservas_validator import validar_datos_reserva
+from backend.src.services.reservas_service import crear_reserva
 from backend.seguridad import cliente_required
 
 reservas_bp = Blueprint("reservas", __name__)

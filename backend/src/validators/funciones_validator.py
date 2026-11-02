@@ -1,37 +1,39 @@
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
+
 
 def validar_crear_funcion(data):
-    
-    error = None
+    if not isinstance(data, dict) or not data:
+        return "No se proporcionaron datos en formato JSON."
 
-    if not data:
-        error = "No se proporcionaron datos en formato JSON."
-    elif not data.get('id_pelicula'):
-        error = 'El campo id_pelicula es obligatorio.'
-    elif not isinstance(data.get('id_pelicula'), int):
-        error = 'El id_pelicula debe ser un número entero.'
-    elif not data.get('id_sala'):
-        error = 'El campo id_sala es obligatorio.'
-    elif not isinstance(data.get('id_sala'), int):
-        error = 'El id_sala debe ser un número entero.'
-    elif not data.get('fecha_hora_inicio'):
-        error = 'El campo fecha_hora_inicio es obligatorio.'
-    else:
-    
-        try:
-            datetime.fromisoformat(data.get('fecha_hora_inicio'))
-        except ValueError:
-            error = 'Formato de fecha_hora_inicio inválido. Utilice formato ISO (YYYY-MM-DDTHH:MM:SS).'
+    for campo in ("id_pelicula", "id_sala"):
+        valor = data.get(campo)
+        if type(valor) is not int or valor <= 0:
+            return f"El campo {campo} debe ser un entero positivo."
 
-        if error is None:
-            precio = data.get('precio_base')
-            if precio is None:
-                error = 'El campo precio_base es obligatorio.'
-            else:
-                try:
-                    if float(precio) < 0:
-                        error = 'El precio_base no puede ser negativo.'
-                except (ValueError, TypeError):
-                    error = 'El precio_base debe ser un valor numérico.'
+    fecha = data.get("fecha_hora_inicio")
+    if not isinstance(fecha, str) or not fecha.strip():
+        return "El campo fecha_hora_inicio es obligatorio."
 
-    return error
+    try:
+        datetime.fromisoformat(fecha)
+    except ValueError:
+        return "Formato de fecha_hora_inicio inválido. Utilice formato ISO (YYYY-MM-DDTHH:MM:SS)."
+
+    precio = data.get("precio_base")
+    if precio is None or isinstance(precio, bool):
+        return "El campo precio_base debe ser un valor numérico."
+
+    try:
+        precio_decimal = Decimal(str(precio))
+    except (InvalidOperation, ValueError):
+        return "El precio_base debe ser un valor numérico."
+
+    if not precio_decimal.is_finite():
+        return "El precio_base debe ser un valor numérico finito."
+    if precio_decimal < 0:
+        return "El precio_base no puede ser negativo."
+    if precio_decimal.as_tuple().exponent < -2:
+        return "El precio_base admite como máximo dos decimales."
+
+    return None
