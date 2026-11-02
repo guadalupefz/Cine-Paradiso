@@ -21,6 +21,7 @@ from backend.src.routes.compras_routes import compras_bp
 from backend.src.routes.servicios_routes import servicios_bp
 from backend.src.routes.estadisticas_routes import estadisticas_bp
 from backend.src.routes.qr_routes import qr_bp
+from backend.src.routes.reservas_routes import reservas_bp
 
 app = Flask(__name__, static_folder="static")
 app.config.update(
@@ -32,7 +33,7 @@ app.config.update(
     PERMANENT_SESSION_LIFETIME=timedelta(hours=2),
     MAX_CONTENT_LENGTH=1024 * 1024,
 )
-for blueprint in (auth_bp, mis_rutas, peliculas_externas_bp, peliculas_bp, funciones_bp, locales_bp, salas_bp, compras_bp, servicios_bp, estadisticas_bp, qr_bp):
+for blueprint in (auth_bp, mis_rutas, peliculas_externas_bp, peliculas_bp, funciones_bp, locales_bp, salas_bp, compras_bp, servicios_bp, estadisticas_bp, qr_bp, reservas_bp):
     app.register_blueprint(blueprint, url_prefix="/api")
 
 @app.get("/")
