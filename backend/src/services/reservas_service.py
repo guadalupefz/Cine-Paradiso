@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 import mysql.connector
 
-from src.db import get_connection
+from backend.db.db import get_connection
 from src.repositories.reservas_repositories import (
     obtener_butacas_ocupadas_con_bloqueo,
     limpiar_reservas_expiradas,
