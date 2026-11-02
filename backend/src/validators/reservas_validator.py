@@ -1,11 +1,7 @@
 def validar_datos_reserva(id_funcion: int, data: dict):
 
-    # Valida los datos de entrada para la creación de una reserva.
-    # Retorna una lista de diccionarios de error acumulativos.
-
     errores = []
 
-    # 1. Validar ID de la función (parámetro de URL)
     if isinstance(id_funcion, bool) or not isinstance(id_funcion, int) or id_funcion <= 0:
         errores.append({
             "code": "ID_FUNCION_INVALIDO",
@@ -13,7 +9,6 @@ def validar_datos_reserva(id_funcion: int, data: dict):
             "field": "id_funcion"
         })
 
-    # 2. Validar que el cuerpo sea un diccionario/JSON
     if not isinstance(data, dict):
         errores.append({
             "code": "JSON_INVALIDO",
@@ -21,7 +16,6 @@ def validar_datos_reserva(id_funcion: int, data: dict):
         })
         return errores
 
-    # 3. Validar id_usuario
     if "id_usuario" not in data:
         errores.append({
             "code": "CAMPO_REQUERIDO",
@@ -37,7 +31,6 @@ def validar_datos_reserva(id_funcion: int, data: dict):
                 "field": "id_usuario"
             })
 
-    # 4. Validar lista de butacas
     if "butacas" not in data:
         errores.append({
             "code": "CAMPO_REQUERIDO",
