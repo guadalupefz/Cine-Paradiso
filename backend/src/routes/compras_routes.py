@@ -1,17 +1,17 @@
 from flask import Blueprint, request, jsonify
 import mysql.connector
 from backend.db.db import get_connection
-from backend.seguridad import cualquier_logueado
+from backend.seguridad import cualquier_logueado, cliente_required
 from backend.src.repositories.compra_repository import obtener_compras_por_usuario, obtener_servicios_de_compra, obtener_compra_de_usuario, obtener_entradas_por_compra
 
 from backend.src.validators.compra_validator import validar_datos_compra
-from backend.src.services.compra_service import realizar_compra
+from backend.src.services.compra_service import realizar_compra, confirmar_compra
 
 compras_bp = Blueprint("compras", __name__)
 
 
 @compras_bp.route("/compras", methods=["POST"])
-@cualquier_logueado
+@cliente_required
 def registrar_compra(id_usuario):
     data = request.get_json(silent=True)
 
@@ -113,3 +113,26 @@ def listar_entradas(id_usuario, id_compra):
 
     finally:
         conn.close()
+
+@compras_bp.post("/compras/<int:id_compra>/confirmar")
+@cliente_required
+def confirmar_compra_route(id_usuario, id_compra):
+    try:
+        resultado = confirmar_compra(id_usuario, id_compra)
+
+        return jsonify({
+            "mensaje": "Compra confirmada correctamente.",
+            "compra": resultado
+        }), 200
+
+    except ValueError as e:
+        return jsonify({
+            "error": "COMPRA_INVALIDA",
+            "mensaje": str(e)
+        }), 400
+
+    except Exception:
+        return jsonify({
+            "error": "ERROR_SERVIDOR",
+            "mensaje": "No se pudo confirmar la compra."
+        }), 500
