@@ -195,7 +195,7 @@ def confirmar_compra(id_usuario, id_compra):
 
         conn.commit()
 
-        return {
+        resultado = {
             "id_compra": id_compra,
             "total": str(compra["total"]),
             "estado": "aprobada",
@@ -209,3 +209,13 @@ def confirmar_compra(id_usuario, id_compra):
     finally:
         cursor.close()
         conn.close()
+
+    try:
+        comprobante = obtener_comprobante(id_compra, id_usuario)
+
+        enviar_mail_compra(comprobante, entradas_confirmadas)
+
+    except Exception as error:
+        print(f"no se pudo enviar el correo: {error}")
+
+    return resultado
