@@ -5,6 +5,7 @@ from decimal import Decimal
 from backend.db.db import get_connection
 from backend.src.repositories.compra_repository import (
     obtener_funcion,
+    obtener_usuario,
     obtener_butacas_de_funcion,
     obtener_butacas_ocupadas,
     crear_compra,
@@ -17,6 +18,12 @@ def realizar_compra(id_usuario, id_funcion, ids_butacas):
     cursor = conn.cursor(dictionary=True)
 
     try:
+        # Verificar que exista el usuario.
+        usuario = obtener_usuario(cursor, id_usuario)
+
+        if usuario is None:
+            raise ValueError("El usuario no existe.")
+        
         # Verificar que exista la función.
         funcion = obtener_funcion(cursor, id_funcion)
 

@@ -8,6 +8,14 @@ def obtener_funcion(cursor, id_funcion):
     cursor.execute(query, (id_funcion,))
     return cursor.fetchone()
 
+def obtener_usuario(cursor, id_usuario):
+    query = """
+        SELECT id_usuario
+        FROM usuario
+        WHERE id_usuario = %s
+    """
+    cursor.execute(query, (id_usuario,))
+    return cursor.fetchone()
 
 def obtener_butacas_de_funcion(cursor, id_funcion):
     query = """

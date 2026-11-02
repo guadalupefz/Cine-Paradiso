@@ -6,10 +6,8 @@ from mysql.connector import Error as MySQLError
 from flask import Blueprint, jsonify, request
 
 from backend.db.db import get_connection
-from backend.src.services.funciones_service import (listar_funciones_servicio,
-                                                    crear_funcion_servicio)
-from backend.src.repositories.funciones_repository import (
-    modificar_funcion, obtener_funciones, obtener_cartelera)
+from backend.src.services.funciones_service import (listar_funciones_servicio, crear_funcion_servicio)
+from backend.src.repositories.funciones_repository import (modificar_funcion, obtener_funciones, obtener_cartelera)
 from backend.src.validators.funciones_validator import validar_crear_funcion
 
 funciones_bp = Blueprint("funciones", __name__)
@@ -64,6 +62,7 @@ def consultar_cartelera():
 
         return jsonify({"cartelera": cartelera}), 200
 
+    
     except mysql.connector.Error:
         return jsonify({
             "error": "ERROR_BASE_DATOS",
