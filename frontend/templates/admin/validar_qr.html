@@ -29,4 +29,32 @@
 <p>{{ resultado.mensaje }}</p>
 {% endif %}
 
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<script>
+document.getElementById("btn-escanear").addEventListener("click", function () {
+
+    const scanner = new Html5Qrcode("reader");
+
+    scanner.start(
+        { facingMode: "environment" },
+        {
+            fps: 10,
+            qrbox: 250
+        },
+        function(decodedText) {
+
+            document.getElementById("qr_token").value = decodedText;
+
+            scanner.stop();
+
+            alert("QR leído correctamente");
+        }
+    ).catch(function(error) {
+        console.error(error);
+        alert("No se pudo abrir la cámara");
+    });
+
+});
+</script>
 {% endblock %}
