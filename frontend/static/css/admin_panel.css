@@ -1,0 +1,49 @@
+/* Base visual compartida por las vistas administrativas adaptadas al mockup. */
+.admin-panel {
+    --fondo: #0b1220;
+    --panel: #141e30;
+    --borde: #2b3950;
+    --texto: #f1f4fa;
+    --suave: #adb9cb;
+    --dorado: #f2c45b;
+    background: var(--fondo);
+    color: var(--texto);
+    line-height: 1.5;
+}
+.admin-panel *, .admin-panel *::before, .admin-panel *::after { box-sizing: border-box; }
+.admin-panel header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 32px; text-align: left; background: #101929; border-bottom: 1px solid var(--borde); }
+.admin-panel .logo { color: var(--dorado); }
+.admin-panel .logo h1 { font-size: 22px; margin: 0; letter-spacing: -.5px; }
+.admin-panel .admin-leyenda { margin: 0; font-size: 14px; color: var(--suave); }
+.admin-panel .contenedor_admin { min-height: calc(100vh - 74px); }
+.admin-panel .menu_admin { width: 205px; flex: 0 0 205px; margin: 0; padding: 28px 16px; gap: 6px; border-right: 1px solid var(--borde); background: #101929; }
+.admin-panel .menu_admin a { display: block; margin: 0; padding: 10px 14px; border-radius: 7px; color: var(--suave); font-size: 14px; }
+.admin-panel .menu_admin a:hover { color: var(--texto); background: #1e2b42; }
+.admin-panel .menu_admin a[aria-current="page"] { background: #3c3424; color: var(--dorado); }
+.admin-panel .menu_admin form { margin: 24px 0 0; }
+.admin-panel .menu_admin button { background: transparent; color: var(--suave); border: 1px solid var(--borde); width: 100%; }
+.admin-panel .contenido_admin { width: auto; max-width: 1520px; margin: 0 auto; padding: 36px; background: transparent; border-radius: 0; }
+.admin-panel h2, .admin-panel h3, .admin-panel h4 { color: var(--texto); text-align: left; }
+.admin-panel h2 { font-size: 30px; line-height: 1.2; margin: 8px 0 12px; letter-spacing: -.7px; }
+.admin-panel h3 { font-size: 18px; margin: 0 0 5px; }
+.admin-panel h4 { font-size: 18px; margin: 10px 0; }
+.admin-panel p { margin-top: 0; }
+.admin-panel a { text-decoration: none; color: var(--dorado); }
+.admin-panel a:hover { color: #ffdfa0; }
+.admin-panel :is(a, button, input):focus-visible { outline: 3px solid var(--dorado); outline-offset: 4px; }
+
+.admin-panel .aviso.error { background: #3b222d; color: #ffd3d0; border-color: #8a4e59; }
+.admin-panel .aviso.ok { background: #173b32; color: #bcf2d7; border-color: #357560; }
+@media (max-width: 1180px) {
+    .admin-panel .contenido_admin { padding: 28px 24px; }
+}
+@media (max-width: 760px) {
+    .admin-panel header { padding: 18px 20px; align-items: flex-start; flex-direction: column; gap: 4px; }
+    .admin-panel .contenedor_admin { display: block; }
+    .admin-panel .menu_admin { width: 100%; padding: 12px; border-right: 0; border-bottom: 1px solid var(--borde); display: flex; flex-direction: row; flex-wrap: wrap; gap: 4px; justify-content: flex-start; }
+    .admin-panel .menu_admin a { padding: 8px 10px; }
+    .admin-panel .menu_admin form { margin: 0; }
+    .admin-panel .menu_admin button { padding: 8px 10px; font-size: 14px; }
+    .admin-panel .contenido_admin { margin: 0; padding: 26px 16px; }
+    .admin-panel h2 { font-size: 26px; }
+}

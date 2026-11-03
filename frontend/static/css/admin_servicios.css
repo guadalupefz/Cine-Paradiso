@@ -1,36 +1,4 @@
-/* Vista de servicios del panel, según el mockup de administración. */
-.admin-servicios {
-    --fondo: #0b1220;
-    --panel: #141e30;
-    --borde: #2b3950;
-    --texto: #f1f4fa;
-    --suave: #adb9cb;
-    --dorado: #f2c45b;
-    background: var(--fondo);
-    color: var(--texto);
-    line-height: 1.5;
-}
-.admin-servicios *, .admin-servicios *::before, .admin-servicios *::after { box-sizing: border-box; }
-.admin-servicios header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 32px; text-align: left; background: #101929; border-bottom: 1px solid var(--borde); }
-.admin-servicios .logo { color: var(--dorado); }
-.admin-servicios .logo h1 { font-size: 22px; margin: 0; letter-spacing: -.5px; }
-.admin-servicios .admin-leyenda { margin: 0; font-size: 14px; color: var(--suave); }
-.admin-servicios .contenedor_admin { min-height: calc(100vh - 74px); }
-.admin-servicios .menu_admin { width: 205px; flex: 0 0 205px; margin: 0; padding: 28px 16px; gap: 6px; border-right: 1px solid var(--borde); background: #101929; }
-.admin-servicios .menu_admin a { display: block; margin: 0; padding: 10px 14px; border-radius: 7px; color: var(--suave); font-size: 14px; }
-.admin-servicios .menu_admin a:hover { color: var(--texto); background: #1e2b42; }
-.admin-servicios .menu_admin a[aria-current="page"] { background: #3c3424; color: var(--dorado); }
-.admin-servicios .menu_admin form { margin: 24px 0 0; }
-.admin-servicios .menu_admin button { background: transparent; color: var(--suave); border: 1px solid var(--borde); width: 100%; }
-.admin-servicios .contenido_admin { width: auto; max-width: 1520px; margin: 0 auto; padding: 36px; background: transparent; border-radius: 0; }
-.admin-servicios h2, .admin-servicios h3, .admin-servicios h4 { color: var(--texto); text-align: left; }
-.admin-servicios h2 { font-size: 30px; line-height: 1.2; margin: 8px 0 12px; letter-spacing: -.7px; }
-.admin-servicios h3 { font-size: 18px; margin: 0 0 5px; }
-.admin-servicios h4 { font-size: 18px; margin: 10px 0; }
-.admin-servicios p { margin-top: 0; }
-.admin-servicios a { text-decoration: none; color: var(--dorado); }
-.admin-servicios a:hover { color: #ffdfa0; }
-.admin-servicios :is(a, button, input):focus-visible { outline: 3px solid var(--dorado); outline-offset: 4px; }
+/* Estilos específicos de servicios adicionales. */
 .admin-servicios .volver-servicios { display: inline-block; margin-bottom: 22px; font-size: 14px; }
 .admin-servicios .encabezado-servicios { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 28px; }
 .admin-servicios .seccion-servicios { font-size: 11px; letter-spacing: 1.8px; color: var(--dorado); font-weight: bold; margin-bottom: 0; }
