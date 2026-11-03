@@ -1,7 +1,7 @@
 {% extends "admin/base_admin.html" %}
 {% block title %}Funciones · Cine Paradiso{% endblock %}
 {% block clase_pagina %}admin-panel admin-funciones{% endblock %}
-{% block estilos_adicionales %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_funciones.css') }}">{% endblock %}
+{% block estilos_adicionales %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_funciones.css') }}"><script src="{{ url_for('static', filename='js/admin_funciones.js') }}" defer></script>{% endblock %}
 {% block content %}
 {% if mostrar_formulario %}<a class="volver-funciones" href="{{ url_for('admin_funciones') }}">← Volver a funciones</a>{% endif %}
 <div class="encabezado-funciones">
@@ -35,7 +35,7 @@
                     <option value="">Seleccioná una sala</option>
                     {% set ids_salas = salas|map(attribute='id_sala')|map('string')|list %}
                     {% if datos_formulario.id_sala and datos_formulario.id_sala not in ids_salas %}<option value="{{ datos_formulario.id_sala }}" selected disabled>Sala no disponible ({{ datos_formulario.id_sala }})</option>{% endif %}
-                    {% for sala in salas %}<option value="{{ sala.id_sala }}" {{ 'selected' if datos_formulario.id_sala == sala.id_sala|string else '' }} data-local="{{ sala.id_local }}" data-capacidad="{{ sala.capacidad }}">{{ sala.local_nombre }} · {{ sala.nombre }}</option>{% endfor %}
+                    {% for sala in salas %}<option value="{{ sala.id_sala }}" {{ 'selected' if datos_formulario.id_sala == sala.id_sala|string else '' }} data-local="{{ sala.id_local }}" data-nombre="{{ sala.nombre }}" data-capacidad="{{ sala.capacidad }}">{{ sala.local_nombre }} · {{ sala.nombre }}</option>{% endfor %}
                 </select>
                 <small>La sala pertenece al local indicado.</small>
             </div>
