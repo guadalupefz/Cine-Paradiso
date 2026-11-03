@@ -5,10 +5,11 @@ import mysql.connector
 from backend.db.db import get_connection
 
 from backend.src.repositories.servicios_repository import obtener_servicio
-from backend.src.repositories.compra_repository import obtener_butacas_de_funcion
+from backend.src.repositories.compra_repository import obtener_butacas_de_funcion, obtener_funcion, obtener_hora_actual
+from backend.src.validators.inicio_funcion_validator import validar_inicio_funcion
 
 from backend.src.repositories.reservas_repositories import (obtener_butacas_ocupadas_con_bloqueo,
-    limpiar_reservas_expiradas, obtener_precio_base_funcion, crear_compra_pendiente,
+    limpiar_reservas_expiradas, crear_compra_pendiente,
     crear_entradas_reserva, agregar_servicio_a_compra
 )
 
@@ -28,16 +29,23 @@ def crear_reserva(id_usuario: int, id_funcion: int,
 
         with conn.cursor(dictionary=True) as cursor:
 
-            # Consultar precio de la función
-            precio_base = obtener_precio_base_funcion(cursor, id_funcion)
+            # Leer la función bajo el mismo bloqueo usado para reservar.
+            funcion = obtener_funcion(cursor, id_funcion)
 
-            if precio_base is None:
+            if funcion is None:
                 conn.rollback()
                 return None, {
                     "error": "FUNCION_NO_ENCONTRADA",
                     "mensaje": "La función especificada no existe.",
                     "status_code": 404
                 }
+
+            try:
+                validar_inicio_funcion(funcion["fecha_hora_inicio"], obtener_hora_actual(cursor))
+            except ValueError as error:
+                conn.rollback()
+                return None, {"error": "FUNCION_INICIADA", "mensaje": str(error), "status_code": 400}
+            precio_base = funcion["precio_base"]
 
             # La funcion ya esta bloqueada: las reservas de esta funcion se
             # resuelven en orden, incluso cuando todavia no existe una entrada.

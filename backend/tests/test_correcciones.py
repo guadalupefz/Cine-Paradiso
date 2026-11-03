@@ -1,6 +1,6 @@
 import os
 import unittest
-from datetime import timedelta
+from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 os.environ.setdefault("SECRET_KEY", "clave-ficticia-para-verificar-jwt-de-mas-de-32-caracteres")
@@ -77,7 +77,7 @@ class Correcciones(unittest.TestCase):
     def test_reserva_butaca_ajena_no_escribe(self):
         conexion = MagicMock()
         cursor = conexion.cursor.return_value.__enter__.return_value
-        with patch.object(reservas_service, "get_connection", return_value=conexion), patch.object(reservas_service, "obtener_precio_base_funcion", return_value=8000), patch.object(reservas_service, "obtener_butacas_de_funcion", return_value=[{"id_butaca": 1}]), patch.object(reservas_service, "crear_compra_pendiente") as crear:
+        with patch.object(reservas_service, "get_connection", return_value=conexion), patch.object(reservas_service, "obtener_funcion", return_value={"precio_base": 8000, "fecha_hora_inicio": datetime(2032, 1, 1)}), patch.object(reservas_service, "obtener_hora_actual", return_value=datetime(2026, 11, 3)), patch.object(reservas_service, "obtener_butacas_de_funcion", return_value=[{"id_butaca": 1}]), patch.object(reservas_service, "crear_compra_pendiente") as crear:
             reserva, error = reservas_service.crear_reserva(8, 1, [99])
         self.assertIsNone(reserva)
         self.assertEqual(error["status_code"], 400)
@@ -88,7 +88,7 @@ class Correcciones(unittest.TestCase):
 
     def test_interbloqueo_devuelve_conflicto(self):
         conexion = MagicMock()
-        with patch.object(reservas_service, "get_connection", return_value=conexion), patch.object(reservas_service, "obtener_precio_base_funcion", side_effect=Error("interbloqueo simulado", errno=1213)):
+        with patch.object(reservas_service, "get_connection", return_value=conexion), patch.object(reservas_service, "obtener_funcion", side_effect=Error("interbloqueo simulado", errno=1213)):
             reserva, error = reservas_service.crear_reserva(8, 1, [1])
         self.assertIsNone(reserva)
         self.assertEqual(error["status_code"], 409)
