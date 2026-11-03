@@ -1,9 +1,89 @@
-{% extends "admin/base_admin.html" %}{% block title %}Servicios - Administración{% endblock %}{% block content %}
-<h2>Gestión de servicios</h2><p>Los cambios de precio no modifican los importes de compras anteriores.</p>
-<section class="tarjeta-admin"><h3>{{ 'Modificar servicio' if servicio_editar else 'Crear servicio' }}</h3>
-{% if error_formulario %}<p role="alert" class="aviso error">{{ error_formulario }}</p>{% endif %}
-<form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="accion" value="{{ 'editar' if servicio_editar else 'crear' }}">{% if servicio_editar %}<input type="hidden" name="id_servicio" value="{{ servicio_editar.id_servicio }}">{% endif %}
-<label for="nombre">Nombre</label><input id="nombre" name="nombre" maxlength="100" required value="{{ datos_formulario.nombre }}">
-<label for="precio">Precio por unidad</label><input id="precio" name="precio" type="number" min="0.01" max="99999999.99" step="0.01" required value="{{ datos_formulario.precio }}"><button type="submit">Guardar servicio</button>{% if servicio_editar %}<a href="{{ url_for('admin_servicios') }}">Cancelar edición</a>{% endif %}</form></section>
-<h3>Servicios registrados</h3><div class="tabla-scroll"><table><thead><tr><th>Nombre</th><th>Precio</th><th>Acciones</th></tr></thead><tbody>{% for servicio in servicios %}<tr><td>{{ servicio.nombre }}</td><td>${{ servicio.precio }}</td><td><a href="{{ url_for('admin_servicios',editar=servicio.id_servicio) }}">Modificar</a><form method="post" class="form-inline"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="accion" value="eliminar"><input type="hidden" name="id_servicio" value="{{ servicio.id_servicio }}"><button type="submit" class="secundario">Eliminar si no tiene compras</button></form></td></tr>{% else %}{% if not error_listado %}<tr><td colspan="3">Todavía no hay servicios.</td></tr>{% endif %}{% endfor %}</tbody></table></div>
+{% extends "admin/base_admin.html" %}
+{% block title %}Servicios adicionales · Cine Paradiso{% endblock %}
+{% block clase_pagina %}admin-servicios{% endblock %}
+{% block estilos_adicionales %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_servicios.css') }}">
+<script src="{{ url_for('static', filename='js/admin_servicios.js') }}" defer></script>
+{% endblock %}
+{% block content %}
+{% if servicio_editar %}
+<a class="volver-servicios" href="{{ url_for('admin_servicios') }}">← Volver a servicios adicionales</a>
+{% endif %}
+<div class="encabezado-servicios">
+    <div>
+        <p class="seccion-servicios">ADMINISTRACIÓN / SERVICIOS</p>
+        <h2>{{ 'Editar servicio adicional' if servicio_editar else 'Servicios adicionales' }}</h2>
+        <p class="texto-suave">{{ 'Actualizá el nombre y el precio del producto.' if servicio_editar else 'Gestioná los productos que se ofrecen junto con las entradas.' }}</p>
+    </div>
+    <span class="etiqueta-catalogo">Catálogo del cine</span>
+</div>
+
+<div class="distribucion-servicios {{ 'modo-edicion' if servicio_editar else '' }}">
+    <section class="panel-servicios formulario-servicio" aria-labelledby="titulo-formulario">
+        <div class="titulo-panel">
+            <h3 id="titulo-formulario">{{ 'Datos del servicio' if servicio_editar else 'Nuevo servicio' }}</h3>
+            <p class="texto-suave">Todos los campos son obligatorios.</p>
+        </div>
+        {% if error_formulario %}<p role="alert" class="aviso error">{{ error_formulario }}</p>{% endif %}
+        <form method="post" class="datos-servicio">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="accion" value="{{ 'editar' if servicio_editar else 'crear' }}">
+            {% if servicio_editar %}<input type="hidden" name="id_servicio" value="{{ servicio_editar.id_servicio }}">{% endif %}
+            <div class="campo-servicio">
+                <label for="nombre">Nombre del servicio</label>
+                <input id="nombre" name="nombre" maxlength="100" required value="{{ datos_formulario.nombre }}" placeholder="Ej.: Balde de pochoclos">
+            </div>
+            <div class="campo-servicio">
+                <label for="precio">Precio por unidad</label>
+                <div class="precio-servicio">
+                    <input id="precio" name="precio" type="number" inputmode="decimal" min="0.01" max="99999999.99" step="0.01" required value="{{ datos_formulario.precio }}" placeholder="0.00" aria-describedby="ayuda-precio">
+                    <span aria-hidden="true">ARS</span>
+                </div>
+                <small id="ayuda-precio">En pesos argentinos. Mayor que cero, con hasta dos decimales.</small>
+            </div>
+            <p class="nota-precios">Los cambios de precio se aplican a nuevas compras. Las compras anteriores conservan el precio pagado.</p>
+            <div class="acciones-formulario">
+                {% if servicio_editar %}<a class="accion-secundaria" href="{{ url_for('admin_servicios') }}">Cancelar</a>{% endif %}
+                <button type="submit" class="accion-principal">{{ 'Guardar cambios' if servicio_editar else 'Crear servicio' }}</button>
+            </div>
+        </form>
+    </section>
+
+    {% if not servicio_editar %}
+    <section class="panel-servicios catalogo-servicios" aria-labelledby="titulo-catalogo">
+        <div class="titulo-panel encabezado-catalogo">
+            <div><h3 id="titulo-catalogo">Servicios registrados</h3><p class="texto-suave">Nombre, precio actual y acciones.</p></div>
+            {% if not error_listado %}<span class="cantidad-servicios">{{ servicios|length }} {{ 'producto' if servicios|length == 1 else 'productos' }}</span>{% endif %}
+        </div>
+        {% if error_listado %}
+        <div class="estado-servicios"><h4>No pudimos cargar el catálogo</h4><p>Intentá nuevamente para ver los servicios disponibles.</p><a class="accion-secundaria" href="{{ url_for('admin_servicios') }}">Volver a intentar</a></div>
+        {% elif servicios %}
+        <div class="tabla-scroll">
+            <table>
+                <caption class="solo-lectores">Catálogo de servicios adicionales</caption>
+                <thead><tr><th scope="col">Servicio</th><th scope="col">Precio unitario</th><th scope="col">Acciones</th></tr></thead>
+                <tbody>{% for servicio in servicios %}
+                    <tr>
+                        <th scope="row">{{ servicio.nombre }}</th>
+                        <td class="importe-servicio">${{ servicio.precio }} <span>ARS</span></td>
+                        <td><div class="acciones-servicio">
+                            <a class="accion-editar" href="{{ url_for('admin_servicios', editar=servicio.id_servicio) }}" aria-label="Editar {{ servicio.nombre }}">Editar</a>
+                            <form method="post" class="eliminar-servicio" data-confirmar-eliminacion>
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                <input type="hidden" name="accion" value="eliminar">
+                                <input type="hidden" name="id_servicio" value="{{ servicio.id_servicio }}">
+                                <button type="submit" class="accion-eliminar" aria-label="Eliminar {{ servicio.nombre }}">Eliminar</button>
+                            </form>
+                        </div></td>
+                    </tr>
+                {% endfor %}</tbody>
+            </table>
+        </div>
+        <p class="ayuda-eliminar">Solo se pueden eliminar servicios que no estén asociados a compras.</p>
+        {% else %}
+        <div class="estado-servicios"><span class="icono-vacio" aria-hidden="true">＋</span><h4>Todavía no hay servicios.</h4><p>Creá el primer producto desde el formulario.</p></div>
+        {% endif %}
+    </section>
+    {% endif %}
+</div>
 {% endblock %}
