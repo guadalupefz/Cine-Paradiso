@@ -299,6 +299,55 @@ def ver_compra():
     butacas = [b.strip() for b in request.args.get("butacas", "").split(",") if b.strip()]
     return render_template("compra.html", id_funcion=id_funcion, butacas=butacas, error=not id_funcion or not butacas)
 
+@app.post("/procesar-compra")
+@requiere_usuario
+def procesar_compra():
+
+    id_funcion = request.form.get("id_funcion", type=int)
+    butacas_texto = request.form.get("butacas", "")
+
+    if not id_funcion or id_funcion <= 0:
+        flash("La función seleccionada no es válida.", "error")
+        return redirect(url_for("index"))
+
+    try:
+        ids_butacas = [
+            int(b.strip())
+            for b in butacas_texto.split(",")
+            if b.strip()
+        ]
+    except ValueError:
+        flash("La selección de butacas no es válida.", "error")
+        return redirect(url_for("ver_butacas", id_funcion=id_funcion))
+
+    if (
+        not ids_butacas
+        or any(id_butaca <= 0 for id_butaca in ids_butacas)
+        or len(ids_butacas) != len(set(ids_butacas))
+    ):
+        flash("La selección de butacas no es válida.", "error")
+        return redirect(url_for("ver_butacas", id_funcion=id_funcion))
+
+    resultado, estado = llamar_backend(
+        "POST",
+        "/compras",
+        json={
+            "id_funcion": id_funcion,
+            "ids_butacas": ids_butacas
+        }
+    )
+
+    if estado == 201 and isinstance(resultado, dict) and resultado.get("id_compra"):
+        return redirect(
+            url_for(
+                "ver_comprobante",
+                id_compra=resultado["id_compra"]
+            )
+        )
+
+    flash(mensaje_error(resultado), "error")
+    return redirect(url_for("ver_butacas", id_funcion=id_funcion))
+
 @app.get("/servicios")
 def ver_servicios():
     datos, estado = llamar_backend("GET", "/servicios")
