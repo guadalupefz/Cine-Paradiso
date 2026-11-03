@@ -1,7 +1,80 @@
-{% extends "admin/base_admin.html" %}{% block title %}Funciones - Administración{% endblock %}{% block content %}
-<h2>Gestión de funciones</h2><section class="tarjeta-admin"><h3>{{ 'Modificar función' if funcion_editar else 'Programar función' }}</h3>{% if error_formulario %}<p class="aviso error" role="alert">{{ error_formulario }}</p>{% endif %}{% for error in errores_carga %}<p class="aviso error" role="alert">{{ error }}</p>{% endfor %}<form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">{% if funcion_editar %}<input type="hidden" name="id_funcion" value="{{ funcion_editar.id_funcion }}">{% endif %}
-<label for="pelicula">Película</label><select id="pelicula" name="id_pelicula" required><option value="">Seleccioná una película</option>{% for pelicula in peliculas %}<option value="{{ pelicula.id_pelicula }}" {{ 'selected' if datos_formulario.id_pelicula == pelicula.id_pelicula|string else '' }}>{{ pelicula.titulo }}</option>{% endfor %}</select>
-<label for="sala">Sala</label><select id="sala" name="id_sala" required><option value="">Seleccioná una sala</option>{% for sala in salas %}<option value="{{ sala.id_sala }}" {{ 'selected' if datos_formulario.id_sala == sala.id_sala|string else '' }}>{{ sala.local_nombre }} · {{ sala.nombre }}</option>{% endfor %}</select>
-<label for="fecha_hora">Fecha y hora</label><input id="fecha_hora" type="datetime-local" step="1" name="fecha_hora_inicio" required value="{{ datos_formulario.fecha_hora_inicio }}">
-<label for="precio_base">Precio base</label><input id="precio_base" type="number" name="precio_base" min="0" step="0.01" required value="{{ datos_formulario.precio_base }}"><button type="submit" {% if not habilitar_guardado %}disabled{% endif %}>Guardar función</button>{% if funcion_editar %}<a href="{{ url_for('admin_funciones') }}">Cancelar edición</a>{% endif %}</form></section>
-<h3>Funciones programadas</h3><div class="tabla-scroll"><table><thead><tr><th>Película</th><th>Sala</th><th>Fecha y hora</th><th>Precio</th><th></th></tr></thead><tbody>{% for funcion in funciones %}<tr><td>{{ funcion.titulo }}</td><td>{{ funcion.sala_nombre }}</td><td>{{ funcion.fecha_hora_inicio }}</td><td>${{ funcion.precio_base }}</td><td><a href="{{ url_for('admin_funciones',editar=funcion.id_funcion) }}">Modificar</a></td></tr>{% else %}{% if not error_listado %}<tr><td colspan="5">No hay funciones programadas.</td></tr>{% endif %}{% endfor %}</tbody></table></div>{% endblock %}
+{% extends "admin/base_admin.html" %}
+{% block title %}Funciones · Cine Paradiso{% endblock %}
+{% block clase_pagina %}admin-panel admin-funciones{% endblock %}
+{% block estilos_adicionales %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_funciones.css') }}">{% endblock %}
+{% block content %}
+{% if mostrar_formulario %}<a class="volver-funciones" href="{{ url_for('admin_funciones') }}">← Volver a funciones</a>{% endif %}
+<div class="encabezado-funciones">
+    <div><p class="seccion-funciones">ADMINISTRACIÓN / PROGRAMACIÓN</p><h2>{{ 'Editar función' if funcion_editar else 'Programar función' if mostrar_formulario else 'Funciones' }}</h2><p class="texto-suave">{{ 'Elegí la película, la sala y el horario de la función.' if mostrar_formulario else 'Consultá y organizá las proyecciones de cada sala.' }}</p></div>
+    {% if not mostrar_formulario %}<a class="accion-principal" href="{{ url_for('admin_funciones', nuevo=1) }}">＋ Programar función</a>{% endif %}
+</div>
+{% for error in errores_carga %}<p class="aviso error" role="alert">{{ error }}</p>{% endfor %}
+{% if mostrar_formulario %}
+<section class="panel-funciones" aria-labelledby="titulo-formulario">
+    <div class="titulo-panel"><h3 id="titulo-formulario">Datos de la función</h3><p class="texto-suave">Todos los campos son obligatorios.</p></div>
+    {% if error_formulario %}<p class="aviso error" role="alert">{{ error_formulario }}</p>{% endif %}
+    {% if not habilitar_guardado %}<p class="aviso error" role="alert">Para guardar necesitás películas y salas disponibles. Revisá los datos o <a href="{{ request.url }}">volvé a cargar la página</a>.</p>{% endif %}
+    <form method="post" class="formulario-funcion">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        {% if funcion_editar %}<input type="hidden" name="id_funcion" value="{{ funcion_editar.id_funcion }}">{% endif %}
+        <div class="campos-funcion">
+            <div class="campo-funcion ancho-completo">
+                <label for="pelicula">Película</label>
+                <select id="pelicula" name="id_pelicula" required>
+                    <option value="">Seleccioná una película</option>
+                    {% set ids_peliculas = peliculas|map(attribute='id_pelicula')|map('string')|list %}
+                    {% if datos_formulario.id_pelicula and datos_formulario.id_pelicula not in ids_peliculas %}<option value="{{ datos_formulario.id_pelicula }}" selected disabled>Película no disponible ({{ datos_formulario.id_pelicula }})</option>{% endif %}
+                    {% for pelicula in peliculas %}<option value="{{ pelicula.id_pelicula }}" {{ 'selected' if datos_formulario.id_pelicula == pelicula.id_pelicula|string else '' }} data-duracion="{{ pelicula.duracion_minutos }}">{{ pelicula.titulo }}</option>{% endfor %}
+                </select>
+                <small>Usá una película del catálogo del cine.</small>
+            </div>
+            <div class="campo-funcion selector-local" hidden><label for="local">Local</label><select id="local"><option value="">Seleccioná un local</option>{% for local in locales %}<option value="{{ local.id_local }}">{{ local.nombre }}</option>{% endfor %}</select></div>
+            <div class="campo-funcion ancho-completo selector-sala">
+                <label for="sala">Sala</label>
+                <select id="sala" name="id_sala" required>
+                    <option value="">Seleccioná una sala</option>
+                    {% set ids_salas = salas|map(attribute='id_sala')|map('string')|list %}
+                    {% if datos_formulario.id_sala and datos_formulario.id_sala not in ids_salas %}<option value="{{ datos_formulario.id_sala }}" selected disabled>Sala no disponible ({{ datos_formulario.id_sala }})</option>{% endif %}
+                    {% for sala in salas %}<option value="{{ sala.id_sala }}" {{ 'selected' if datos_formulario.id_sala == sala.id_sala|string else '' }} data-local="{{ sala.id_local }}" data-capacidad="{{ sala.capacidad }}">{{ sala.local_nombre }} · {{ sala.nombre }}</option>{% endfor %}
+                </select>
+                <small>La sala pertenece al local indicado.</small>
+            </div>
+            <div class="campo-funcion ancho-completo"><label for="fecha_hora">Fecha y hora de inicio</label><input id="fecha_hora" type="datetime-local" step="1" name="fecha_hora_inicio" required value="{{ datos_formulario.fecha_hora_inicio }}"><small>Ingresá el horario local de la proyección.</small></div>
+            <div class="campo-funcion ancho-completo"><label for="precio_base">Precio por entrada</label><div class="precio-funcion"><input id="precio_base" type="number" inputmode="decimal" name="precio_base" min="0" max="99999999.99" step="0.01" required value="{{ datos_formulario.precio_base }}" placeholder="0.00" aria-describedby="ayuda-precio"><span aria-hidden="true">ARS</span></div><small id="ayuda-precio">En pesos argentinos, con hasta dos decimales.</small></div>
+            <p class="nota-programacion ancho-completo">Los horarios de una misma sala no pueden superponerse. Si ya hay entradas vendidas, la película, la sala y el horario tienen restricciones de edición.</p>
+        </div>
+        <aside class="agenda-funciones" aria-labelledby="titulo-agenda">
+            <h4 id="titulo-agenda">Programación de la sala</h4>
+            <p id="detalle-sala" class="texto-suave">Consultá las funciones registradas antes de programar.</p>
+            {% if error_listado %}<p class="aviso error">No se pudieron consultar los horarios existentes.</p>{% else %}
+            <p id="estado-agenda" class="texto-suave" aria-live="polite">{% if funciones %}Funciones registradas en las salas del cine.{% else %}No hay funciones programadas.{% endif %}</p>
+            <ul class="agenda-lista">
+                {% for funcion in funciones %}{% if not funcion_editar or funcion.id_funcion != funcion_editar.id_funcion %}
+                <li data-sala="{{ funcion.id_sala }}" data-dia="{{ funcion.fecha_formulario[:10] }}"><strong>{{ funcion.fecha_visible }} · {{ funcion.hora_visible }}</strong><span>{{ funcion.titulo }}</span><small>{{ funcion.local_nombre }} · {{ funcion.sala_nombre }}{% if funcion.duracion_visible %} · {{ funcion.duracion_visible }} min{% endif %}</small></li>
+                {% endif %}{% endfor %}
+            </ul>
+            {% endif %}
+            <dl class="resumen-funcion"><div><dt>Duración de la película</dt><dd id="duracion-elegida">—</dd></div><div><dt>Capacidad de la sala</dt><dd id="capacidad-elegida">—</dd></div></dl>
+            <p class="ayuda-agenda">La disponibilidad se verifica al guardar. Estos horarios pueden cambiar si otro administrador modifica la programación.</p>
+        </aside>
+        <div class="pie-formulario"><p class="texto-suave">Revisá la película, la sala y la fecha antes de confirmar.</p><div class="acciones-funcion"><a class="accion-secundaria" href="{{ url_for('admin_funciones') }}">Cancelar</a><button class="accion-principal" type="submit" {% if not habilitar_guardado %}disabled{% endif %}>{{ 'Guardar cambios' if funcion_editar else 'Programar función' }}</button></div></div>
+    </form>
+</section>
+{% else %}
+<section aria-labelledby="titulo-listado">
+    <div class="cabecera-listado"><h3 id="titulo-listado">Funciones programadas</h3>{% if not error_listado %}<span class="cantidad-funciones">{{ funciones|length }} {{ 'función' if funciones|length == 1 else 'funciones' }}</span>{% endif %}</div>
+    {% if error_listado %}<div class="panel-funciones estado-funciones"><h4>No pudimos cargar la programación</h4><p>Volvé a intentar para ver las funciones registradas.</p><a class="accion-secundaria" href="{{ url_for('admin_funciones') }}">Volver a intentar</a></div>
+    {% elif funciones %}
+    <ul class="lista-funciones-admin">{% for funcion in funciones %}
+        <li class="fila-funcion">
+            <div class="pelicula-funcion"><span class="etiqueta-dato">PELÍCULA</span><h4>{{ funcion.titulo }}</h4><span class="numero-funcion">Función #{{ funcion.id_funcion }}</span></div>
+            <div><span class="etiqueta-dato">UBICACIÓN</span><p>{{ funcion.local_nombre }}</p><small>{{ funcion.sala_nombre }}</small></div>
+            <div><span class="etiqueta-dato">FECHA Y HORA</span><p>{{ funcion.fecha_visible }}</p><small>{{ funcion.hora_visible }}</small></div>
+            <div><span class="etiqueta-dato">PRECIO</span><p class="importe-funcion">${{ funcion.precio_base }}</p><small>ARS por entrada</small></div>
+            <a class="accion-secundaria" href="{{ url_for('admin_funciones', editar=funcion.id_funcion) }}" aria-label="Editar función {{ funcion.id_funcion }}">Editar</a>
+        </li>
+    {% endfor %}</ul>
+    {% else %}<div class="panel-funciones estado-funciones"><span class="icono-vacio" aria-hidden="true">＋</span><h4>No hay funciones programadas.</h4><p>Elegí una película, una sala y un horario para crear la primera función.</p><a class="accion-principal" href="{{ url_for('admin_funciones', nuevo=1) }}">Programar la primera función</a></div>{% endif %}
+</section>
+{% endif %}
+{% endblock %}

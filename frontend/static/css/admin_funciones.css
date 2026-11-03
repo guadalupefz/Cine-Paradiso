@@ -1,0 +1,71 @@
+/* Programación y edición de funciones. */
+.admin-funciones [hidden] { display: none !important; }
+.admin-funciones .encabezado-funciones { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+.admin-funciones .seccion-funciones { color: var(--dorado); font-size: 11px; font-weight: bold; letter-spacing: 1.7px; margin-bottom: 8px; }
+.admin-funciones .texto-suave { color: var(--suave); font-size: 14px; margin: 0; }
+.admin-funciones .volver-funciones { display: inline-block; margin-bottom: 22px; font-size: 14px; }
+.admin-funciones .panel-funciones { padding: 26px; border: 1px solid var(--borde); border-radius: 14px; background: var(--panel); }
+.admin-funciones .titulo-panel { margin-bottom: 26px; }
+.admin-funciones .accion-principal, .admin-funciones .accion-secundaria { display: inline-block; padding: 11px 18px; border-radius: 7px; font: inherit; font-size: 14px; text-align: center; text-decoration: none; }
+.admin-funciones .accion-principal { color: #171b24; background: var(--dorado); border: 1px solid var(--dorado); font-weight: bold; }
+.admin-funciones .accion-principal:hover { color: #171b24; background: #ffda86; }
+.admin-funciones .accion-principal:disabled { cursor: not-allowed; opacity: .5; }
+.admin-funciones .accion-secundaria { border: 1px solid #53627a; color: var(--texto); background: transparent; }
+.admin-funciones .accion-secundaria:hover { color: white; background: #25334a; }
+.admin-funciones .formulario-funcion { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 300px); gap: 28px; }
+.admin-funciones .campos-funcion { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; align-content: start; }
+.admin-funciones .ancho-completo { grid-column: 1 / -1; }
+.admin-funciones .campo-funcion { display: grid; align-content: start; gap: 8px; min-width: 0; }
+.admin-funciones label { font-size: 14px; font-weight: bold; }
+.admin-funciones input:not([type="hidden"]), .admin-funciones select { width: 100%; min-width: 0; padding: 13px 14px; border: 1px solid #43516a; border-radius: 7px; background: #0d1728; color: var(--texto); font: inherit; color-scheme: dark; }
+.admin-funciones select { text-overflow: ellipsis; }
+.admin-funciones input::placeholder { color: #8898af; }
+.admin-funciones select:focus-visible { outline: 3px solid var(--dorado); outline-offset: 4px; }
+.admin-funciones small { color: var(--suave); font-size: 12px; }
+.admin-funciones .precio-funcion { position: relative; }
+.admin-funciones .precio-funcion input { padding-right: 72px; }
+.admin-funciones .precio-funcion span { position: absolute; right: 14px; top: 15px; pointer-events: none; color: var(--suave); font-size: 13px; }
+.admin-funciones .nota-programacion { margin: 0; padding: 14px; border-left: 2px solid var(--dorado); background: #302b24; color: #eed6a8; font-size: 13px; }
+.admin-funciones .agenda-funciones { padding: 20px; border: 1px solid var(--borde); border-radius: 10px; background: #101929; align-self: start; min-width: 0; }
+.admin-funciones .agenda-funciones h4 { margin-top: 0; font-size: 16px; }
+.admin-funciones .agenda-funciones .texto-suave { font-size: 12px; margin-bottom: 16px; }
+.admin-funciones .agenda-lista { list-style: none; padding: 0; margin: 16px 0; max-height: 290px; overflow-y: auto; }
+.admin-funciones .agenda-lista li { display: grid; gap: 5px; padding: 12px 10px; margin-bottom: 10px; background: #17243a; border-left: 2px solid #607b9f; border-radius: 5px; font-size: 13px; overflow-wrap: anywhere; }
+.admin-funciones .agenda-lista strong { color: #e5eefb; font-size: 12px; }
+.admin-funciones .agenda-lista small { font-size: 11px; }
+.admin-funciones .resumen-funcion { padding-top: 18px; border-top: 1px solid var(--borde); }
+.admin-funciones .resumen-funcion div { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; margin: 12px 0; font-size: 12px; }
+.admin-funciones dt { color: var(--suave); }
+.admin-funciones dd { margin: 0; }
+.admin-funciones .ayuda-agenda { color: var(--suave); font-size: 11px; line-height: 1.6; margin: 18px 0 0; }
+.admin-funciones .pie-formulario { grid-column: 1 / -1; border-top: 1px solid var(--borde); padding-top: 24px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.admin-funciones .pie-formulario .texto-suave { font-size: 12px; }
+.admin-funciones .acciones-funcion { display: flex; gap: 12px; flex-shrink: 0; }
+.admin-funciones .cabecera-listado { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.admin-funciones .cantidad-funciones { color: var(--suave); font-size: 13px; }
+.admin-funciones .lista-funciones-admin { padding: 0; margin: 0; list-style: none; display: grid; gap: 14px; }
+.admin-funciones .fila-funcion { padding: 20px; border: 1px solid var(--borde); border-radius: 12px; background: var(--panel); display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) auto; gap: 20px; align-items: center; }
+.admin-funciones .fila-funcion h4 { font-size: 16px; margin: 6px 0; overflow-wrap: anywhere; }
+.admin-funciones .fila-funcion p { font-size: 14px; margin: 6px 0; overflow-wrap: anywhere; }
+.admin-funciones .etiqueta-dato, .admin-funciones .numero-funcion { display: block; color: var(--suave); font-size: 10px; letter-spacing: 1px; }
+.admin-funciones .importe-funcion { font-variant-numeric: tabular-nums; }
+.admin-funciones .estado-funciones { text-align: center; padding: 40px 24px; color: var(--suave); }
+.admin-funciones .estado-funciones h4 { text-align: center; color: var(--texto); }
+.admin-funciones .icono-vacio { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border: 1px solid var(--borde); border-radius: 50%; font-size: 24px; color: var(--dorado); }
+@media (max-width: 1100px) {
+    .admin-funciones .formulario-funcion { grid-template-columns: minmax(0, 1fr); }
+    .admin-funciones .agenda-funciones { max-width: none; }
+    .admin-funciones .fila-funcion { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .admin-funciones .fila-funcion .accion-secundaria { justify-self: start; }
+}
+@media (max-width: 760px) {
+    .admin-funciones .encabezado-funciones { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .admin-funciones .panel-funciones { padding: 18px; }
+    .admin-funciones .formulario-funcion { gap: 22px; }
+    .admin-funciones .campos-funcion { grid-template-columns: minmax(0, 1fr); }
+    .admin-funciones .agenda-funciones { padding: 16px; }
+    .admin-funciones .pie-formulario { align-items: flex-start; flex-direction: column; }
+    .admin-funciones .acciones-funcion { flex-wrap: wrap; }
+    .admin-funciones .fila-funcion { padding: 18px; gap: 18px; }
+    .admin-funciones .pelicula-funcion { grid-column: 1 / -1; }
+}
