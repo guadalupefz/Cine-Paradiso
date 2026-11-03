@@ -2,32 +2,35 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}Cine Paradiso{% endblock %}</title>
-
     <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sitio_publico.css') }}">
+    <script src="{{ url_for('static', filename='js/posters_publicos.js') }}" defer></script>
+    {% block estilos_adicionales %}{% endblock %}
 </head>
-<body>
-    <header>
-        <a href="{{ url_for('index') }}" class="logo">
-            <h1>Cine Paradiso</h1>
-        </a>
-
-        <nav aria-label="Navegación principal">
-            {% if usuario_actual %}<a href="{{ url_for('mis_compras') }}">Mis compras</a>{% if usuario_actual.rol|lower == 'administrador' %}<a href="{{ url_for('admin_resumen') }}">Administración</a>{% endif %}<form class="form-inline" action="{{ url_for('logout') }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit">Cerrar sesión</button></form>{% else %}<a href="{{ url_for('login') }}">Iniciar sesión</a>{% endif %}
-            <a href="{{ url_for('index') }}">Cartelera</a>
-            <a href="{{ url_for('ver_servicios') }}">Servicios</a>
+<body class="sitio-publico {% block clase_pagina %}{% endblock %}">
+    <a class="saltar-contenido" href="#contenido-principal">Saltar al contenido</a>
+    <header class="cabecera-sitio">
+        <a href="{{ url_for('index') }}" class="marca-sitio" aria-label="Cine Paradiso, inicio"><span class="simbolo-marca" aria-hidden="true">✦</span><span>Cine Paradiso</span></a>
+        <nav class="navegacion-sitio" aria-label="Navegación principal">
+            <a href="{{ url_for('index') }}" {% if request.endpoint in ['index', 'ver_funciones', 'ver_butacas', 'ver_compra'] %}aria-current="page"{% endif %}>Cartelera</a>
+            <a href="{{ url_for('ver_servicios') }}" {% if request.endpoint == 'ver_servicios' %}aria-current="page"{% endif %}>Servicios</a>
+            {% if usuario_actual %}
+                <a href="{{ url_for('mis_compras') }}" {% if request.endpoint in ['mis_compras', 'ver_comprobante'] %}aria-current="page"{% endif %}>Mis compras</a>
+                {% if usuario_actual.rol|trim|lower == 'administrador' %}<a href="{{ url_for('admin_resumen') }}">Administración</a>{% endif %}
+                <form class="form-inline" action="{{ url_for('logout') }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="boton-cabecera" type="submit">Cerrar sesión</button></form>
+            {% else %}
+                <a class="enlace-acceso" href="{{ url_for('login') }}" {% if request.endpoint == 'login' %}aria-current="page"{% endif %}>Iniciar sesión</a>
+            {% endif %}
         </nav>
     </header>
-
-    <main>
-        {% with mensajes=get_flashed_messages(with_categories=true) %}{% for categoria,mensaje in mensajes %}<p class="aviso {{ categoria }}" role="status">{{ mensaje }}</p>{% endfor %}{% endwith %}
+    <main id="contenido-principal" tabindex="-1">
+        {% with mensajes=get_flashed_messages(with_categories=true) %}
+            {% for categoria,mensaje in mensajes %}<p class="aviso {{ categoria }}" role="{{ 'alert' if categoria == 'error' else 'status' }}">{{ mensaje }}</p>{% endfor %}
+        {% endwith %}
         {% block content %}{% endblock %}
     </main>
-
-    <footer>
-        <p>&copy; Cine Paradiso</p>
-    </footer>
+    <footer class="pie-sitio"><p class="lema-sitio">El cine de siempre. Las historias de hoy.</p><p>Precios en pesos argentinos · &copy; Cine Paradiso</p></footer>
 </body>
 </html>
