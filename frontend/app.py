@@ -271,32 +271,100 @@ def admin_servicios():
 @app.route("/admin/peliculas", methods=["GET", "POST"])
 @requiere_admin
 def admin_peliculas():
+    campos = ("titulo", "sinopsis", "poster", "clasificacion", "genero", "duracion_minutos")
+    datos_formulario = dict.fromkeys(campos, "")
+    datos_formulario["poster"] = "/static/img/default.svg"
+    pelicula_editar = None
     resultado_api = None
+    busqueda_api = ""
+    error_api = None
+    error_formulario = None
+    estado_pagina = 200
+    mostrar_formulario = request.args.get("nuevo") == "1"
+
     if request.method == "POST":
         accion = request.form.get("accion", "crear")
         if accion in ("buscar", "importar"):
-            resultado_api, estado = llamar_backend("GET" if accion == "buscar" else "POST", "/pelicula", params={"titulo":request.form.get("titulo", "")})
-            if estado != 200 or accion == "importar":
-                flash(mensaje_error(resultado_api), "ok" if estado == 200 else "error")
-            if accion == "importar":
-                return redirect(url_for("admin_peliculas"))
+            busqueda_api = request.form.get("titulo", "").strip()
+            if not busqueda_api:
+                error_api = "Ingresá un título para consultar la API."
+                estado_pagina = 400
+            else:
+                resultado, estado = llamar_backend(
+                    "GET" if accion == "buscar" else "POST",
+                    "/pelicula", params={"titulo": busqueda_api},
+                )
+                # El endpoint existente también comunica duplicados con una clave " Error" y HTTP 200.
+                rechazo = next((str(valor) for clave, valor in resultado.items()
+                                if clave.strip().casefold() == "error"), None) if isinstance(resultado, dict) else None
+                if estado not in (200, 201) or rechazo:
+                    error_api = rechazo or mensaje_error(resultado)
+                    estado_pagina = estado if estado not in (200, 201) else 409
+                elif accion == "importar":
+                    flash(mensaje_error(resultado), "ok")
+                    return redirect(url_for("admin_peliculas"))
+                elif isinstance(resultado, dict) and resultado.get("titulo"):
+                    resultado_api = resultado
+                else:
+                    error_api = "La API no devolvió una ficha de película válida."
+                    estado_pagina = 502
         elif accion in ("crear", "editar"):
-            identificador = request.form.get("id_pelicula",type=int)
-            datos = {k:request.form.get(k, "") for k in ("titulo","sinopsis","poster","clasificacion","genero")}
-            datos["duracion_minutos"] = request.form.get("duracion_minutos",type=int)
-            ruta = "/peliculas" + (f"/{identificador}" if accion == "editar" and identificador else "")
+            mostrar_formulario = True
+            identificador = request.form.get("id_pelicula", type=int)
+            if accion == "editar" and (identificador is None or identificador <= 0):
+                abort(400)
+            datos_formulario = {campo: request.form.get(campo, "") for campo in campos}
+            datos = dict(datos_formulario)
+            datos["duracion_minutos"] = request.form.get("duracion_minutos", type=int)
+            ruta = "/peliculas" + (f"/{identificador}" if accion == "editar" else "")
             resultado, estado = llamar_backend("PUT" if accion == "editar" else "POST", ruta, json=datos)
-            flash(mensaje_error(resultado), "ok" if estado in (200,201) else "error")
-            return redirect(url_for("admin_peliculas"))
+            if estado in (200, 201):
+                flash(mensaje_error(resultado), "ok")
+                return redirect(url_for("admin_peliculas"))
+            error_formulario = mensaje_error(resultado)
+            estado_pagina = estado
+            if accion == "editar":
+                pelicula_editar = {"id_pelicula": identificador}
         else:
             abort(400)
+
     datos, estado = llamar_backend("GET", "/peliculas")
-    peliculas = lista(datos,"peliculas")
-    editar = request.args.get("editar", type=int)
-    pelicula_editar = next((p for p in peliculas if p["id_pelicula"] == editar), None)
-    if estado != 200:
+    error_listado = estado != 200
+    peliculas = lista(datos, "peliculas") if not error_listado else []
+    if error_listado:
         flash(mensaje_error(datos), "error")
-    return render_template("admin/peliculas_admin.html", peliculas=peliculas, pelicula_editar=pelicula_editar, resultado_api=resultado_api)
+
+    if request.method == "GET" and "editar" in request.args:
+        editar = request.args.get("editar", type=int)
+        if editar is None or editar <= 0:
+            abort(400)
+        if not error_listado:
+            pelicula_editar = next((p for p in peliculas if p["id_pelicula"] == editar), None)
+            if pelicula_editar is None:
+                flash("La película que querés editar ya no está disponible.", "error")
+                return redirect(url_for("admin_peliculas"))
+            mostrar_formulario = True
+            datos_formulario = {campo: pelicula_editar.get(campo) or "" for campo in campos}
+            duracion = str(datos_formulario["duracion_minutos"]).strip().split()
+            datos_formulario["duracion_minutos"] = duracion[0] if duracion else ""
+
+    def poster_para_vista(valor):
+        if isinstance(valor, str):
+            if valor.startswith(("https://", "http://")):
+                return valor
+            if valor.startswith(("/static/", "static/")):
+                return urljoin(BACKEND_ORIGEN + "/", valor.lstrip("/"))
+        return url_for("static", filename="img/poster_sin_imagen.svg")
+
+    return render_template(
+        "admin/peliculas_admin.html", peliculas=peliculas,
+        pelicula_editar=pelicula_editar, mostrar_formulario=mostrar_formulario,
+        datos_formulario=datos_formulario, resultado_api=resultado_api,
+        busqueda_api=busqueda_api, error_api=error_api,
+        error_formulario=error_formulario, error_listado=error_listado,
+        poster_para_vista=poster_para_vista,
+    ), estado_pagina
+
 
 @app.route("/admin/funciones", methods=["GET", "POST"])
 @requiere_admin

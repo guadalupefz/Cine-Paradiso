@@ -1,11 +1,82 @@
-{% extends "admin/base_admin.html" %}{% block title %}Películas - Administración{% endblock %}{% block content %}
-<h2>Gestión de películas</h2><section class="tarjeta-admin"><h3>Buscar en la API externa</h3><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><label for="busqueda">Título</label><input id="busqueda" name="titulo" required><button name="accion" value="buscar">Consultar</button><button name="accion" value="importar">Importar al catálogo</button></form>{% if resultado_api and resultado_api.titulo %}<h4>{{ resultado_api.titulo }}</h4><p>{{ resultado_api.sinopsis }}</p><p>{{ resultado_api.duracion_minutos }}</p>{% endif %}</section>
-<section class="tarjeta-admin"><h3>{{ 'Modificar película' if pelicula_editar else 'Carga manual' }}</h3><p>Podés completar el catálogo aunque la API externa no esté disponible.</p><form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="accion" value="{{ 'editar' if pelicula_editar else 'crear' }}">{% if pelicula_editar %}<input type="hidden" name="id_pelicula" value="{{ pelicula_editar.id_pelicula }}">{% endif %}
-<label for="titulo">Título</label><input id="titulo" name="titulo" maxlength="150" required value="{{ pelicula_editar.titulo if pelicula_editar else '' }}">
-<label for="duracion">Duración en minutos</label><input id="duracion" name="duracion_minutos" type="number" min="1" max="1440" required value="{{ (pelicula_editar.duracion_minutos|string).split(' ')[0] if pelicula_editar else '' }}">
-<label for="sinopsis">Sinopsis</label><textarea id="sinopsis" name="sinopsis" required>{{ pelicula_editar.sinopsis if pelicula_editar else '' }}</textarea>
-<label for="genero">Género</label><input id="genero" name="genero" maxlength="50" required value="{{ pelicula_editar.genero if pelicula_editar else '' }}">
-<label for="clasificacion">Clasificación</label><input id="clasificacion" name="clasificacion" maxlength="20" required value="{{ pelicula_editar.clasificacion if pelicula_editar else '' }}">
-<label for="poster">URL o ruta del póster</label><input id="poster" name="poster" maxlength="100" required value="{{ pelicula_editar.poster if pelicula_editar else '/static/img/default.svg' }}">
-<button type="submit">Guardar película</button>{% if pelicula_editar %}<a href="{{ url_for('admin_peliculas') }}">Cancelar edición</a>{% endif %}</form></section>
-<h3>Catálogo local</h3><div class="tabla-scroll"><table><thead><tr><th>Título</th><th>Duración</th><th>Clasificación</th><th></th></tr></thead><tbody>{% for pelicula in peliculas %}<tr><td>{{ pelicula.titulo }}</td><td>{{ pelicula.duracion_minutos }}</td><td>{{ pelicula.clasificacion }}</td><td><a href="{{ url_for('admin_peliculas',editar=pelicula.id_pelicula) }}">Modificar</a></td></tr>{% else %}<tr><td colspan="4">No hay películas cargadas.</td></tr>{% endfor %}</tbody></table></div>{% endblock %}
+{% extends "admin/base_admin.html" %}
+{% block title %}{{ 'Editar película' if pelicula_editar else 'Películas' }} · Cine Paradiso{% endblock %}
+{% block clase_pagina %}admin-panel admin-peliculas{% endblock %}
+{% block estilos_adicionales %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_peliculas.css') }}">
+<script src="{{ url_for('static', filename='js/admin_peliculas.js') }}" defer></script>
+{% endblock %}
+{% block content %}
+{% if mostrar_formulario %}<a class="volver-peliculas" href="{{ url_for('admin_peliculas') }}">← Volver a películas</a>{% endif %}
+<div class="encabezado-peliculas">
+    <div>
+        <p class="seccion-peliculas">ADMINISTRACIÓN / CATÁLOGO</p>
+        <h2>{{ 'Editar película' if pelicula_editar else 'Agregar película' if mostrar_formulario else 'Películas' }}</h2>
+        <p class="texto-suave">{{ 'Completá la ficha que se mostrará en el catálogo del cine.' if mostrar_formulario else 'Organizá el catálogo y sumá nuevas historias a la pantalla.' }}</p>
+    </div>
+    {% if not mostrar_formulario %}<a class="accion-principal" href="{{ url_for('admin_peliculas', nuevo=1) }}">＋ Agregar película</a>{% endif %}
+</div>
+
+{% if mostrar_formulario %}
+<section class="panel-peliculas" aria-labelledby="titulo-ficha">
+    <div class="titulo-panel"><h3 id="titulo-ficha">Datos de la película</h3><p class="texto-suave">Todos los campos son obligatorios.</p></div>
+    {% if error_formulario %}<p class="aviso error" role="alert">{{ error_formulario }}</p>{% endif %}
+    <form method="post" class="formulario-pelicula">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="accion" value="{{ 'editar' if pelicula_editar else 'crear' }}">
+        {% if pelicula_editar %}<input type="hidden" name="id_pelicula" value="{{ pelicula_editar.id_pelicula }}">{% endif %}
+        <div class="campos-pelicula">
+            <div class="campo-pelicula ancho-completo"><label for="titulo">Título de la película</label><input id="titulo" name="titulo" maxlength="150" required value="{{ datos_formulario.titulo }}" placeholder="Ej.: La última función"></div>
+            <div class="campo-pelicula ancho-completo"><label for="sinopsis">Sinopsis</label><textarea id="sinopsis" name="sinopsis" maxlength="65000" required rows="5" placeholder="Contá de qué trata la película.">{{ datos_formulario.sinopsis }}</textarea></div>
+            <div class="campo-pelicula"><label for="duracion">Duración en minutos</label><input id="duracion" name="duracion_minutos" type="number" min="1" max="1440" step="1" required value="{{ datos_formulario.duracion_minutos }}" placeholder="Ej.: 108" aria-describedby="ayuda-duracion"><small id="ayuda-duracion">Un número entero entre 1 y 1440.</small></div>
+            <div class="campo-pelicula"><label for="clasificacion">Clasificación por edad</label><input id="clasificacion" name="clasificacion" maxlength="20" required list="clasificaciones" value="{{ datos_formulario.clasificacion }}" placeholder="Ej.: +13"><datalist id="clasificaciones"><option value="ATP"><option value="+13"><option value="+16"><option value="+18"><option value="PG-13"><option value="R"></datalist><small>Conservá la clasificación de la ficha de la película.</small></div>
+            <div class="campo-pelicula ancho-completo"><label for="genero">Género</label><input id="genero" name="genero" maxlength="50" required value="{{ datos_formulario.genero }}" placeholder="Ej.: Drama, aventura"><small>Hasta 50 caracteres.</small></div>
+        </div>
+        <aside class="poster-formulario" aria-label="Póster de la película">
+            <label for="poster">URL o ruta del póster</label>
+            <p class="texto-suave">Pegá la dirección de un póster o conservá la imagen predeterminada.</p>
+            <img class="poster-preview" src="{{ poster_para_vista(datos_formulario.poster) }}" alt="Vista previa del póster" data-poster-fallback="{{ url_for('static', filename='img/poster_sin_imagen.svg') }}" referrerpolicy="no-referrer">
+            <input id="poster" name="poster" maxlength="100" required value="{{ datos_formulario.poster }}" aria-describedby="ayuda-poster">
+            <small id="ayuda-poster">Máximo 100 caracteres. Podés conservar la imagen predeterminada.</small>
+        </aside>
+        <div class="pie-formulario"><p class="texto-suave">Las películas con funciones programadas tienen restricciones para cambiar la duración.</p><div class="acciones-pelicula"><a class="accion-secundaria" href="{{ url_for('admin_peliculas') }}">Cancelar</a><button class="accion-principal" type="submit">{{ 'Guardar cambios' if pelicula_editar else 'Guardar película' }}</button></div></div>
+    </form>
+</section>
+{% else %}
+<section class="panel-peliculas importacion-peliculas" aria-labelledby="titulo-api">
+    <div class="titulo-panel"><p class="seccion-peliculas">BUSCADOR EXTERNO</p><h3 id="titulo-api">Importar desde OMDb</h3><p class="texto-suave">Consultá una ficha antes de agregarla al catálogo.</p></div>
+    <form method="post" class="buscar-pelicula">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="accion" value="buscar">
+        <div class="campo-pelicula"><label for="busqueda">Título en la API</label><input id="busqueda" name="titulo" maxlength="150" required value="{{ busqueda_api }}" placeholder="Ej.: Cinema Paradiso"></div>
+        <button class="accion-secundaria" type="submit">Buscar película</button>
+    </form>
+    {% if error_api %}<p class="aviso error" role="alert">{{ error_api }}</p><p class="texto-suave">También podés <a href="{{ url_for('admin_peliculas', nuevo=1) }}">cargar la película manualmente</a>.</p>{% endif %}
+    {% if resultado_api %}
+    <article class="resultado-pelicula" aria-labelledby="titulo-resultado">
+        <img src="{{ poster_para_vista(resultado_api.poster) }}" alt="Póster de {{ resultado_api.titulo }}" data-poster-fallback="{{ url_for('static', filename='img/poster_sin_imagen.svg') }}" referrerpolicy="no-referrer">
+        <div><p class="seccion-peliculas">RESULTADO DE LA BÚSQUEDA</p><h4 id="titulo-resultado">{{ resultado_api.titulo }}</h4><p class="datos-ficha">{{ resultado_api.duracion_minutos or 'Duración no disponible' }}{% if resultado_api.duracion_minutos %} min{% endif %} · {{ resultado_api.clasificacion or 'Sin clasificación' }} · {{ resultado_api.genero or 'Sin género' }}</p><p class="sinopsis-resultado">{{ resultado_api.sinopsis or 'Sin sinopsis disponible.' }}</p>
+            <form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="accion" value="importar"><input type="hidden" name="titulo" value="{{ busqueda_api }}"><button class="accion-principal" type="submit">Importar al catálogo</button></form>
+        </div>
+    </article>
+    {% endif %}
+</section>
+
+<section class="catalogo-peliculas" aria-labelledby="titulo-catalogo">
+    <div class="cabecera-catalogo"><h3 id="titulo-catalogo">Catálogo local</h3>{% if not error_listado %}<span class="cantidad-peliculas">{{ peliculas|length }} {{ 'película' if peliculas|length == 1 else 'películas' }}</span>{% endif %}</div>
+    {% if error_listado %}
+    <div class="panel-peliculas estado-peliculas"><h4>No pudimos cargar el catálogo</h4><p>Intentá nuevamente para ver las películas registradas.</p><a class="accion-secundaria" href="{{ url_for('admin_peliculas') }}">Volver a intentar</a></div>
+    {% elif peliculas %}
+    <div class="grilla-peliculas">
+        {% for pelicula in peliculas %}
+        <article class="ficha-pelicula">
+            <img class="poster-catalogo" src="{{ poster_para_vista(pelicula.poster) }}" alt="Póster de {{ pelicula.titulo }}" data-poster-fallback="{{ url_for('static', filename='img/poster_sin_imagen.svg') }}" loading="lazy" referrerpolicy="no-referrer">
+            <div class="detalle-pelicula"><p class="genero-pelicula">{{ pelicula.genero or 'Género no informado' }}</p><h4>{{ pelicula.titulo }}</h4><p class="datos-ficha">{{ pelicula.duracion_minutos or 'Sin duración' }}{% if pelicula.duracion_minutos and not 'min' in pelicula.duracion_minutos|string %} min{% endif %} <span class="clasificacion-pelicula">{{ pelicula.clasificacion or 'Sin clasificación' }}</span></p><a class="accion-secundaria" href="{{ url_for('admin_peliculas', editar=pelicula.id_pelicula) }}" aria-label="Editar {{ pelicula.titulo }}">Editar película</a></div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="panel-peliculas estado-peliculas"><span class="icono-catalogo" aria-hidden="true">＋</span><h4>No hay películas cargadas.</h4><p>Buscá una película en OMDb o cargá su ficha manualmente.</p><a class="accion-principal" href="{{ url_for('admin_peliculas', nuevo=1) }}">Agregar la primera película</a></div>
+    {% endif %}
+</section>
+{% endif %}
+{% endblock %}
