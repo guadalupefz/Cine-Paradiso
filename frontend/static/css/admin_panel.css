@@ -47,3 +47,25 @@
     .admin-panel .contenido_admin { margin: 0; padding: 26px 16px; }
     .admin-panel h2 { font-size: 26px; }
 }
+
+/* Componentes para las pantallas que heredan la base del panel. */
+.admin-panel .saltar-contenido { position: absolute; top: -100px; left: 16px; z-index: 10; padding: 10px 16px; background: var(--dorado); color: #171b24; }
+.admin-panel .saltar-contenido:focus { top: 8px; }
+.admin-panel .tarjeta-admin { border-color: var(--borde); background: var(--panel); color: var(--texto); overflow-wrap: anywhere; }
+.admin-panel .tarjeta-admin h3 { color: var(--texto); }
+.admin-panel .contenido_admin > form { display: grid; gap: 16px; max-width: 620px; margin-top: 24px; }
+.admin-panel .campo_formulario { display: grid; gap: 8px; }
+.admin-panel label { font-size: 14px; font-weight: bold; }
+.admin-panel :where(input:not([type='hidden']):not([type='checkbox']):not([type='radio']), select, textarea) { max-width: 100%; min-width: 0; padding: 12px 14px; border: 1px solid #43516a; border-radius: 7px; background: #0d1728; color: var(--texto); font: inherit; color-scheme: dark; }
+.admin-panel .campo_formulario input { width: 100%; }
+.admin-panel button { border: 1px solid var(--dorado); background: var(--dorado); color: #171b24; font: bold 14px Arial, sans-serif; }
+.admin-panel button:hover { background: #ffda86; }
+.admin-panel .contenido_admin > form button { justify-self: start; }
+.admin-panel .menu_admin button { font-weight: normal; }
+.admin-panel .menu_admin button:hover { background: #25334a; }
+.admin-panel table { background: transparent; color: var(--texto); }
+.admin-panel th, .admin-panel td { border-bottom-color: var(--borde); }
+.admin-panel th { background: #101a2a; }
+.admin-panel #reader { max-width: 100%; }
+.admin-panel #reader :is(video, img) { max-width: 100%; }
+.admin-panel :is(select, textarea):focus-visible { outline: 3px solid var(--dorado); outline-offset: 4px; }
