@@ -129,14 +129,14 @@ def actualizar_funcion(id_usuario, id_funcion):
         }), 400
 
     try:
-        if isinstance(data["id_pelicula"], bool):
+        if type(data["id_pelicula"]) is not int:
             raise ValueError
 
-        if isinstance(data["id_sala"], bool):
+        if type(data["id_sala"]) is not int:
             raise ValueError
 
-        id_pelicula = int(data["id_pelicula"])
-        id_sala = int(data["id_sala"])
+        id_pelicula = data["id_pelicula"]
+        id_sala = data["id_sala"]
 
         if id_pelicula <= 0 or id_sala <= 0:
             raise ValueError

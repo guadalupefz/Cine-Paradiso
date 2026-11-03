@@ -182,6 +182,26 @@ class TestB08(unittest.TestCase):
 
         self.assertEqual(respuesta.status_code, 400)
 
+    def test_ids_invalidos_se_rechazan_antes_de_modificar_funciones(self):
+        valores_invalidos = (1.8, 1.0, True, None, "1", 0, -1, [], {})
+        rutas = (("post", "/api/funciones"), ("put", "/api/funciones/1"))
+
+        for metodo, ruta in rutas:
+            for campo in ("id_pelicula", "id_sala"):
+                for valor in valores_invalidos:
+                    with self.subTest(metodo=metodo, campo=campo, valor=valor):
+                        datos = self.funcion_valida()
+                        datos[campo] = valor
+
+                        with patch.object(funciones, "get_connection") as abrir, patch.object(
+                            funciones, "crear_funcion_servicio"
+                        ) as crear:
+                            respuesta = getattr(self.client, metodo)(ruta, json=datos)
+
+                        self.assertEqual(respuesta.status_code, 400, respuesta.json)
+                        abrir.assert_not_called()
+                        crear.assert_not_called()
+
     def test_modificar_funcion_con_datos_incompletos(self):
         respuesta = self.client.put(
             "/api/funciones/1",
