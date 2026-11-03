@@ -100,6 +100,10 @@ def acceso_denegado(error):
 def formulario_invalido(error):
     return render_template("error.html", mensaje=getattr(error, "description", "Formulario inválido")), 400
 
+@app.errorhandler(404)
+def pagina_no_encontrada(error):
+    return render_template("error.html", mensaje="La página que buscás no está disponible. Podés volver a la cartelera."), 404
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -136,7 +140,7 @@ def index():
             vistos.add(peli["id_pelicula"])
     if estado != 200:
         flash(mensaje_error(datos), "error")
-    return render_template("cartelera.html", peliculas=peliculas)
+    return render_template("cartelera.html", peliculas=peliculas, error=estado != 200)
 
 @app.get("/funciones")
 def ver_funciones():
@@ -187,8 +191,9 @@ def mis_compras():
         )
 
         compra["entradas"] = lista(entradas, "entradas") if estado_entradas == 200 else []
+        compra["error_entradas"] = estado_entradas != 200
 
-    return render_template("compras.html", compras=compras)
+    return render_template("compras.html", compras=compras, error=estado != 200)
 
 
 @app.get("/admin")

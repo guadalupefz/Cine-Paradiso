@@ -6,6 +6,7 @@
     <section>
         <div class="cabecera-cartelera"><div><p class="etiqueta-cartelera">EN NUESTRA PANTALLA</p><h2>Cartelera</h2><p class="introduccion">Elegí una película, encontrá tu función y que empiece la magia.</p></div><p class="sello-cartelera"><span aria-hidden="true">✦</span>BUEN CINE, SIEMPRE.</p></div>
 
+        {% if error %}<p class="mensaje-error">No pudimos cargar la cartelera. <a href="{{ url_for('index') }}">Volver a intentar</a>.</p>{% else %}
         <div class="peliculas">
             {% for pelicula in peliculas %}
                 <div class="pelicula">
@@ -31,5 +32,6 @@
                 <p class="estado-vacio">No hay películas disponibles en este momento.</p>
             {% endfor %}
         </div>
+        {% endif %}
     </section>
 {% endblock %}

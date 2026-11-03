@@ -4,12 +4,14 @@
 
 <h2>Mis compras</h2>
 
+{% if error %}<p class="mensaje-error">No se pudieron cargar tus compras. <a href="{{ url_for('mis_compras') }}">Volver a intentar</a>.</p>{% else %}
 {% for compra in compras %}
     <article class="tarjeta-admin">
         <h3>Compra {{ compra.id_compra }}</h3>
         <p>{{ compra.fecha_hora }} · {{ compra.estado }}</p>
         <p>Total: ${{ compra.total }}</p>
 
+        {% if compra.error_entradas %}<p class="mensaje-error">No se pudieron cargar las entradas de esta compra.</p>{% endif %}
         {% for entrada in compra.entradas %}
             <div>
                 <p>entrada {{ entrada.id_entrada }}</p>
@@ -31,5 +33,6 @@
 {% else %}
     <p>No tenés compras registradas.</p>
 {% endfor %}
+{% endif %}
 
 {% endblock %}
