@@ -13,19 +13,21 @@ def obtener_cartelera(cursor):
         JOIN pelicula p ON f.id_pelicula = p.id_pelicula
         JOIN sala s ON f.id_sala = s.id_sala
         JOIN local l ON s.id_local = l.id_local
-        WHERE f.fecha_hora_inicio >= NOW()
+        WHERE f.fecha_hora_inicio > NOW()
     """
     cursor.execute(query)
     return cursor.fetchall()
 
 # Listar todas las funciones disponibles
-def obtener_funciones(cursor):
+def obtener_funciones(cursor, solo_vigentes=False):
     query = """
         SELECT f.id_funcion, f.id_pelicula, f.id_sala, f.fecha_hora_inicio, f.precio_base, p.titulo, s.nombre as sala_nombre
         FROM funcion f
         JOIN pelicula p ON f.id_pelicula = p.id_pelicula
         JOIN sala s ON f.id_sala = s.id_sala
     """
+    if solo_vigentes:
+        query += " WHERE f.fecha_hora_inicio > NOW()"
     cursor.execute(query)
     return cursor.fetchall()
 

@@ -27,7 +27,7 @@ funciones_bp = Blueprint("funciones", __name__)
 @funciones_bp.route("/funciones", methods=["GET"])
 def listar_funciones_route():
     try:
-        funciones = listar_funciones_servicio()
+        funciones = listar_funciones_servicio(solo_vigentes=request.args.get("vigentes") == "1")
         return jsonify(funciones), 200
     except Exception:
         return jsonify({"error": "Error interno del servidor"}), 500

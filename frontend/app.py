@@ -275,7 +275,7 @@ def index():
 @app.get("/funciones")
 def ver_funciones():
     id_pelicula = request.args.get("id_pelicula", type=int)
-    datos, estado = llamar_backend("GET", "/funciones")
+    datos, estado = llamar_backend("GET", "/funciones", params={"vigentes": "1"})
     funciones = [f for f in lista(datos, "funciones") if not id_pelicula or f.get("id_pelicula") == id_pelicula]
     for funcion in funciones:
         try:

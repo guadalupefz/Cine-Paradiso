@@ -6,13 +6,13 @@ from backend.src.repositories.funciones_repository import (obtener_funciones,
                                                            verificar_solapamiento_sala)
 
 #Devuelve lista de diccionarios
-def listar_funciones_servicio():
+def listar_funciones_servicio(solo_vigentes=False):
 
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
     try:
-        funciones = obtener_funciones(cursor)
+        funciones = obtener_funciones(cursor, solo_vigentes=solo_vigentes)
         return funciones
 
     finally:
