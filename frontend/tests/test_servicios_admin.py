@@ -1,5 +1,6 @@
 import os
 import unittest
+from urllib.parse import urlsplit, parse_qs
 from unittest.mock import patch
 
 os.environ.setdefault("SECRET_KEY", "clave-ficticia-para-pruebas-de-frontend-2026")
@@ -93,7 +94,8 @@ class ServiciosAdmin(unittest.TestCase):
             sesion.pop("backend_token")
         respuesta = self.client.get("/admin/servicios")
         self.assertEqual(respuesta.status_code, 302)
-        self.assertEqual(respuesta.location, "/login")
+        self.assertEqual(urlsplit(respuesta.location).path, "/login")
+        self.assertEqual(parse_qs(urlsplit(respuesta.location).query)["next"], ["/admin/servicios"])
         self.assertFalse(self.llamadas)
 
     def test_cliente_no_accede(self):

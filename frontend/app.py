@@ -3,7 +3,8 @@ import secrets
 from functools import wraps
 from pathlib import Path
 from datetime import datetime
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlsplit, unquote, parse_qs
+from werkzeug.exceptions import HTTPException
 
 import requests
 from dotenv import load_dotenv
@@ -60,12 +61,71 @@ def usuario_actual():
                 session.pop("backend_token", None)
     return g.usuario
 
+def destino_interno(valor):
+    """Reconstruye destinos GET conocidos; nunca redirige a URLs externas."""
+    if not isinstance(valor, str) or not valor.startswith("/") or len(valor) > 2048:
+        return None
+    if "\\" in valor or any(ord(caracter) < 32 or ord(caracter) == 127 for caracter in valor):
+        return None
+    try:
+        partes = urlsplit(valor)
+        if partes.scheme or partes.netloc or partes.fragment:
+            return None
+        ruta = unquote(partes.path)
+        if not ruta.startswith("/") or ruta.startswith("//") or "\\" in ruta:
+            return None
+        endpoint, parametros = app.url_map.bind("localhost").match(ruta, method="GET")
+        permitidos = {
+            "ver_butacas", "ver_compra", "mis_compras", "ver_comprobante", "ver_qr_cliente",
+            "admin_resumen", "admin_peliculas", "admin_funciones", "admin_servicios", "validar_qr",
+        }
+        if endpoint not in permitidos or any(valor <= 0 for valor in parametros.values() if isinstance(valor, int)):
+            return None
+        consulta = parse_qs(partes.query, keep_blank_values=True, max_num_fields=20)
+        if endpoint == "ver_butacas":
+            pelicula = consulta.get("id_pelicula", [""])[0]
+            if pelicula:
+                parametros["id_pelicula"] = int(pelicula)
+                if parametros["id_pelicula"] <= 0:
+                    return None
+        elif endpoint == "ver_compra":
+            parametros["id_funcion"] = int(consulta.get("id_funcion", [""])[0])
+            if parametros["id_funcion"] <= 0:
+                return None
+            parametros["butacas"] = consulta.get("butacas", [""])[0]
+        elif endpoint in ("admin_peliculas", "admin_funciones", "admin_servicios"):
+            editar = consulta.get("editar", [""])[0]
+            if editar:
+                parametros["editar"] = int(editar)
+                if parametros["editar"] <= 0:
+                    return None
+            elif consulta.get("nuevo") == ["1"]:
+                parametros["nuevo"] = 1
+        return url_for(endpoint, **parametros)
+    except (ValueError, HTTPException):
+        return None
+
+
+def destino_de_acceso():
+    if "next" in request.form or "next" in request.args:
+        valor = request.form.get("next") if "next" in request.form else request.args.get("next")
+        destino = destino_interno(valor)
+        if destino:
+            session["destino_acceso"] = destino
+        else:
+            session.pop("destino_acceso", None)
+    return destino_interno(session.get("destino_acceso"))
+
+
 def requiere_usuario(funcion):
     @wraps(funcion)
     def vista(*args, **kwargs):
         if usuario_actual() is None:
             flash("Iniciá sesión para continuar.", "error")
-            return redirect(url_for("login"))
+            destino = destino_interno(request.full_path)
+            if destino:
+                session["destino_acceso"] = destino
+            return redirect(url_for("login", next=destino))
         return funcion(*args, **kwargs)
     return vista
 
@@ -106,16 +166,18 @@ def pagina_no_encontrada(error):
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    destino = destino_de_acceso()
     if request.method == "POST":
         datos, estado = llamar_backend("POST", "/auth/login", json={"email": request.form.get("email", ""), "password": request.form.get("password", "")})
         if estado == 200:
-            session.pop("backend_cookie", None)
+            session.clear()
+            session["csrf_token"] = secrets.token_hex(24)
             session["backend_token"] = datos["access_token"]
             flash("Sesión iniciada.", "ok")
             usuario = datos.get("usuario", {})
-            return redirect(url_for("admin_resumen" if usuario.get("rol", "").casefold() == "administrador" else "index"))
+            return redirect(destino or url_for("admin_resumen" if usuario.get("rol", "").strip().casefold() == "administrador" else "index"))
         flash(mensaje_error(datos), "error")
-    return render_template("login.html")
+    return render_template("login.html", destino=destino)
 
 @app.post("/logout")
 def logout():
@@ -163,6 +225,7 @@ def ver_butacas(id_funcion):
     return render_template("butacas.html", butacas=lista(datos,"butacas"), pelicula={"titulo": "Selección de butacas"}, id_funcion=id_funcion, id_pelicula=request.args.get("id_pelicula",type=int), error=estado != 200)
 
 @app.get("/compra")
+@requiere_usuario
 def ver_compra():
     id_funcion = request.args.get("id_funcion",type=int)
     butacas = [b.strip() for b in request.args.get("butacas", "").split(",") if b.strip()]
