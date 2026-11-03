@@ -4,9 +4,12 @@ from decimal import Decimal
 from datetime import datetime, timedelta
 
 from backend.db.db import get_connection
+from backend.src.validators.inicio_funcion_validator import validar_inicio_funcion
 from backend.src.repositories.reservas_repositories import limpiar_reservas_expiradas
 from backend.src.repositories.compra_repository import (
     obtener_funcion,
+    obtener_hora_actual,
+    obtener_inicio_funciones_compra,
     obtener_usuario,
     obtener_butacas_de_funcion,
     obtener_butacas_ocupadas,
@@ -35,6 +38,8 @@ def realizar_compra(id_usuario, id_funcion, ids_butacas):
 
         if funcion is None:
             raise ValueError("La función no existe.")
+
+        validar_inicio_funcion(funcion["fecha_hora_inicio"], obtener_hora_actual(cursor))
 
         if not ids_butacas:
             raise ValueError("Debe seleccionar al menos una butaca.")
@@ -165,6 +170,9 @@ def confirmar_compra(id_usuario, id_compra):
 
         if not entradas:
             raise ValueError("La compra no tiene entradas asociadas.")
+
+        primer_inicio = obtener_inicio_funciones_compra(cursor, id_compra)
+        validar_inicio_funcion(primer_inicio, obtener_hora_actual(cursor))
 
         cursor.execute(
             """

@@ -1,6 +1,6 @@
 def obtener_funcion(cursor, id_funcion):
     query = """
-        SELECT id_funcion, id_sala, precio_base
+        SELECT id_funcion, id_sala, precio_base, fecha_hora_inicio
         FROM funcion
         WHERE id_funcion = %s
         FOR UPDATE
@@ -142,3 +142,21 @@ def obtener_entradas_comprobante(cursor, id_compra):
     cursor.execute(query, (id_compra,))
 
     return cursor.fetchall()
+
+def obtener_hora_actual(cursor):
+    # Se consulta después de adquirir los bloqueos de la operación.
+    cursor.execute("SELECT NOW() AS ahora")
+    return cursor.fetchone()["ahora"]
+
+
+def obtener_inicio_funciones_compra(cursor, id_compra):
+    cursor.execute(
+        """
+        SELECT MIN(f.fecha_hora_inicio) AS primer_inicio
+        FROM entrada e
+        JOIN funcion f ON f.id_funcion = e.id_funcion
+        WHERE e.id_compra = %s
+        """,
+        (id_compra,),
+    )
+    return cursor.fetchone()["primer_inicio"]
