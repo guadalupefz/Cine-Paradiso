@@ -203,24 +203,70 @@ def admin_resumen():
 @app.route("/admin/servicios", methods=["GET", "POST"])
 @requiere_admin
 def admin_servicios():
+    servicio_editar = None
+    datos_formulario = {"nombre": "", "precio": ""}
+    error_formulario = None
+    estado_formulario = 200
+
     if request.method == "POST":
         accion = request.form.get("accion", "crear")
         identificador = request.form.get("id_servicio", type=int)
-        if accion not in ("crear", "editar", "eliminar") or (accion != "crear" and not identificador):
+        if accion not in ("crear", "editar", "eliminar") or (
+            accion != "crear" and (not identificador or identificador <= 0)
+        ):
             abort(400)
-        metodo = {"crear":"POST", "editar":"PUT", "eliminar":"DELETE"}[accion]
+
+        metodo = {"crear": "POST", "editar": "PUT", "eliminar": "DELETE"}[accion]
         ruta = "/servicios" + (f"/{identificador}" if accion != "crear" else "")
-        argumentos = {} if accion == "eliminar" else {"json":{"nombre":request.form.get("nombre", ""),"precio":request.form.get("precio", "")}}
-        datos, estado = llamar_backend(metodo, ruta, **argumentos)
-        flash(mensaje_error(datos), "ok" if estado in (200,201) else "error")
-        return redirect(url_for("admin_servicios"))
+        datos_formulario = {
+            "nombre": request.form.get("nombre", ""),
+            "precio": request.form.get("precio", ""),
+        }
+        argumentos = {} if accion == "eliminar" else {"json": datos_formulario}
+        resultado, estado = llamar_backend(metodo, ruta, **argumentos)
+
+        if estado in (200, 201):
+            flash(mensaje_error(resultado), "ok")
+            return redirect(url_for("admin_servicios"))
+
+        if accion == "eliminar":
+            flash(mensaje_error(resultado), "error")
+            return redirect(url_for("admin_servicios"))
+
+        error_formulario = mensaje_error(resultado)
+        estado_formulario = estado
+        if accion == "editar":
+            servicio_editar = {"id_servicio": identificador}
+
     datos, estado = llamar_backend("GET", "/servicios")
-    servicios = lista(datos, "servicios")
-    editar = request.args.get("editar", type=int)
-    servicio_editar = next((s for s in servicios if s["id_servicio"] == editar), None)
-    if estado != 200:
+    error_listado = estado != 200
+    servicios = lista(datos, "servicios") if not error_listado else []
+    if error_listado:
         flash(mensaje_error(datos), "error")
-    return render_template("admin/servicios_admin.html", servicios=servicios, servicio_editar=servicio_editar)
+
+    if request.method == "GET":
+        editar = request.args.get("editar", type=int)
+        if editar is not None and not error_listado:
+            servicio_editar = next(
+                (s for s in servicios if s["id_servicio"] == editar), None
+            )
+            if servicio_editar is None:
+                flash("El servicio que querés editar ya no está disponible.", "error")
+                return redirect(url_for("admin_servicios"))
+            datos_formulario = {
+                "nombre": servicio_editar["nombre"],
+                "precio": servicio_editar["precio"],
+            }
+
+    return render_template(
+        "admin/servicios_admin.html",
+        servicios=servicios,
+        servicio_editar=servicio_editar,
+        datos_formulario=datos_formulario,
+        error_formulario=error_formulario,
+        error_listado=error_listado,
+    ), estado_formulario
+
 
 @app.route("/admin/peliculas", methods=["GET", "POST"])
 @requiere_admin
