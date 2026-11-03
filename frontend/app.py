@@ -117,6 +117,48 @@ def destino_de_acceso():
     return destino_interno(session.get("destino_acceso"))
 
 
+def contexto_de_acceso(destino):
+    if not destino:
+        return None
+    partes = urlsplit(destino)
+    if partes.path.startswith("/butacas/"):
+        id_funcion = int(partes.path.rsplit("/", 1)[1])
+        butacas = []
+    elif partes.path == "/compra":
+        consulta = parse_qs(partes.query)
+        id_funcion = int(consulta["id_funcion"][0])
+        butacas = [valor.strip() for valor in consulta.get("butacas", [""])[0].split(",") if valor.strip()]
+    else:
+        return None
+    datos, estado = llamar_backend("GET", "/funciones")
+    funcion = next((fila for fila in lista(datos, "funciones") if fila.get("id_funcion") == id_funcion), None) if estado == 200 else None
+    if funcion is None:
+        return {"no_disponible": True}
+    peliculas, estado_peliculas = llamar_backend("GET", "/peliculas")
+    pelicula = next((fila for fila in lista(peliculas, "peliculas") if fila.get("id_pelicula") == funcion.get("id_pelicula")), {}) if estado_peliculas == 200 else {}
+    poster = pelicula.get("poster") or ""
+    if poster.startswith(("http://", "https://")):
+        poster_vista = poster
+    elif poster.startswith(("static/", "/static/")):
+        poster_vista = urljoin(BACKEND_ORIGEN + "/", poster.lstrip("/"))
+    else:
+        poster_vista = url_for("static", filename="img/poster_sin_imagen.svg")
+    valor_fecha = funcion.get("fecha_hora_inicio", "")
+    try:
+        try:
+            fecha = datetime.fromisoformat(valor_fecha)
+        except ValueError:
+            fecha = datetime.strptime(valor_fecha, "%a, %d %b %Y %H:%M:%S GMT")
+        fecha_visible = fecha.strftime("%d/%m/%Y · %H:%M")
+    except (ValueError, TypeError):
+        fecha_visible = "Fecha no disponible"
+    return {
+        "titulo": funcion.get("titulo", "Función seleccionada"),
+        "fecha": fecha_visible, "sala": funcion.get("sala_nombre", "Sala no disponible"),
+        "precio": funcion.get("precio_base"), "butacas": butacas, "poster": poster_vista,
+    }
+
+
 def requiere_usuario(funcion):
     @wraps(funcion)
     def vista(*args, **kwargs):
@@ -185,7 +227,7 @@ def registro():
             estado_pagina = estado
     return render_template(
         "registro.html", datos_formulario=datos_formulario,
-        error_formulario=error_formulario, destino=destino,
+        error_formulario=error_formulario, destino=destino, contexto=contexto_de_acceso(destino),
     ), estado_pagina
 
 
@@ -203,7 +245,7 @@ def login():
             usuario = datos.get("usuario", {})
             return redirect(destino or url_for("admin_resumen" if usuario.get("rol", "").strip().casefold() == "administrador" else "index"))
         flash(mensaje_error(datos), "error")
-    return render_template("login.html", destino=destino, email_acceso=email_acceso)
+    return render_template("login.html", destino=destino, email_acceso=email_acceso, contexto=contexto_de_acceso(destino))
 
 @app.post("/logout")
 def logout():

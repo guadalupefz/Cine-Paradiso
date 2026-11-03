@@ -1,20 +1,17 @@
-{% extends "base.html" %}
+{% extends "acceso_base.html" %}
 {% block title %}Crear cuenta · Cine Paradiso{% endblock %}
-{% block content %}
-<section class="formulario-acceso">
-    <h2>Crear cuenta</h2>
-    <p>Registrate para continuar con tu visita al cine.</p>
-    {% if error_formulario %}<p class="aviso error" role="alert">{{ error_formulario }}</p>{% endif %}
-    <form method="post" action="{{ url_for('registro') }}">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <input type="hidden" name="next" value="{{ destino or '' }}">
-        <label for="nombre">Nombre</label><input id="nombre" name="nombre" autocomplete="given-name" maxlength="100" required value="{{ datos_formulario.nombre }}">
-        <label for="apellido">Apellido</label><input id="apellido" name="apellido" autocomplete="family-name" maxlength="100" required value="{{ datos_formulario.apellido }}">
-        <label for="email">Correo electrónico</label><input id="email" name="email" type="email" autocomplete="email" maxlength="150" required value="{{ datos_formulario.email }}">
-        <label for="password">Contraseña</label><input id="password" name="password" type="password" autocomplete="new-password" maxlength="256" required>
-        <label for="confirmar_password">Confirmar contraseña</label><input id="confirmar_password" name="confirmar_password" type="password" autocomplete="new-password" maxlength="256" required>
-        <button type="submit">Crear cuenta</button>
-    </form>
-    <a href="{{ url_for('login', next=destino) }}">Ya tengo cuenta · Iniciar sesión</a>
-</section>
+{% block formulario_acceso %}
+<h2 id="titulo-acceso">Crear cuenta</h2>
+<p class="introduccion-acceso">Registrate para seguir con tu visita al cine. Después podrás iniciar sesión con tu nueva cuenta.</p>
+{% if error_formulario %}<p id="error-registro" class="aviso error" role="alert">{{ error_formulario }}</p>{% endif %}
+<form method="post" action="{{ url_for('registro') }}" class="formulario-cuenta" {% if error_formulario %}aria-describedby="error-registro"{% endif %}>
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="next" value="{{ destino or '' }}">
+    <div class="nombres-cuenta"><div class="campo-cuenta"><label for="nombre">Nombre</label><input id="nombre" name="nombre" autocomplete="given-name" maxlength="100" required value="{{ datos_formulario.nombre }}"></div><div class="campo-cuenta"><label for="apellido">Apellido</label><input id="apellido" name="apellido" autocomplete="family-name" maxlength="100" required value="{{ datos_formulario.apellido }}"></div></div>
+    <div class="campo-cuenta"><label for="email">Correo electrónico</label><input id="email" name="email" type="email" autocomplete="email" maxlength="150" required value="{{ datos_formulario.email }}" placeholder="nombre@ejemplo.com"></div>
+    <div class="campo-cuenta"><label for="password">Contraseña</label><div class="entrada-password"><input id="password" name="password" type="password" autocomplete="new-password" maxlength="256" required aria-describedby="ayuda-password"><button class="mostrar-password" type="button" data-mostrar-password="password" aria-controls="password" aria-pressed="false">Mostrar</button></div><small id="ayuda-password">Usá una contraseña larga y única. Máximo 256 caracteres.</small></div>
+    <div class="campo-cuenta"><label for="confirmar_password">Confirmar contraseña</label><div class="entrada-password"><input id="confirmar_password" name="confirmar_password" type="password" autocomplete="new-password" maxlength="256" required><button class="mostrar-password" type="button" data-mostrar-password="confirmar_password" aria-controls="confirmar_password" aria-pressed="false">Mostrar</button></div></div>
+    <button class="continuar-acceso" type="submit">Crear cuenta</button>
+</form>
+<p class="alternativa-acceso">¿Ya tenés cuenta? <a href="{{ url_for('login', next=destino) }}">Iniciar sesión</a></p>
 {% endblock %}

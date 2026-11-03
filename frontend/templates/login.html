@@ -1,19 +1,14 @@
-{% extends "base.html" %}
-{% block title %}Iniciar sesión - Cine Paradiso{% endblock %}
-{% block content %}
-<section class="formulario-acceso">
-  <h2>Iniciar sesión</h2>
-  <p>Ingresá para consultar tus compras o administrar el cine.</p>
-  <form method="post" action="{{ url_for('login') }}">
+{% extends "acceso_base.html" %}
+{% block title %}Iniciar sesión · Cine Paradiso{% endblock %}
+{% block formulario_acceso %}
+<h2 id="titulo-acceso">Iniciar sesión</h2>
+<p class="introduccion-acceso">{{ 'Ingresá a tu cuenta y continuá con la función que elegiste.' if contexto else 'Ingresá para consultar tus compras o seguir con tu visita al cine.' }}</p>
+<form method="post" action="{{ url_for('login') }}" class="formulario-cuenta">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <input type="hidden" name="next" value="{{ destino or '' }}">
-    <label for="email">Correo electrónico</label>
-    <input id="email" type="email" name="email" autocomplete="username" maxlength="150" required value="{{ email_acceso }}">
-    <label for="password">Contraseña</label>
-    <input id="password" type="password" name="password" autocomplete="current-password" required>
-    <button type="submit">Ingresar</button>
-  </form>
-  <a href="{{ url_for('registro', next=destino) }}">Crear cuenta</a>
-  <a href="{{ url_for('index') }}">Volver a la cartelera</a>
-</section>
+    <div class="campo-cuenta"><label for="email">Correo electrónico</label><input id="email" type="email" name="email" autocomplete="username" maxlength="150" required value="{{ email_acceso }}" placeholder="nombre@ejemplo.com"></div>
+    <div class="campo-cuenta"><label for="password">Contraseña</label><div class="entrada-password"><input id="password" type="password" name="password" autocomplete="current-password" maxlength="256" required><button class="mostrar-password" type="button" data-mostrar-password="password" aria-controls="password" aria-pressed="false">Mostrar</button></div></div>
+    <button class="continuar-acceso" type="submit">{{ 'Ingresar y continuar' if destino else 'Ingresar' }}</button>
+</form>
+<p class="alternativa-acceso">¿Todavía no tenés cuenta? <a href="{{ url_for('registro', next=destino) }}">Crear cuenta</a></p>
 {% endblock %}

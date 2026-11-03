@@ -1,0 +1,49 @@
+/* Acceso y registro, con la función elegida cuando existe un destino de compra. */
+.sitio-publico .envoltura-acceso { max-width: 540px; margin: 0 auto; }
+.sitio-publico .envoltura-acceso.con-funcion { max-width: 1040px; }
+.sitio-publico .volver-acceso { display: inline-block; margin-bottom: 28px; font-size: 12px; text-decoration: none; }
+.sitio-publico .distribucion-acceso { display: grid; grid-template-columns: minmax(0, 1fr); gap: 54px; align-items: start; }
+.sitio-publico .con-funcion .distribucion-acceso { grid-template-columns: minmax(0, 1.3fr) minmax(280px, .9fr); }
+.sitio-publico .tarjeta-acceso { min-width: 0; padding: 32px; border: 1px solid var(--borde-publico); border-radius: 8px; background: var(--papel); }
+.sitio-publico .con-funcion .tarjeta-acceso { padding: 0; border: 0; background: transparent; }
+.sitio-publico .etiqueta-acceso { color: var(--vino); letter-spacing: 1.8px; font-size: 10px; font-weight: bold; margin: 0 0 16px; }
+.sitio-publico .tarjeta-acceso h2 { font-size: 42px; }
+.sitio-publico .introduccion-acceso { color: var(--texto-suave); font-size: 14px; margin: 0 0 28px; }
+.sitio-publico .formulario-cuenta { display: grid; gap: 20px; }
+.sitio-publico .campo-cuenta { display: grid; gap: 8px; min-width: 0; }
+.sitio-publico .campo-cuenta small { color: var(--texto-suave); font-size: 11px; }
+.sitio-publico .nombres-cuenta { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.sitio-publico .entrada-password { position: relative; }
+.sitio-publico .entrada-password input { padding-right: 87px; }
+.sitio-publico button.mostrar-password { position: absolute; right: 7px; top: 50%; transform: translateY(-50%); padding: 8px; margin: 0; border: 0; background: transparent; color: var(--vino); font-size: 11px; font-weight: normal; }
+.sitio-publico button.mostrar-password:hover { background: #eee1ca; color: var(--vino-oscuro); }
+.sitio-publico button.continuar-acceso { width: 100%; margin-top: 6px; background: var(--dorado); border-color: var(--dorado); color: var(--tinta); }
+.sitio-publico button.continuar-acceso:hover { background: #e5b546; color: var(--tinta); }
+.sitio-publico .alternativa-acceso { margin: 26px 0 0; text-align: center; font-size: 12px; color: var(--texto-suave); }
+.sitio-publico .alternativa-acceso a { font-weight: bold; }
+.sitio-publico .seleccion-acceso { min-width: 0; padding: 24px; background: var(--papel); border: 1px solid var(--borde-publico); border-radius: 8px; }
+.sitio-publico .cabecera-seleccion { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 22px; }
+.sitio-publico .cabecera-seleccion .etiqueta-acceso { font-size: 9px; margin: 0; }
+.sitio-publico .estado-seleccion { padding: 3px 8px; color: #77520d; background: #f8e8b6; border-radius: 20px; font-size: 10px; }
+.sitio-publico .ficha-seleccion { display: grid; grid-template-columns: 90px minmax(0, 1fr); gap: 18px; align-items: start; margin-bottom: 24px; }
+.sitio-publico .ficha-seleccion img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; }
+.sitio-publico .ficha-seleccion h3 { font-size: 23px; margin: 0 0 14px; overflow-wrap: anywhere; }
+.sitio-publico .ficha-seleccion p { font-size: 12px; margin: 7px 0; color: var(--texto-suave); }
+.sitio-publico .ayuda-seleccion { font-size: 12px; color: var(--texto-suave); }
+.sitio-publico .detalle-seleccion { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 10px; padding: 14px 0; border-top: 1px solid var(--borde-publico); font-size: 12px; }
+.sitio-publico .detalle-seleccion span { color: var(--texto-suave); }
+.sitio-publico .detalle-seleccion strong { color: var(--vino); overflow-wrap: anywhere; }
+.sitio-publico .detalle-seleccion small { font-size: 10px; }
+.sitio-publico .nota-seleccion { margin: 18px 0 0; padding: 14px; background: #fbefc9; color: #71501d; font-size: 11px; }
+@media (max-width: 800px) {
+    .sitio-publico .con-funcion .distribucion-acceso { grid-template-columns: minmax(0, 1fr); gap: 34px; }
+    .sitio-publico .envoltura-acceso.con-funcion { max-width: 540px; }
+}
+@media (max-width: 420px) {
+    .sitio-publico .tarjeta-acceso { padding: 24px 20px; }
+    .sitio-publico .tarjeta-acceso h2 { font-size: 34px; }
+    .sitio-publico .nombres-cuenta { grid-template-columns: minmax(0, 1fr); }
+    .sitio-publico .seleccion-acceso { padding: 20px; }
+    .sitio-publico .ficha-seleccion { grid-template-columns: 72px minmax(0, 1fr); gap: 14px; }
+    .sitio-publico .ficha-seleccion h3 { font-size: 21px; }
+}
