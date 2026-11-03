@@ -27,15 +27,20 @@
         <p>
             <strong>Total de butacas:</strong> {{ butacas|length }}
         </p>
-
+        
         <p>
-            Este es un resumen preliminar. La compra todavía no está
-            confirmada y no se realizó ningún pago.
+            Revisá los datos antes de confirmar. La compra todavía no
+            se realizó.
         </p>
+        
+        <form method="POST" action="{{ url_for('procesar_compra') }}">
+             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+             <input type="hidden" name="id_funcion" value="{{ id_funcion }}">
+             <input type="hidden" name="butacas" value="{{ butacas|join(',') }}">
 
-        <a href="{{ url_for('ver_butacas', id_funcion=id_funcion) }}">
-            Volver a seleccionar butacas
-        </a>
+             <button type="submit">Confirmar compra</button>
+        </form>
+        
     {% endif %}
 </section>
 {% endblock %}
