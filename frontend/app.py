@@ -369,32 +369,102 @@ def admin_peliculas():
 @app.route("/admin/funciones", methods=["GET", "POST"])
 @requiere_admin
 def admin_funciones():
+    campos = ("id_pelicula", "id_sala", "fecha_hora_inicio", "precio_base")
+    datos_formulario = dict.fromkeys(campos, "")
+    funcion_editar = None
+    error_formulario = None
+    estado_pagina = 200
+    mostrar_formulario = request.args.get("nuevo") == "1"
+
     if request.method == "POST":
-        identificador = request.form.get("id_funcion",type=int)
-        datos = {"id_pelicula":request.form.get("id_pelicula",type=int), "id_sala":request.form.get("id_sala",type=int), "fecha_hora_inicio":request.form.get("fecha_hora_inicio", ""), "precio_base":request.form.get("precio_base", "")}
-        resultado, estado = llamar_backend("PUT" if identificador else "POST", "/funciones" + (f"/{identificador}" if identificador else ""), json=datos)
-        flash(mensaje_error(resultado), "ok" if estado in (200,201) else "error")
-        return redirect(url_for("admin_funciones"))
+        mostrar_formulario = True
+        identificador = request.form.get("id_funcion", type=int)
+        if "id_funcion" in request.form and (identificador is None or identificador <= 0):
+            abort(400)
+        datos_formulario = {campo: request.form.get(campo, "") for campo in campos}
+        datos = dict(datos_formulario)
+        datos["id_pelicula"] = request.form.get("id_pelicula", type=int)
+        datos["id_sala"] = request.form.get("id_sala", type=int)
+        ruta = "/funciones" + (f"/{identificador}" if identificador is not None else "")
+        resultado, estado = llamar_backend("PUT" if identificador is not None else "POST", ruta, json=datos)
+        if estado in (200, 201):
+            flash(mensaje_error(resultado), "ok")
+            return redirect(url_for("admin_funciones"))
+        error_formulario = mensaje_error(resultado)
+        estado_pagina = estado
+        if identificador is not None:
+            funcion_editar = {"id_funcion": identificador}
+
     p, ep = llamar_backend("GET", "/peliculas")
     f, ef = llamar_backend("GET", "/funciones")
     l, el = llamar_backend("GET", "/locales")
+    peliculas = lista(p, "peliculas") if ep == 200 else []
+    funciones = [dict(funcion) for funcion in lista(f, "funciones")] if ef == 200 else []
+    locales = lista(l, "locales") if el == 200 else []
     salas = []
-    for local in lista(l,"locales"):
+    errores_carga = []
+    if ep != 200:
+        errores_carga.append("No se pudieron cargar las películas.")
+    if el != 200:
+        errores_carga.append("No se pudieron cargar los locales.")
+    for local in locales:
         datos, estado = llamar_backend("GET", f"/locales/{local['id_local']}/salas")
-        for sala in lista(datos,"salas"):
-            sala["local_nombre"] = local["nombre"]
-            salas.append(sala)
-    if any(e != 200 for e in (ep,ef,el)):
-        flash("No se pudieron cargar todos los datos del formulario.", "error")
-    funciones = lista(f,"funciones")
-    editar = request.args.get("editar",type=int)
-    funcion_editar = next((x for x in funciones if x["id_funcion"] == editar),None)
-    if funcion_editar:
+        if estado != 200:
+            errores_carga.append(f"No se pudieron cargar las salas de {local['nombre']}.")
+            continue
+        for sala in lista(datos, "salas"):
+            salas.append({**sala, "id_local": local["id_local"], "local_nombre": local["nombre"]})
+    error_listado = ef != 200
+    if error_listado:
+        flash("No se pudieron cargar las funciones programadas.", "error")
+
+    def fecha_de_funcion(valor):
+        if not isinstance(valor, str):
+            return None
         try:
-            funcion_editar["fecha_formulario"] = datetime.strptime(funcion_editar["fecha_hora_inicio"],"%a, %d %b %Y %H:%M:%S GMT").strftime("%Y-%m-%dT%H:%M")
-        except (ValueError,TypeError):
-            funcion_editar["fecha_formulario"] = ""
-    return render_template("admin/funciones_admin.html", peliculas=lista(p,"peliculas"), funciones=funciones, salas=salas, funcion_editar=funcion_editar)
+            return datetime.fromisoformat(valor)
+        except ValueError:
+            try:
+                return datetime.strptime(valor, "%a, %d %b %Y %H:%M:%S GMT")
+            except ValueError:
+                return None
+
+    salas_por_id = {sala["id_sala"]: sala for sala in salas}
+    peliculas_por_id = {pelicula["id_pelicula"]: pelicula for pelicula in peliculas}
+    for funcion in funciones:
+        fecha = fecha_de_funcion(funcion.get("fecha_hora_inicio"))
+        funcion["fecha_formulario"] = fecha.strftime("%Y-%m-%dT%H:%M:%S") if fecha else ""
+        funcion["fecha_visible"] = fecha.strftime("%d/%m/%Y") if fecha else "Fecha no disponible"
+        funcion["hora_visible"] = fecha.strftime("%H:%M:%S" if fecha.second else "%H:%M") if fecha else ""
+        sala = salas_por_id.get(funcion.get("id_sala"), {})
+        funcion["local_nombre"] = sala.get("local_nombre", "Local no disponible")
+        funcion["sala_nombre"] = sala.get("nombre") or funcion.get("sala_nombre", "Sala no disponible")
+        duracion = str(peliculas_por_id.get(funcion.get("id_pelicula"), {}).get("duracion_minutos", "")).split()
+        funcion["duracion_visible"] = duracion[0] if duracion else ""
+    funciones.sort(key=lambda funcion: funcion["fecha_formulario"] or "9999")
+
+    if request.method == "GET" and "editar" in request.args:
+        editar = request.args.get("editar", type=int)
+        if editar is None or editar <= 0:
+            abort(400)
+        if not error_listado:
+            funcion_editar = next((funcion for funcion in funciones if funcion["id_funcion"] == editar), None)
+            if funcion_editar is None:
+                flash("La función que querés editar ya no está disponible.", "error")
+                return redirect(url_for("admin_funciones"))
+            mostrar_formulario = True
+            datos_formulario = {campo: str(funcion_editar.get(campo, "")) for campo in campos}
+            datos_formulario["fecha_hora_inicio"] = funcion_editar["fecha_formulario"]
+
+    return render_template(
+        "admin/funciones_admin.html", peliculas=peliculas, funciones=funciones,
+        locales=locales, salas=salas, funcion_editar=funcion_editar,
+        datos_formulario=datos_formulario, error_formulario=error_formulario,
+        mostrar_formulario=mostrar_formulario, estado_pagina=estado_pagina,
+        errores_carga=errores_carga, error_listado=error_listado,
+        habilitar_guardado=not errores_carga and bool(peliculas) and bool(salas),
+    ), estado_pagina
+
 
 @app.route("/admin/validar-qr", methods=["GET", "POST"])
 @requiere_admin
