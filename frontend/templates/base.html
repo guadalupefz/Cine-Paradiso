@@ -21,6 +21,7 @@
                 {% if usuario_actual.rol|trim|lower == 'administrador' %}<a href="{{ url_for('admin_resumen') }}">Administración</a>{% endif %}
                 <form class="form-inline" action="{{ url_for('logout') }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="boton-cabecera" type="submit">Cerrar sesión</button></form>
             {% else %}
+                <a href="{{ url_for('registro') }}" {% if request.endpoint == 'registro' %}aria-current="page"{% endif %}>Crear cuenta</a>
                 <a class="enlace-acceso" href="{{ url_for('login') }}" {% if request.endpoint == 'login' %}aria-current="page"{% endif %}>Iniciar sesión</a>
             {% endif %}
         </nav>

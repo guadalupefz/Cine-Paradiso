@@ -8,11 +8,12 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <input type="hidden" name="next" value="{{ destino or '' }}">
     <label for="email">Correo electrónico</label>
-    <input id="email" type="email" name="email" autocomplete="username" maxlength="150" required value="{{ request.form.get('email','') }}">
+    <input id="email" type="email" name="email" autocomplete="username" maxlength="150" required value="{{ email_acceso }}">
     <label for="password">Contraseña</label>
     <input id="password" type="password" name="password" autocomplete="current-password" required>
     <button type="submit">Ingresar</button>
   </form>
+  <a href="{{ url_for('registro', next=destino) }}">Crear cuenta</a>
   <a href="{{ url_for('index') }}">Volver a la cartelera</a>
 </section>
 {% endblock %}

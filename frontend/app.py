@@ -164,9 +164,35 @@ def formulario_invalido(error):
 def pagina_no_encontrada(error):
     return render_template("error.html", mensaje="La página que buscás no está disponible. Podés volver a la cartelera."), 404
 
+@app.route("/registro", methods=["GET", "POST"])
+def registro():
+    destino = destino_de_acceso()
+    datos_formulario = {campo: request.form.get(campo, "") for campo in ("nombre", "apellido", "email")}
+    error_formulario = None
+    estado_pagina = 200
+    if request.method == "POST":
+        password = request.form.get("password", "")
+        if password != request.form.get("confirmar_password", ""):
+            error_formulario = "Las contraseñas no coinciden. Volvé a ingresarlas."
+            estado_pagina = 400
+        else:
+            resultado, estado = llamar_backend("POST", "/auth/registro", json={**datos_formulario, "password": password})
+            if estado == 201:
+                session["email_acceso"] = datos_formulario["email"].strip().lower()
+                flash("Tu cuenta fue creada. Iniciá sesión para continuar.", "ok")
+                return redirect(url_for("login", next=destino))
+            error_formulario = mensaje_error(resultado)
+            estado_pagina = estado
+    return render_template(
+        "registro.html", datos_formulario=datos_formulario,
+        error_formulario=error_formulario, destino=destino,
+    ), estado_pagina
+
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     destino = destino_de_acceso()
+    email_acceso = request.form.get("email", "") if request.method == "POST" else session.pop("email_acceso", "")
     if request.method == "POST":
         datos, estado = llamar_backend("POST", "/auth/login", json={"email": request.form.get("email", ""), "password": request.form.get("password", "")})
         if estado == 200:
@@ -177,7 +203,7 @@ def login():
             usuario = datos.get("usuario", {})
             return redirect(destino or url_for("admin_resumen" if usuario.get("rol", "").strip().casefold() == "administrador" else "index"))
         flash(mensaje_error(datos), "error")
-    return render_template("login.html", destino=destino)
+    return render_template("login.html", destino=destino, email_acceso=email_acceso)
 
 @app.post("/logout")
 def logout():
