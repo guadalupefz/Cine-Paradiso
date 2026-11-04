@@ -282,3 +282,142 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
+
+
+
+/* CARTELERA - TARJETAS DE PELICULAS */
+
+.sitio-publico .cabecera-cartelera {
+    padding: 35px 0;
+    margin-bottom: 45px;
+}
+
+.sitio-publico .etiqueta-cartelera {
+    letter-spacing: 3px;
+    font-size: 11px;
+}
+
+.sitio-publico .cabecera-cartelera h2 {
+    font-size: clamp(42px, 5vw, 64px);
+    margin-bottom: 15px;
+}
+
+.sitio-publico .peliculas {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
+    align-items: stretch;
+    gap: 32px 28px;
+}
+
+.sitio-publico .pelicula {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    background: var(--papel);
+    border: 1px solid var(--borde-publico);
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.sitio-publico .pelicula:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(52, 41, 35, .12);
+}
+
+.sitio-publico .pelicula img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    border-radius: 0;
+}
+
+.sitio-publico .pelicula h3 {
+    padding: 0 18px;
+    margin: 20px 0 12px;
+    font-size: 23px;
+}
+
+.sitio-publico .pelicula p {
+    padding: 0 18px;
+    margin-top: 5px;
+}
+
+.sitio-publico .pelicula .sinopsis-pelicula {
+    line-height: 1.6;
+    flex-grow: 1;
+}
+
+.sitio-publico .pelicula a {
+    display: flex;
+    align-items: center;
+    margin: 15px 18px 18px;
+    padding: 13px 15px;
+    background: var(--vino);
+    color: var(--papel);
+    border: 0;
+    border-radius: 4px;
+    text-decoration: none;
+    justify-content: center;
+    transition: background .2s ease;
+}
+
+.sitio-publico .pelicula a:hover {
+    background: var(--vino-oscuro);
+    color: var(--papel);
+}
+
+@media (max-width: 600px) {
+    .sitio-publico .peliculas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+
+    .sitio-publico .pelicula h3 {
+        font-size: 19px;
+        padding: 0 12px;
+    }
+
+    .sitio-publico .pelicula p {
+        padding: 0 12px;
+    }
+
+    .sitio-publico .pelicula a {
+        margin: 10px 12px 14px;
+        font-size: 11px;
+    }
+}
+
+
+/* CARTELERA: DISTRIBUCION RESPONSIVE */
+
+.sitio-publico .peliculas {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 28px 20px;
+}
+
+@media (max-width: 1100px) {
+    .sitio-publico .peliculas {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 900px) {
+    .sitio-publico .peliculas {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    .sitio-publico .peliculas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+    }
+}
+
+@media (max-width: 380px) {
+    .sitio-publico .peliculas {
+        grid-template-columns: 1fr;
+    }
+}
