@@ -3,85 +3,201 @@
 {% block title %}Selección de butacas - Cine Paradiso{% endblock %}
 
 {% block content %}
-<section class="butacas">
+<section class="seleccion-butacas">
 
-    <h2>{{ pelicula.titulo }}</h2>
-    <p>Función seleccionada: {{ id_funcion }}</p>
-    <h3>Seleccioná tus butacas</h3>
+    <!-- Barra de progreso -->
+    <nav class="progreso-compra" aria-label="Progreso de compra">
+        <span class="paso completado">1. Función</span>
+        <span class="paso activo">2. Butacas</span>
+        <span class="paso">3. Servicios</span>
+        <span class="paso">4. Comprar</span>
+    </nav>
+
+    <h2>Seleccioná tus butacas</h2>
 
     {% if error %}
-        <p>No se pudieron cargar las butacas de esta función.</p>
+
+        <p class="mensaje-error">
+            No se pudieron cargar los datos de esta función.
+        </p>
 
     {% elif butacas %}
 
-        <div class="leyenda-butacas">
-            <span>Disponible</span>
-            <span>Ocupada</span>
-            <span>Seleccionada</span>
-        </div>
+        <div class="contenido-seleccion-butacas"
+             data-precio="{{ funcion.precio_base or 0 }}">
 
-        <p class="contador">
-            Butacas seleccionadas: <span id="cantidad-seleccionadas">0</span>
-        </p>
+            <!-- Columna izquierda -->
+            <div class="sector-mapa">
 
-        <div class="lista-butacas">
+                <div class="informacion-funcion">
 
-            {% for fila, butacas_fila in butacas|groupby("fila") %}
-
-                <div class="fila-butacas">
-                    <span class="nombre-fila">{{ fila }}</span>
-
-                    {% for butaca in butacas_fila %}
-
-                        {% set estado = butaca.estado|lower %}
-                        {% set ocupada = estado in [
-                            'ocupada',
-                            'ocupado',
-                            'reservada',
-                            'reservado',
-                            'no disponible'
-                        ] %}
-
-                        <button
-                            type="button"
-                            class="butaca {% if ocupada %}ocupada{% else %}disponible{% endif %}"
-                            data-id-butaca="{{ butaca.id_butaca }}"
-                            {% if ocupada %}
-                                disabled
-                                aria-label="Butaca {{ fila }}{{ butaca.numero }}, {{ butaca.estado }}"
-                            {% else %}
-                                aria-pressed="false"
-                                aria-label="Butaca {{ fila }}{{ butaca.numero }}, disponible"
-                            {% endif %}
+                    {% if funcion.poster %}
+                        <img
+                            src="{{ funcion.poster }}"
+                            alt="Póster de {{ funcion.titulo }}"
+                            class="poster-funcion"
                         >
-                            <span>{{ fila }}{{ butaca.numero }}</span>
-                            <span>{{ butaca.estado }}</span>
-                        </button>
+                    {% endif %}
 
-                    {% endfor %}
+                    <div class="datos-funcion">
+                        <h3>{{ funcion.titulo }}</h3>
+
+                        <p>
+                            <strong>Fecha:</strong>
+                            {{ funcion.fecha }}
+                        </p>
+
+                        <p>
+                            <strong>Horario:</strong>
+                            {{ funcion.horario }}
+                        </p>
+
+                        <p>
+                            <strong>Cine:</strong>
+                            {{ funcion.local_nombre }}
+                        </p>
+
+                        <p>
+                            <strong>Sala:</strong>
+                            {{ funcion.sala_nombre }}
+                        </p>
+
+                        <p>
+                            <strong>Duración:</strong>
+                            {{ funcion.duracion_minutos }} minutos
+                        </p>
+
+                        <p>
+                            <strong>Clasificación:</strong>
+                            {{ funcion.clasificacion }}
+                        </p>
+                    </div>
+
                 </div>
 
-            {% endfor %}
+                <!-- Mapa de butacas -->
+                <div class="mapa-cine">
 
-        </div>
+                    <div class="pantalla-cine">
+                        PANTALLA
+                    </div>
 
-        <div class="continuar-compra">
-            <button id="continuar-compra" type="button" disabled>
-                Continuar con la compra
-            </button>
+                    <div class="leyenda-butacas">
+                        <span>
+                            <i class="indicador disponible"></i>
+                            Disponible
+                        </span>
 
-            <p id="mensaje-seleccion" aria-live="polite">
-                Seleccioná al menos una butaca.
-            </p>
+                        <span>
+                            <i class="indicador ocupada"></i>
+                            Ocupada
+                        </span>
+
+                        <span>
+                            <i class="indicador seleccionada"></i>
+                            Seleccionada
+                        </span>
+                    </div>
+
+                    <div class="lista-butacas">
+
+                        {% for fila, butacas_fila in butacas|groupby("fila") %}
+
+                            <div class="fila-butacas">
+
+                                <span class="nombre-fila">
+                                    {{ fila }}
+                                </span>
+
+                                {% for butaca in butacas_fila %}
+
+                                    {% set estado = butaca.estado|lower %}
+                                    {% set ocupada = estado in [
+                                        'ocupada',
+                                        'ocupado',
+                                        'reservada',
+                                        'reservado',
+                                        'no disponible'
+                                    ] %}
+
+                                    <button
+                                        type="button"
+                                        class="butaca {% if ocupada %}ocupada{% else %}disponible{% endif %}"
+                                        data-id-butaca="{{ butaca.id_butaca }}"
+                                        data-etiqueta="{{ fila }}{{ butaca.numero }}"
+                                        {% if ocupada %}
+                                            disabled
+                                            aria-label="Butaca {{ fila }}{{ butaca.numero }}, ocupada"
+                                        {% else %}
+                                            aria-pressed="false"
+                                            aria-label="Butaca {{ fila }}{{ butaca.numero }}, disponible"
+                                        {% endif %}
+                                    >
+                                        {{ fila }}{{ butaca.numero }}
+                                    </button>
+
+                                {% endfor %}
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Columna derecha: resumen -->
+            <aside class="resumen-butacas">
+
+                <h3>Resumen de selección</h3>
+
+                <p>
+                    Butacas seleccionadas:
+                    <strong id="cantidad-seleccionadas">0</strong>
+                </p>
+
+                <ul id="detalle-butacas">
+                    <li>Ninguna butaca seleccionada</li>
+                </ul>
+
+                <div class="detalle-precio">
+                    <p>
+                        Precio por butaca:
+                        <strong id="precio-unitario">
+                            ${{ "%.2f"|format(funcion.precio_base|float) }}
+                        </strong>
+                    </p>
+
+                    <p class="total-butacas">
+                        Total:
+                        <strong id="total-butacas">$0.00</strong>
+                    </p>
+                </div>
+
+                <button id="continuar-compra" type="button" disabled>
+                    Continuar
+                </button>
+
+                <p id="mensaje-seleccion" aria-live="polite">
+                    Seleccioná al menos una butaca.
+                </p>
+
+            </aside>
+
         </div>
 
     {% else %}
 
-        <p>No hay butacas disponibles para esta función.</p>
+        <p class="mensaje-vacio">
+            No hay butacas disponibles para esta función.
+        </p>
 
     {% endif %}
 
-    <a href="{{ url_for('ver_funciones', id_pelicula=id_pelicula) }}">
+    <a class="volver-funciones"
+       href="{{ url_for('ver_funciones', id_pelicula=id_pelicula) }}">
         Volver a funciones
     </a>
 
@@ -94,31 +210,54 @@ document.addEventListener("DOMContentLoaded", function () {
     const contador = document.getElementById("cantidad-seleccionadas");
     const continuar = document.getElementById("continuar-compra");
     const mensaje = document.getElementById("mensaje-seleccion");
+    const detalle = document.getElementById("detalle-butacas");
+    const total = document.getElementById("total-butacas");
+    const contenedor = document.querySelector(".contenido-seleccion-butacas");
 
-    if (!contador || !continuar || !mensaje) {
+    if (!contador || !continuar || !mensaje || !detalle || !total || !contenedor) {
         return;
     }
+
+    const precioUnitario = Number(contenedor.dataset.precio);
 
     function obtenerSeleccionadas() {
         return Array.from(
             document.querySelectorAll(".butaca.seleccionada")
-        ).map(function (butaca) {
-            return Number(butaca.dataset.idButaca);
-        });
+        );
     }
 
     function actualizarSeleccion() {
+
         const seleccionadas = obtenerSeleccionadas();
+        const cantidad = seleccionadas.length;
+        const importe = cantidad * precioUnitario;
 
-        contador.textContent = seleccionadas.length;
-        continuar.disabled = seleccionadas.length === 0;
+        contador.textContent = cantidad;
+        continuar.disabled = cantidad === 0;
 
-        if (seleccionadas.length === 0) {
+        detalle.innerHTML = "";
+
+        if (cantidad === 0) {
+
+            const elemento = document.createElement("li");
+            elemento.textContent = "Ninguna butaca seleccionada";
+            detalle.appendChild(elemento);
+
             mensaje.textContent = "Seleccioná al menos una butaca.";
+
         } else {
+
+            seleccionadas.forEach(function (butaca) {
+                const elemento = document.createElement("li");
+                elemento.textContent = butaca.dataset.etiqueta;
+                detalle.appendChild(elemento);
+            });
+
             mensaje.textContent =
-                "Seleccionaste " + seleccionadas.length + " butaca(s).";
+                "Seleccionaste " + cantidad + " butaca(s).";
         }
+
+        total.textContent = "$" + importe.toFixed(2);
     }
 
     butacas.forEach(function (butaca) {
@@ -142,9 +281,13 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
+        const idsSeleccionados = seleccionadas.map(function (butaca) {
+            return Number(butaca.dataset.idButaca);
+        });
+
         const params = new URLSearchParams({
             id_funcion: "{{ id_funcion }}",
-            butacas: seleccionadas.join(",")
+            butacas: idsSeleccionados.join(",")
         });
 
         window.location.href = "/compra?" + params.toString();
