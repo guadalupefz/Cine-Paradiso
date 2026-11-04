@@ -458,6 +458,7 @@
         font-size: 10px;
     }
 }
+
 .sitio-publico .seleccion-butacas {
     max-width: 1150px;
     margin: 0 auto;
@@ -764,4 +765,109 @@
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
+
+
+
+
+/* FILTROS DE GENERO DE CARTELERA */
+
+.sitio-publico .filtros-cartelera {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 28px 0 32px;
+}
+
+.sitio-publico .filtro-genero {
+    padding: 10px 18px;
+    border: 1px solid var(--borde-publico);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--tinta);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease,
+                border-color 0.2s ease;
+}
+
+.sitio-publico .filtro-genero:hover {
+    border-color: var(--vino);
+    color: var(--vino);
+}
+
+.sitio-publico .filtro-genero.activo {
+    border-color: var(--vino);
+    background: var(--vino);
+    color: #fff;
+}
+
+.sitio-publico .pelicula[hidden] {
+    display: none !important;
+}
+
+@media (max-width: 600px) {
+    .sitio-publico .filtros-cartelera {
+        gap: 8px;
+        margin: 22px 0;
+    }
+
+    .sitio-publico .filtro-genero {
+        padding: 8px 13px;
+        font-size: 12px;
+    }
+}
+
+
+/* BOTON VER FUNCIONES CARTELERA */
+
+.sitio-publico .pelicula a {
+    display: inline-block;
+    margin: 12px 18px 18px;
+    padding: 11px 20px;
+    border: 1px solid var(--vino);
+    border-radius: 5px;
+    background: var(--vino);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.sitio-publico .pelicula a:hover {
+    background: transparent;
+    color: var(--vino);
+    transform: translateY(-2px);
+}
+
+
+/* Filtros de genero de la cartelera */
+.sitio-publico .filtros-cartelera {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 28px 0 24px;
+}
+
+.sitio-publico .filtro-genero {
+    padding: 9px 16px;
+    border: 1px solid var(--borde-publico);
+    border-radius: 20px;
+    background: transparent;
+    color: var(--tinta);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background .2s, color .2s, border-color .2s;
+}
+
+.sitio-publico .filtro-genero:hover,
+.sitio-publico .filtro-genero.activo {
+    background: var(--vino);
+    border-color: var(--vino);
+    color: #fff8e9;
+
 }
