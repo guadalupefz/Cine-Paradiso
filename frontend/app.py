@@ -275,16 +275,62 @@ def index():
 @app.get("/funciones")
 def ver_funciones():
     id_pelicula = request.args.get("id_pelicula", type=int)
-    datos, estado = llamar_backend("GET", "/funciones", params={"vigentes": "1"})
-    funciones = [f for f in lista(datos, "funciones") if not id_pelicula or f.get("id_pelicula") == id_pelicula]
+
+    datos, estado = llamar_backend("GET", "/cartelera")
+
+    peliculas_cartelera = lista(datos, "cartelera")
+
+    funciones = [
+        f for f in peliculas_cartelera
+        if id_pelicula and f.get("id_pelicula") == id_pelicula
+    ]
+
+    pelicula = funciones[0].copy() if funciones else {}
+
+    if pelicula:
+        poster = pelicula.get("poster", "")
+
+        if poster and not poster.startswith(("http://", "https://")):
+            pelicula["poster"] = urljoin(
+                BACKEND_ORIGEN + "/",
+                poster.lstrip("/")
+            )
+
     for funcion in funciones:
         try:
-            fecha = datetime.strptime(funcion["fecha_hora_inicio"], "%a, %d %b %Y %H:%M:%S GMT")
-            funcion["fecha"], funcion["horario"] = fecha.strftime("%d/%m/%Y"), fecha.strftime("%H:%M")
+            fecha = datetime.strptime(
+                funcion["fecha_hora_inicio"],
+                "%a, %d %b %Y %H:%M:%S GMT"
+            )
+
+            funcion["fecha"] = fecha.strftime("%d/%m/%Y")
+            funcion["horario"] = fecha.strftime("%H:%M")
+
         except (ValueError, TypeError):
-            funcion["fecha"], funcion["horario"] = funcion.get("fecha_hora_inicio", ""), ""
-    pelicula = {"titulo": funciones[0]["titulo"] if funciones else "Funciones"}
-    return render_template("funciones.html", funciones=funciones, pelicula=pelicula, id_pelicula=id_pelicula, error=estado != 200)
+            funcion["fecha"] = funcion.get("fecha_hora_inicio", "")
+            funcion["horario"] = ""
+
+    return render_template(
+        "funciones.html",
+        funciones=funciones,
+        pelicula=pelicula,
+        id_pelicula=id_pelicula,
+        error=estado != 200
+    )
+
+#@app.get("/funciones")
+#def ver_funciones():
+    #id_pelicula = request.args.get("id_pelicula", type=int)
+    #datos, estado = llamar_backend("GET", "/funciones", params={"vigentes": "1"})
+    #funciones = [f for f in lista(datos, "funciones") if not id_pelicula or f.get("id_pelicula") == id_pelicula]
+    #for funcion in funciones:
+        #try:
+            #fecha = datetime.strptime(funcion["fecha_hora_inicio"], "%a, %d %b %Y %H:%M:%S GMT")
+            #funcion["fecha"], funcion["horario"] = fecha.strftime("%d/%m/%Y"), fecha.strftime("%H:%M")
+        #except (ValueError, TypeError):
+            #funcion["fecha"], funcion["horario"] = funcion.get("fecha_hora_inicio", ""), ""
+    #pelicula = {"titulo": funciones[0]["titulo"] if funciones else "Funciones"}
+    #return render_template("funciones.html", funciones=funciones, pelicula=pelicula, id_pelicula=id_pelicula, error=estado != 200)
 
 @app.get("/butacas/<int:id_funcion>")
 @requiere_usuario
