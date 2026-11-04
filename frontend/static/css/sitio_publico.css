@@ -113,3 +113,172 @@
 @media (prefers-reduced-motion: reduce) {
     .sitio-publico * { scroll-behavior: auto; }
 }
+
+.sitio-publico .detalle-pelicula {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+
+.sitio-publico .detalle-pelicula-principal {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: 55px;
+    align-items: start;
+    margin: 20px 0 45px;
+}
+
+.sitio-publico .detalle-pelicula-poster img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    background: var(--vino-oscuro);
+}
+
+.sitio-publico .detalle-pelicula-info {
+    padding-top: 5px;
+}
+
+.sitio-publico .detalle-pelicula-info h2 {
+    font-size: clamp(38px, 5vw, 58px);
+    margin: 12px 0 20px;
+}
+
+.sitio-publico .datos-pelicula {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    margin-bottom: 22px;
+    color: var(--texto-suave);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+.sitio-publico .sinopsis-detalle {
+    max-width: 650px;
+    color: var(--texto-suave);
+    font-size: 15px;
+    line-height: 1.8;
+}
+
+
+.sitio-publico .seleccion-funcion {
+    width: 100%;
+    margin: 45px 0 0;
+}
+
+.sitio-publico .seleccion-funcion h3 {
+    margin: 0 0 8px;
+    font-size: 30px;
+}
+
+.sitio-publico .seleccion-funcion > p {
+    color: var(--texto-suave);
+    font-size: 13px;
+}
+
+.sitio-publico .seleccion-funcion .lista-funciones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
+    gap: 12px;
+    margin: 28px 0;
+}
+
+.sitio-publico .funcion-opcion {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 125px;
+    padding: 15px 8px;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    background: transparent;
+    text-align: center;
+    cursor: pointer;
+    transition: background .2s, border-color .2s;
+}
+
+.sitio-publico .funcion-opcion:hover {
+    background: #f0e5d2;
+}
+
+.sitio-publico .funcion-opcion:has(input:checked) {
+    background: var(--vino);
+    color: var(--papel);
+    border-color: var(--vino);
+}
+
+.sitio-publico .funcion-opcion input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    margin: 0 0 7px;
+    accent-color: var(--dorado);
+    cursor: pointer;
+}
+
+.sitio-publico .funcion-opcion-datos {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: normal;
+}
+
+.sitio-publico .funcion-opcion-datos strong {
+    font-size: 14px;
+}
+
+.sitio-publico .funcion-opcion:has(input:checked) .funcion-opcion-datos {
+    color: var(--papel);
+}
+
+
+
+.sitio-publico #btn-elegir-butacas {
+    display: block;
+    width: auto;
+    min-width: 180px;
+    margin: 20px 0 25px auto;
+    padding: 14px 25px;
+    border: 1px solid var(--dorado);
+    border-radius: 0;
+    background: var(--dorado);
+    color: var(--tinta);
+}
+
+.sitio-publico #btn-elegir-butacas:hover:not(:disabled) {
+    background: #e5b546;
+    color: var(--tinta);
+}
+
+.sitio-publico .volver-cartelera {
+    display: inline-block;
+    margin-top: 25px;
+    font-size: 12px;
+}
+
+/* Adaptación a celulares y tablets */
+
+@media (max-width: 750px) {
+    .sitio-publico .detalle-pelicula-principal {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 25px;
+    }
+
+    .sitio-publico .detalle-pelicula-poster {
+        max-width: 280px;
+    }
+
+    .sitio-publico .seleccion-funcion {
+        margin-left: 0;
+    }
+
+    .sitio-publico .seleccion-funcion .lista-funciones {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
