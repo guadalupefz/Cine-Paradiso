@@ -1,43 +1,152 @@
 {% extends "base.html" %}
 
-{% block title %}Funciones - Cine Paradiso{% endblock %}
+{% block title %}{{ pelicula.titulo }} - Cine Paradiso{% endblock %}
 
 {% block content %}
-    <section class="funciones">
-        <h2>{{ pelicula.titulo }}</h2>
+<section class="detalle-pelicula">
 
-        <h3>Funciones disponibles</h3>
+    {% if error %}
+        <p class="mensaje-error">
+            No se pudieron cargar las funciones.
+            Intentá nuevamente más tarde.
+        </p>
 
-        {% if error %}
-            <p class="mensaje-error">
-                No se pudieron cargar las funciones.
-                Intentá nuevamente más tarde.
-            </p>
+    {% else %}
 
-        {% elif funciones %}
-            <div class="lista-funciones">
-                {% for funcion in funciones %}
-                    <div class="funcion">
-                        <p>Fecha: {{ funcion.fecha }}</p>
-                        <p>Horario: {{ funcion.horario }}</p>
+        <div class="detalle-pelicula-principal">
 
-                       <a href="{{ url_for(
-                        'ver_butacas',
-                        id_funcion=funcion.id_funcion,
-                        id_pelicula=id_pelicula
-                        ) }}">
-                            Seleccionar butacas
-                    </a>
-                </div>
-                {% endfor %}
+            <!-- Póster -->
+            <div class="detalle-pelicula-poster">
+                <img
+                    src="{{ pelicula.poster or url_for('static', filename='img/poster_sin_imagen.svg') }}"
+                    alt="Póster de {{ pelicula.titulo }}"
+                    referrerpolicy="no-referrer"
+                >
             </div>
 
-        {% else %}
-            <p class="mensaje-vacio">
-                No hay funciones disponibles para esta película.
-            </p>
-        {% endif %}
+            <!-- Información de la película -->
+            <div class="detalle-pelicula-info">
 
-        <a href="{{ url_for('index') }}">Volver a cartelera</a>
-    </section>
+                <p class="etiqueta-cartelera">EN NUESTRA PANTALLA</p>
+
+                <h2>{{ pelicula.titulo }}</h2>
+
+                <div class="datos-pelicula">
+                    <span>{{ pelicula.genero or 'Género no disponible' }}</span>
+                    <span>{{ pelicula.duracion_minutos }} min</span>
+                    <span>{{ pelicula.clasificacion }}</span>
+                </div>
+
+                <p class="sinopsis-detalle">
+                    {{ pelicula.sinopsis or 'Sinopsis no disponible.' }}
+                </p>
+
+                <!-- Funciones: ahora dentro de la columna derecha -->
+                <div class="seleccion-funcion">
+
+                    <h3>Funciones disponibles</h3>
+
+                    <p>Elegí el horario que prefieras para continuar.</p>
+
+                    {% if funciones %}
+
+                        <div class="lista-funciones">
+
+                            {% for funcion in funciones %}
+
+                                <label class="funcion-opcion">
+
+                                    <input
+                                        type="radio"
+                                        name="funcion_seleccionada"
+                                        value="{{ funcion.id_funcion }}"
+                                        data-url="{{ url_for(
+                                            'ver_butacas',
+                                            id_funcion=funcion.id_funcion,
+                                            id_pelicula=id_pelicula
+                                        ) }}"
+                                    >
+
+                                    <span class="funcion-opcion-datos">
+
+                                        <strong>{{ funcion.fecha }}</strong>
+
+                                        <span>{{ funcion.horario }} hs</span>
+
+                                        <span>
+                                            {{ funcion.local_nombre }} -
+                                            {{ funcion.sala_nombre }}
+                                        </span>
+
+                                        <strong>
+                                            ${{ funcion.precio_base }}
+                                        </strong>
+
+                                    </span>
+
+                                </label>
+
+                            {% endfor %}
+
+                        </div>
+
+                        <button
+                            type="button"
+                            id="btn-elegir-butacas"
+                            disabled
+                        >
+                            Elegir butacas
+                        </button>
+
+                    {% else %}
+
+                        <p class="mensaje-vacio">
+                            No hay funciones disponibles para esta película.
+                        </p>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+        </div>
+
+    {% endif %}
+
+    <a href="{{ url_for('index') }}" class="volver-cartelera">
+        Volver a cartelera
+    </a>
+
+</section>
+
+<script>
+    const opcionesFuncion = document.querySelectorAll(
+        'input[name="funcion_seleccionada"]'
+    );
+
+    const botonButacas = document.getElementById(
+        'btn-elegir-butacas'
+    );
+
+    opcionesFuncion.forEach(function(opcion) {
+        opcion.addEventListener('change', function() {
+            botonButacas.disabled = false;
+        });
+    });
+
+    if (botonButacas) {
+        botonButacas.addEventListener('click', function() {
+
+            const seleccionada = document.querySelector(
+                'input[name="funcion_seleccionada"]:checked'
+            );
+
+            if (seleccionada) {
+                window.location.href = seleccionada.dataset.url;
+            }
+
+        });
+    }
+</script>
+
 {% endblock %}
