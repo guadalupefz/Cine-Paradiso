@@ -4,12 +4,27 @@
 
 {% block content %}
     <section>
-        <div class="cabecera-cartelera"><div><p class="etiqueta-cartelera">EN NUESTRA PANTALLA</p><h2>Cartelera</h2><p class="introduccion">Elegí una película, encontrá tu función y que empiece la magia.</p></div><p class="sello-cartelera"><span aria-hidden="true">✦</span>BUEN CINE, SIEMPRE.</p></div>
+        <div class="cabecera-cartelera"><div><p class="etiqueta-cartelera">EN NUESTRA PANTALLA</p><h2>Cartelera</h2><p class="introduccion">Elegí una película, encontrá tu función y que empiece la magia.</p></div><div class="sello-cartelera"><p><span aria-hidden="true">✦</span>BUEN CINE, SIEMPRE.</p><small>{{ peliculas|length }} películas para descubrir</small></div></div>
 
         {% if error %}<p class="mensaje-error">No pudimos cargar la cartelera. <a href="{{ url_for('index') }}">Volver a intentar</a>.</p>{% else %}
+        <div class="barra-filtros"><nav class="filtros-cartelera" aria-label="Filtrar películas por género">
+            <button type="button" class="filtro-genero activo" data-genero="todos">
+                Todas las películas
+            </button>
+            <button type="button" class="filtro-genero" data-genero="drama">
+                Drama
+            </button>
+            <button type="button" class="filtro-genero" data-genero="comedia">
+                Comedia
+            </button>
+            <button type="button" class="filtro-genero" data-genero="otros">
+                Más géneros
+            </button>
+        </nav><span class="cantidad-cartelera">{{ peliculas|length }} películas disponibles</span></div>
+
         <div class="peliculas">
             {% for pelicula in peliculas %}
-                <div class="pelicula">
+                <div class="pelicula" data-genero="{{ (pelicula.genero or '')|lower }}">
                     <img src="{{ pelicula.poster }}"
                          alt="Póster de {{ pelicula.titulo }}" loading="lazy" referrerpolicy="no-referrer" data-poster-fallback="{{ url_for('static', filename='img/poster_sin_imagen.svg') }}">
 

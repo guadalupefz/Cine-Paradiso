@@ -7,7 +7,129 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/sitio_publico.css') }}">
     <script src="{{ url_for('static', filename='js/posters_publicos.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/filtros_cartelera.js') }}" defer></script>
     {% block estilos_adicionales %}{% endblock %}
+
+    <!-- INICIO DISEÑO FIGMA CARTELERA -->
+    <style>
+    body.sitio-publico .cabecera-cartelera {
+        display:flex !important;
+        justify-content:space-between !important;
+        align-items:center !important;
+        padding-bottom:28px !important;
+        margin-bottom:26px !important;
+        border-bottom:1px solid #dfd1b8 !important;
+    }
+
+    body.sitio-publico .cabecera-cartelera h2 {
+        font-family:Georgia,serif !important;
+        font-size:58px !important;
+        font-weight:400 !important;
+    }
+
+    body.sitio-publico .filtros-cartelera {
+        display:flex !important;
+        flex-wrap:wrap !important;
+        gap:9px !important;
+        margin:0 0 25px !important;
+    }
+
+    body.sitio-publico .filtros-cartelera .filtro-genero {
+        padding:8px 17px !important;
+        border:1px solid #dfd1b8 !important;
+        border-radius:30px !important;
+        background:transparent !important;
+        color:#39251d !important;
+        font-size:11px !important;
+    }
+
+    body.sitio-publico .filtros-cartelera .filtro-genero.activo {
+        background:#922632 !important;
+        border-color:#922632 !important;
+        color:#fff8e9 !important;
+    }
+
+    body.sitio-publico .peliculas {
+        display:grid !important;
+        grid-template-columns:repeat(5,minmax(0,1fr)) !important;
+        gap:18px !important;
+        align-items:start !important;
+    }
+
+    body.sitio-publico .pelicula {
+        display:flex !important;
+        flex-direction:column !important;
+        min-width:0 !important;
+        overflow:hidden !important;
+        background:#fffaf0 !important;
+        border:1px solid #dfd1b8 !important;
+        border-radius:3px !important;
+        box-shadow:none !important;
+    }
+
+    body.sitio-publico .pelicula > img {
+        display:block !important;
+        width:100% !important;
+        aspect-ratio:2/3 !important;
+        object-fit:cover !important;
+    }
+
+    body.sitio-publico .pelicula .genero-pelicula {
+        margin:10px 12px 5px !important;
+        color:#922632 !important;
+        font-size:9px !important;
+        font-weight:bold !important;
+        text-transform:uppercase !important;
+    }
+
+    body.sitio-publico .pelicula h3 {
+        margin:5px 12px 8px !important;
+        font-family:Georgia,serif !important;
+        font-size:17px !important;
+    }
+
+    body.sitio-publico .pelicula .datos-ficha,
+    body.sitio-publico .pelicula .sinopsis-pelicula {
+        margin:5px 12px 10px !important;
+        font-size:10px !important;
+        line-height:1.5 !important;
+    }
+
+    body.sitio-publico .pelicula a {
+        margin: auto 12px 12px !important;
+        padding:9px 0 !important;
+        border:0 !important;
+        border-top:1px solid #dfd1b8 !important;
+        border-radius:0 !important;
+        background:transparent !important;
+        color:#922632 !important;
+        font-size:10px !important;
+    }
+
+    @media(max-width:1050px) {
+        body.sitio-publico .peliculas {
+            grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+        }
+    }
+
+    @media(max-width:800px) {
+        body.sitio-publico .peliculas {
+            grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+        }
+    }
+
+    @media(max-width:560px) {
+        body.sitio-publico .peliculas {
+            grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+        }
+        body.sitio-publico .cabecera-cartelera {
+            align-items:flex-start !important;
+            flex-direction:column !important;
+        }
+    }
+    </style>
+    <!-- FIN DISEÑO FIGMA CARTELERA -->
+
 </head>
 <body class="sitio-publico {% block clase_pagina %}{% endblock %}">
     <a class="saltar-contenido" href="#contenido-principal">Saltar al contenido</a>

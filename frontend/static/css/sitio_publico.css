@@ -871,3 +871,265 @@
     color: #fff8e9;
 
 }
+
+
+
+/* ==========================================
+   CARTELERA - DISEÑO FIGMA U6
+   ========================================== */
+
+.sitio-publico .cabecera-cartelera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 30px;
+    padding-bottom: 28px;
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--borde-publico);
+}
+
+.sitio-publico .cabecera-cartelera h2 {
+    margin: 12px 0 8px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(38px, 5vw, 58px);
+    font-weight: 400;
+    letter-spacing: -1.5px;
+}
+
+.sitio-publico .cabecera-cartelera .introduccion {
+    margin: 0;
+    font-size: 13px;
+    color: var(--texto-suave);
+}
+
+.sitio-publico .sello-cartelera {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+    color: var(--vino);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.sitio-publico .sello-cartelera span {
+    font-size: 27px;
+}
+
+/* Filtros */
+
+.sitio-publico .filtros-cartelera {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 25px;
+}
+
+.sitio-publico .filtros-cartelera .filtro-genero {
+    padding: 8px 16px;
+    border: 1px solid var(--borde-publico);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--tinta);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .2s ease;
+}
+
+.sitio-publico .filtros-cartelera .filtro-genero:hover,
+.sitio-publico .filtros-cartelera .filtro-genero.activo {
+    background: var(--vino);
+    border-color: var(--vino);
+    color: #fff8e9;
+}
+
+/* Grilla de cinco películas */
+
+.sitio-publico .peliculas {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 24px 18px;
+    align-items: start;
+}
+
+/* Tarjetas */
+
+.sitio-publico .pelicula {
+    min-width: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: #fffaf0;
+    border: 1px solid #dfd1b8;
+    border-radius: 3px;
+    box-shadow: none;
+    transition: transform .2s ease, box-shadow .2s ease;
+}
+
+.sitio-publico .pelicula:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 18px rgba(67, 39, 25, .10);
+}
+
+/* Póster: conserva la imagen que proporciona el proyecto */
+
+.sitio-publico .pelicula > img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    border-radius: 0;
+}
+
+/* Información */
+
+.sitio-publico .pelicula .genero-pelicula {
+    margin: 10px 12px 5px;
+    color: var(--vino);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .7px;
+    text-transform: uppercase;
+}
+
+.sitio-publico .pelicula h3 {
+    margin: 5px 12px 8px;
+    color: var(--tinta);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.25;
+}
+
+.sitio-publico .pelicula .datos-ficha {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0 12px 9px;
+    color: var(--texto-suave);
+    font-size: 10px;
+}
+
+.sitio-publico .pelicula .clasificacion-pelicula {
+    padding: 3px 6px;
+    border: 1px solid var(--borde-publico);
+    border-radius: 3px;
+    font-size: 9px;
+}
+
+.sitio-publico .pelicula p:not(.genero-pelicula):not(.datos-ficha) {
+    margin: 0 12px 12px;
+    color: var(--texto-suave);
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+/* Ver funciones */
+
+.sitio-publico .pelicula a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: auto 12px 12px;
+    padding: 8px 0;
+    border: 0;
+    border-top: 1px solid var(--borde-publico);
+    border-radius: 0;
+    background: transparent;
+    color: var(--vino);
+    font-size: 10px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.sitio-publico .pelicula a:hover {
+    background: transparent;
+    color: var(--dorado);
+    transform: none;
+}
+
+/* Adaptación a pantallas */
+
+@media (max-width: 1050px) {
+    .sitio-publico .peliculas {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 800px) {
+    .sitio-publico .peliculas {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 560px) {
+    .sitio-publico .peliculas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px 12px;
+    }
+
+    .sitio-publico .cabecera-cartelera {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .sitio-publico .sello-cartelera {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 350px) {
+    .sitio-publico .peliculas {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* CARTELERA: DETALLES DE LA CABECERA Y FILTROS */
+.sitio-publico .sello-cartelera {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 7px;
+}
+
+.sitio-publico .sello-cartelera p {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.sitio-publico .sello-cartelera small {
+    color: var(--texto-secundario, #806f62);
+    font-size: 12px;
+}
+
+.sitio-publico .barra-filtros {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin: 28px 0 26px;
+}
+
+.sitio-publico .barra-filtros .filtros-cartelera {
+    margin: 0;
+}
+
+.sitio-publico .cantidad-cartelera {
+    color: var(--texto-secundario, #806f62);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+@media (max-width: 650px) {
+    .sitio-publico .barra-filtros {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
