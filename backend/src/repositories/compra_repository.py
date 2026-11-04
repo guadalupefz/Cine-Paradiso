@@ -69,10 +69,18 @@ def obtener_compra_por_id(cursor, id_compra):
 
 def obtener_entradas_por_compra(cursor, id_compra):
     query = """
-        SELECT id_entrada, id_funcion, id_butaca, qr_token,
-               fecha_hora_validacion
+        SELECT
+            entrada.id_entrada,
+            entrada.id_funcion,
+            entrada.id_butaca,
+            entrada.qr_token,
+            entrada.fecha_hora_validacion,
+            butaca.fila,
+            butaca.numero
         FROM entrada
-        WHERE id_compra = %s
+        INNER JOIN butaca
+            ON entrada.id_butaca = butaca.id_butaca
+        WHERE entrada.id_compra = %s
     """
     cursor.execute(query, (id_compra,))
     return cursor.fetchall()
