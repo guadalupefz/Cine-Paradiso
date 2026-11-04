@@ -16,7 +16,7 @@
             <div>
                 <p>entrada {{ entrada.id_entrada }}</p>
                 <p>funcion: {{ entrada.id_funcion }}</p>
-                <p>butaca: {{ entrada.id_butaca }}</p>
+                <p>Butaca: {{ entrada.fila }}{{ entrada.numero }}</p>
 
                 <img
                     src="{{ url_for('ver_qr_cliente', id_entrada=entrada.id_entrada) }}"
