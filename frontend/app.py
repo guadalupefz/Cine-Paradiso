@@ -318,25 +318,73 @@ def ver_funciones():
         error=estado != 200
     )
 
-#@app.get("/funciones")
-#def ver_funciones():
-    #id_pelicula = request.args.get("id_pelicula", type=int)
-    #datos, estado = llamar_backend("GET", "/funciones", params={"vigentes": "1"})
-    #funciones = [f for f in lista(datos, "funciones") if not id_pelicula or f.get("id_pelicula") == id_pelicula]
-    #for funcion in funciones:
-        #try:
-            #fecha = datetime.strptime(funcion["fecha_hora_inicio"], "%a, %d %b %Y %H:%M:%S GMT")
-            #funcion["fecha"], funcion["horario"] = fecha.strftime("%d/%m/%Y"), fecha.strftime("%H:%M")
-        #except (ValueError, TypeError):
-            #funcion["fecha"], funcion["horario"] = funcion.get("fecha_hora_inicio", ""), ""
-    #pelicula = {"titulo": funciones[0]["titulo"] if funciones else "Funciones"}
-    #return render_template("funciones.html", funciones=funciones, pelicula=pelicula, id_pelicula=id_pelicula, error=estado != 200)
-
 @app.get("/butacas/<int:id_funcion>")
 @requiere_usuario
 def ver_butacas(id_funcion):
-    datos, estado = llamar_backend("GET", f"/funciones/{id_funcion}/butacas")
-    return render_template("butacas.html", butacas=lista(datos,"butacas"), pelicula={"titulo": "Selección de butacas"}, id_funcion=id_funcion, id_pelicula=request.args.get("id_pelicula",type=int), error=estado != 200)
+    
+    datos_butacas, estado_butacas = llamar_backend(
+        "GET", f"/funciones/{id_funcion}/butacas"
+    )
+    butacas = lista(datos_butacas, "butacas")
+    
+    datos_cartelera, estado_cartelera = llamar_backend("GET", "/cartelera")
+    funciones_cartelera = lista(datos_cartelera, "cartelera")
+
+    funcion = next(
+        (f for f in funciones_cartelera
+         if f.get("id_funcion") == id_funcion),
+        None
+    )
+
+    if funcion:
+        # Preparar el póster
+        poster = funcion.get("poster", "")
+        if poster and not poster.startswith(("http://", "https://")):
+            funcion["poster"] = urljoin(
+                BACKEND_ORIGEN + "/",
+                poster.lstrip("/")
+            )
+
+        try:
+
+            fecha = datetime.strptime(
+            funcion["fecha_hora_inicio"],
+            "%a, %d %b %Y %H:%M:%S GMT"
+            )
+
+            dias = [
+                "lunes", "martes", "miércoles", "jueves",
+                "viernes", "sábado", "domingo"
+            ]
+            meses = [
+                "enero", "febrero", "marzo", "abril",
+                "mayo", "junio", "julio", "agosto",
+                "septiembre", "octubre", "noviembre", "diciembre"
+            ]
+            dia_semana = dias[fecha.weekday()]
+            mes = meses[fecha.month - 1]
+
+            funcion["fecha"] = (
+                f"{dia_semana} {fecha.day} de {mes} de {fecha.year}"
+            )    
+            funcion["horario"] = fecha.strftime("%H:%M")
+        except (ValueError, TypeError):
+            funcion["fecha"] = funcion.get("fecha_hora_inicio", "")
+            funcion["horario"] = ""
+
+    return render_template(
+        "butacas.html",
+        butacas=butacas,
+        pelicula=funcion or {"titulo": "Selección de butacas"},
+        funcion=funcion,
+        id_funcion=id_funcion,
+        id_pelicula=funcion.get("id_pelicula") if funcion else None,
+        error=(
+            estado_butacas != 200
+            or estado_cartelera != 200
+            or funcion is None
+        )
+    )
 
 @app.get("/compra")
 @requiere_usuario
