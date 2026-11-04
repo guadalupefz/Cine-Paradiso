@@ -110,12 +110,14 @@ def listar_entradas(id_usuario, id_compra):
             entradas = obtener_entradas_por_compra(cursor, id_compra)
 
         return jsonify([
-            {
-                "id_entrada": entrada["id_entrada"],
-                "id_funcion": entrada["id_funcion"],
-                "id_butaca": entrada["id_butaca"]
-            }
-            for entrada in entradas
+           {
+           "id_entrada": entrada["id_entrada"],
+            "id_funcion": entrada["id_funcion"],
+            "id_butaca": entrada["id_butaca"],
+            "fila": entrada["fila"],
+            "numero": entrada["numero"]
+           }
+           for entrada in entradas
         ]), 200
 
     finally:
