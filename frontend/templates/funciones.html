@@ -41,10 +41,9 @@
                     {{ pelicula.sinopsis or 'Sinopsis no disponible.' }}
                 </p>
 
-                <!-- Funciones: ahora dentro de la columna derecha -->
                 <div class="seleccion-funcion">
 
-                    <h3>Funciones disponibles</h3>
+                    <h3>Funciones</h3>
 
                     <p>Elegí el horario que prefieras para continuar.</p>
 
@@ -65,23 +64,17 @@
                                             id_funcion=funcion.id_funcion,
                                             id_pelicula=id_pelicula
                                         ) }}"
+                                        data-fecha="{{ funcion.fecha }}"
+                                        data-horario="{{ funcion.horario }}"
+                                        data-local="{{ funcion.local_nombre }}"
+                                        data-sala="{{ funcion.sala_nombre }}"
+                                        data-precio="{{ funcion.precio_base }}"
                                     >
 
                                     <span class="funcion-opcion-datos">
-
-                                        <strong>{{ funcion.fecha }}</strong>
-
-                                        <span>{{ funcion.horario }} hs</span>
-
-                                        <span>
-                                            {{ funcion.local_nombre }} -
-                                            {{ funcion.sala_nombre }}
-                                        </span>
-
-                                        <strong>
-                                            ${{ funcion.precio_base }}
-                                        </strong>
-
+                                        <span>{{ funcion.fecha }}</span>
+                                        <strong>{{ funcion.horario }}</strong>
+                                        <small>SELECCIONAR</small>
                                     </span>
 
                                 </label>
@@ -90,18 +83,29 @@
 
                         </div>
 
+                        <div id="detalle-funcion" hidden>
+
+                            <p>
+                                <strong id="precio-funcion"></strong>
+                                por entrada
+                            </p>
+
+                            <p id="datos-funcion-seleccionada"></p>
+
+                        </div>
+
                         <button
                             type="button"
                             id="btn-elegir-butacas"
                             disabled
                         >
-                            Elegir butacas
+                            Elegir butacas →
                         </button>
 
                     {% else %}
 
                         <p class="mensaje-vacio">
-                            No hay funciones disponibles para esta película.
+                        No hay funciones disponibles para esta película.
                         </p>
 
                     {% endif %}
