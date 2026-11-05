@@ -2479,3 +2479,74 @@ body.sitio-publico .pie-sitio .lema-sitio {
     border-bottom: 1px solid #dfcfb5;
     margin-bottom: 34px;
 }
+
+
+/* AJUSTES FINALES DE CARTELERA SEGUN FIGMA */
+
+/* Datos de cada película */
+.sitio-publico .pelicula .genero-pelicula {
+    margin: 0 0 10px;
+    min-height: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+}
+
+.sitio-publico .pelicula .datos-ficha {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 14px;
+    font-size: 11px;
+}
+
+/* Títulos y descripciones */
+.sitio-publico .pelicula h3 {
+    min-height: 24px;
+    margin: 0 0 14px;
+    font-size: 18px;
+    line-height: 1.2;
+}
+
+.sitio-publico .pelicula .sinopsis-pelicula {
+    min-height: 42px;
+    margin: 0 0 16px;
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+/* Enlace inferior con flecha */
+.sitio-publico .pelicula a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: auto;
+    padding-top: 13px;
+    border-top: 1px solid #dfcfb5;
+    text-decoration: none;
+}
+
+.sitio-publico .pelicula a::after {
+    content: "↗";
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* Alineación y separación de las tarjetas */
+.sitio-publico .peliculas {
+    align-items: stretch;
+}
+
+.sitio-publico .pelicula {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.sitio-publico .pelicula > img {
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    object-fit: cover;
+}
