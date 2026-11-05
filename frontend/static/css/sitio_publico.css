@@ -178,12 +178,28 @@
     color: var(--texto-suave);
     font-size: 13px;
 }
+/* Selección de funciones */
+.sitio-publico .seleccion-funcion {
+    width: 100%;
+    margin: 35px 0 0;
+}
+
+.sitio-publico .seleccion-funcion h3 {
+    margin-bottom: 8px;
+    font-size: 30px;
+}
+
+.sitio-publico .seleccion-funcion > p {
+    color: var(--texto-suave);
+    font-size: 13px;
+}
 
 .sitio-publico .seleccion-funcion .lista-funciones {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(115px, 1fr));
-    gap: 12px;
-    margin: 28px 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px;
+    margin: 25px 0;
 }
 
 .sitio-publico .funcion-opcion {
@@ -191,19 +207,23 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-width: 0;
-    min-height: 125px;
-    padding: 15px 8px;
-    border: 1px solid transparent;
+    width: 145px;
+    height: 145px;
+    min-height: 145px;
+    padding: 12px;
+    box-sizing: border-box;
+    border: 2px solid var(--borde-publico);
     border-radius: 50%;
-    background: transparent;
+    background: var(--papel);
+    color: var(--tinta);
     text-align: center;
     cursor: pointer;
-    transition: background .2s, border-color .2s;
+    transition: background 0.2s, color 0.2s;
 }
 
 .sitio-publico .funcion-opcion:hover {
-    background: #f0e5d2;
+    border-color: var(--vino);
+    background: #f5e9e4;
 }
 
 .sitio-publico .funcion-opcion:has(input:checked) {
@@ -213,11 +233,10 @@
 }
 
 .sitio-publico .funcion-opcion input[type="radio"] {
-    width: 16px;
-    height: 16px;
-    margin: 0 0 7px;
+    width: 15px;
+    height: 15px;
+    margin: 0 0 6px;
     accent-color: var(--dorado);
-    cursor: pointer;
 }
 
 .sitio-publico .funcion-opcion-datos {
@@ -225,19 +244,62 @@
     flex-direction: column;
     align-items: center;
     gap: 5px;
-    font-size: 12px;
-    font-weight: normal;
+    font-size: 11px;
 }
 
 .sitio-publico .funcion-opcion-datos strong {
-    font-size: 14px;
+    font-size: 23px;
 }
 
-.sitio-publico .funcion-opcion:has(input:checked) .funcion-opcion-datos {
+.sitio-publico .funcion-opcion-datos small {
+    font-size: 9px;
+    letter-spacing: 1px;
+}
+
+.sitio-publico .funcion-opcion:has(input:checked)
+.funcion-opcion-datos {
     color: var(--papel);
 }
 
+/* Información del horario seleccionado */
+.sitio-publico #detalle-funcion {
+    margin: 25px 0;
+    padding: 18px;
+    border-left: 4px solid var(--vino);
+    background: #f5eee7;
+}
 
+.sitio-publico #detalle-funcion p {
+    margin: 5px 0;
+}
+
+.sitio-publico #precio-funcion {
+    color: var(--vino);
+    font-size: 23px;
+}
+
+/* Botón para elegir butacas */
+.sitio-publico #btn-elegir-butacas {
+    display: block;
+    width: auto;
+    min-width: 190px;
+    margin: 20px 0 25px auto;
+    padding: 14px 25px;
+    border: 1px solid var(--dorado);
+    border-radius: 0;
+    background: var(--dorado);
+    color: var(--tinta);
+}
+
+.sitio-publico #btn-elegir-butacas:hover:not(:disabled) {
+    background: #e5b546;
+    color: var(--tinta);
+}
+
+.sitio-publico #btn-elegir-butacas:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
 
 .sitio-publico #btn-elegir-butacas {
     display: block;
