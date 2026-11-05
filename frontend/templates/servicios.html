@@ -16,9 +16,15 @@
             <div class="lista-servicios">
                 {% for servicio in servicios %}
                     <div class="servicio">
-                        <h4>{{ servicio.nombre }}</h4>
-                        <p>{{ servicio.descripcion }}</p>
-                        <p>Precio: {{ servicio.precio }}</p>
+                        <!-- Analizar si vale la pena la ilustracion -->
+                        <div class="servicio-info">
+                            <h4>{{ servicio.nombre }}</h4>
+                            <p>{{ servicio.descripcion }}</p>
+                        </div>
+                        <div class="servicio-footer">
+                            <span class="precio">ARS {{ servicio.precio }}</span>
+                            <button class="btn-agregar" data-id="{{ servicio.id_servicio }}">Agregar</button>
+                        </div>
                     </div>
                 {% endfor %}
             </div>
