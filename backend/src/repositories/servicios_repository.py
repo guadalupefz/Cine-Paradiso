@@ -1,9 +1,9 @@
 def obtener_servicios(cursor):
-    cursor.execute("SELECT id_servicio, nombre, precio FROM servicio_adicional ORDER BY nombre")
+    cursor.execute("SELECT id_servicio, nombre, descripcion, precio FROM servicio_adicional ORDER BY nombre")
     return cursor.fetchall()
 
 def obtener_servicio(cursor, id_servicio):
-    cursor.execute("SELECT id_servicio, nombre, precio FROM servicio_adicional WHERE id_servicio = %s", (id_servicio,))
+    cursor.execute("SELECT id_servicio, nombre, descripcion, precio FROM servicio_adicional WHERE id_servicio = %s", (id_servicio,))
     return cursor.fetchone()
 
 def crear_servicio(cursor, nombre, precio):
