@@ -1328,3 +1328,280 @@
         grid-template-columns: 1fr;
     }
 }
+
+
+/* === CARTELERA CINE PARADISO - DISEÑO EDITORIAL === */
+body.sitio-publico {
+    background: #f5f0e7;
+    color: #34251f;
+}
+
+body.sitio-publico .cabecera-sitio {
+    background: #f5f0e7;
+    border-bottom: 1px solid #d8c9ad;
+}
+
+body.sitio-publico .marca-sitio,
+body.sitio-publico .navegacion-sitio a {
+    color: #702b38;
+}
+
+body.sitio-publico main {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 48px 5%;
+}
+
+body.sitio-publico .cabecera-cartelera {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+    padding: 25px 0 38px;
+    border-bottom: 1px solid #c9b68e;
+    margin-bottom: 28px;
+}
+
+body.sitio-publico .etiqueta-cartelera {
+    color: #9a7540;
+    font-size: 11px;
+    letter-spacing: 3px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+body.sitio-publico .cabecera-cartelera h2 {
+    color: #702b38;
+    font-family: Georgia, serif;
+    font-size: clamp(42px, 5vw, 64px);
+    font-weight: 400;
+    margin: 12px 0;
+}
+
+body.sitio-publico .introduccion {
+    color: #75665c;
+    font-family: Georgia, serif;
+    font-size: 17px;
+}
+
+body.sitio-publico .sello-cartelera {
+    border: 1px solid #a88953;
+    border-radius: 50%;
+    width: 175px;
+    height: 175px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #702b38;
+    flex-shrink: 0;
+}
+
+body.sitio-publico .sello-cartelera p {
+    font-family: Georgia, serif;
+    font-size: 17px;
+    letter-spacing: 1px;
+}
+
+body.sitio-publico .sello-cartelera small {
+    color: #8b754f;
+    font-size: 10px;
+}
+
+body.sitio-publico .barra-filtros {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin: 28px 0;
+}
+
+body.sitio-publico .filtros-cartelera {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+body.sitio-publico .filtros-cartelera button {
+    border: 1px solid #b99d79;
+    border-radius: 30px;
+    background: transparent;
+    color: #702b38;
+    padding: 10px 20px;
+    cursor: pointer;
+}
+
+body.sitio-publico .filtros-cartelera button.activo,
+body.sitio-publico .filtros-cartelera button:hover {
+    background: #702b38;
+    border-color: #702b38;
+    color: #fff8ed;
+}
+
+body.sitio-publico .cantidad-cartelera {
+    color: #8a755d;
+    font-size: 12px;
+}
+
+body.sitio-publico .peliculas {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 32px 22px;
+}
+
+body.sitio-publico .pelicula {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+body.sitio-publico .pelicula > img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    background: #e4dac9;
+    margin-bottom: 15px;
+}
+
+body.sitio-publico .pelicula .genero-pelicula {
+    color: #a17c43;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 0 0 8px;
+}
+
+body.sitio-publico .pelicula h3 {
+    color: #702b38;
+    font-family: Georgia, serif;
+    font-size: 22px;
+    font-weight: 400;
+    line-height: 1.2;
+    margin: 8px 0;
+}
+
+body.sitio-publico .pelicula .datos-ficha {
+    color: #827466;
+    font-size: 11px;
+    margin: 0 0 8px;
+}
+
+body.sitio-publico .pelicula .sinopsis-pelicula {
+    color: #65574e;
+    font-size: 13px;
+    line-height: 1.6;
+    flex-grow: 1;
+}
+
+body.sitio-publico .pelicula a {
+    display: inline-block;
+    align-self: flex-start;
+    margin-top: 12px;
+    padding: 10px 18px;
+    background: #702b38;
+    color: #fff8ed;
+    text-decoration: none;
+    font-size: 12px;
+    letter-spacing: .5px;
+}
+
+body.sitio-publico .pelicula a:hover {
+    background: #54202b;
+}
+
+body.sitio-publico .pie-sitio {
+    background: #702b38;
+    color: #f5f0e7;
+    text-align: center;
+    padding: 28px 20px;
+    margin-top: 55px;
+}
+
+body.sitio-publico .pie-sitio .lema-sitio {
+    font-family: Georgia, serif;
+    font-size: 18px;
+}
+
+@media (max-width: 1100px) {
+    body.sitio-publico .peliculas {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    body.sitio-publico main {
+        padding: 28px 5%;
+    }
+    body.sitio-publico .cabecera-cartelera {
+        align-items: flex-start;
+    }
+    body.sitio-publico .sello-cartelera {
+        display: none;
+    }
+    body.sitio-publico .peliculas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 25px 15px;
+    }
+}
+
+@media (max-width: 400px) {
+    body.sitio-publico .peliculas {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* Sello de cartelera: igual a la referencia Figma */
+body.sitio-publico .sello-cartelera {
+    width: auto;
+    height: auto;
+    min-width: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-rows: auto auto;
+    column-gap: 9px;
+    align-items: center;
+    justify-content: center;
+    text-align: left;
+    color: #702b38;
+}
+
+body.sitio-publico .sello-cartelera p {
+    grid-column: 2;
+    grid-row: 1;
+    margin: 0;
+    font-family: Georgia, serif;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+body.sitio-publico .sello-cartelera p span {
+    display: none;
+}
+
+body.sitio-publico .sello-cartelera::before {
+    content: "✦";
+    grid-column: 1;
+    grid-row: 1;
+    color: #702b38;
+    font-size: 25px;
+}
+
+body.sitio-publico .sello-cartelera small {
+    grid-column: 2;
+    grid-row: 2;
+    color: #8b755d;
+    font-size: 9px;
+}
