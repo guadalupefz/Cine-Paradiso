@@ -476,11 +476,43 @@ def ver_compra():
         )
 
     
-    poster = funcion.get("poster", "")
-    if poster and not poster.startswith(("http://", "https://")):
-        funcion["poster"] = urljoin(
-            BACKEND_ORIGEN + "/",
-            poster.lstrip("/")
+    # Recuperar el póster desde la función o desde el catálogo de películas.
+    poster = funcion.get("poster") or ""
+    if not poster:
+        peliculas, estado_peliculas = llamar_backend("GET", "/peliculas")
+        if estado_peliculas == 200:
+            pelicula = next(
+                (
+                    p for p in lista(peliculas, "peliculas")
+                    if p.get("id_pelicula") == funcion.get("id_pelicula")
+                ),
+                {}
+            )
+            poster = pelicula.get("poster") or ""
+
+    if poster.startswith(("http://", "https://")):
+        funcion["poster"] = poster
+    elif poster:
+        ruta_poster = poster.lstrip("/")
+        archivo_local = (
+            Path(__file__).resolve().parent
+            / "static"
+            / ruta_poster.removeprefix("static/")
+        )
+        if ruta_poster.startswith("static/") and archivo_local.is_file():
+            funcion["poster"] = url_for(
+                "static",
+                filename=ruta_poster.removeprefix("static/")
+            )
+        else:
+            funcion["poster"] = urljoin(
+                BACKEND_ORIGEN + "/",
+                ruta_poster
+            )
+    else:
+        funcion["poster"] = url_for(
+            "static",
+            filename="img/poster_sin_imagen.svg"
         )
 
     
@@ -532,6 +564,11 @@ def ver_compra():
     precio_unitario = float(funcion.get("precio_base") or 0)
     total = precio_unitario * len(ids_butacas)
 
+    # Datos de la persona autenticada.
+    usuario = usuario_actual() or {}
+    if isinstance(usuario, dict):
+        usuario = usuario.get("usuario", usuario)
+
     return render_template(
         "compra.html",
         id_funcion=id_funcion,
@@ -540,6 +577,7 @@ def ver_compra():
         funcion=funcion,
         precio_unitario=precio_unitario,
         total=total,
+        usuario=usuario,
         error=estado_butacas != 200
     )
 

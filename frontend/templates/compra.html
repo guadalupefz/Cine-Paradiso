@@ -1,127 +1,174 @@
 {% extends "base.html" %}
 
-{% block title %}Resumen de compra - Cine Paradiso{% endblock %}
+{% block title %}Resumen y pago - Cine Paradiso{% endblock %}
+
+{% macro dinero(valor) -%}
+$ {{ ("{:,.2f}".format(valor|float)).replace(",", "X").replace(".", ",").replace("X", ".") }}
+{%- endmacro %}
 
 {% block content %}
-<section class="compra">
+<section class="checkout">
+    <a class="checkout-volver" href="{{ url_for('ver_servicios') }}">← Volver a Servicios</a>
 
-    <h2>Resumen de tu compra</h2>
+    <nav class="checkout-pasos" aria-label="Pasos de compra">
+        <span class="paso-completo">✓ Tu cuenta</span>
+        <span class="paso-completo">✓ Función</span>
+        <span class="paso-completo">✓ Butacas</span>
+        <span class="paso-completo">✓ Servicios</span>
+        <span class="paso-actual">5 Pago</span>
+        <span class="paso-pendiente">6 Entrada</span>
+    </nav>
+
+    <header class="checkout-encabezado">
+        <p class="checkout-etiqueta">REVISÁ TU VISITA</p>
+        <h2>Resumen y pago</h2>
+        <p>Todo listo para tu próxima historia. Revisá los datos antes de confirmar el pago.</p>
+    </header>
 
     {% if error %}
-
-        <p class="mensaje-error">
-            No se pudo recuperar la información de la función o de las butacas.
-        </p>
-
+        <p class="checkout-error">No se pudo recuperar la información de la función o de las butacas.</p>
         <a href="{{ url_for('index') }}">Volver a la cartelera</a>
-
     {% else %}
+    <div class="checkout-columnas">
+        <div class="checkout-principal">
 
-        <div class="informacion-funcion">
-
-            {% if funcion.poster %}
+            <article class="checkout-panel checkout-funcion">
                 <img
-                    src="{{ funcion.poster }}"
+                    src="{{ funcion.poster or url_for('static', filename='img/poster_sin_imagen.svg') }}"
                     alt="Póster de {{ funcion.titulo }}"
-                    class="poster-funcion"
+                    onerror="this.onerror=null;this.src='{{ url_for('static', filename='img/poster_sin_imagen.svg') }}';"
                 >
-            {% endif %}
 
-            <div class="datos-funcion">
+                <div class="checkout-funcion-datos">
+                    <h3>{{ funcion.titulo }}</h3>
+                    <p>
+                        {{ funcion.genero or 'Cine Paradiso' }}
+                        {% if funcion.duracion_minutos %} · {{ funcion.duracion_minutos }} min{% endif %}
+                        {% if funcion.clasificacion %} · {{ funcion.clasificacion }}{% endif %}
+                    </p>
+                    <p><strong>{{ funcion.fecha }}</strong></p>
+                    <p>{{ funcion.horario }} · {{ funcion.sala_nombre or 'Sala no disponible' }}</p>
+                    <p>{{ funcion.local_nombre or 'Cine Paradiso' }}</p>
+                    <p class="checkout-butacas">
+                        {% for butaca in detalle_butacas %}
+                            {{ butaca }}{% if not loop.last %} · {% endif %}
+                        {% endfor %}
+                    </p>
+                </div>
 
-                <h3>{{ funcion.titulo }}</h3>
+                <div class="checkout-editar">
+                    <a href="{{ url_for('ver_butacas', id_funcion=id_funcion) }}">Modificar butacas</a>
+                </div>
+            </article>
 
-                <p>
-                    <strong>Fecha:</strong>
-                    {{ funcion.fecha }}
+            <article class="checkout-panel checkout-contacto">
+                <div class="checkout-contacto-encabezado">
+                    <div>
+                        <h3>Tus datos de contacto</h3>
+                        <p>La información de tu cuenta se utilizará para identificar tu compra.</p>
+                    </div>
+                    <a class="checkout-modificar" href="{{ url_for('mi_perfil') if 'mi_perfil' in current_app.view_functions else url_for('compras') }}">Mi cuenta</a>
+                </div>
+
+                <div class="checkout-datos-usuario">
+                    <div>
+                        <span>Nombre</span>
+                        <strong>
+                            {{ usuario.get('nombre') or usuario.get('name') or 'No disponible' }}
+                            {% if usuario.get('apellido') %} {{ usuario.get('apellido') }}{% endif %}
+                        </strong>
+                    </div>
+                    <div>
+                        <span>Correo electrónico</span>
+                        <strong>{{ usuario.get('email') or usuario.get('correo') or usuario.get('correo_electronico') or 'No disponible' }}</strong>
+                    </div>
+                </div>
+            </article>
+
+            <article class="checkout-panel checkout-pago">
+                <div class="checkout-panel-titulo">
+                    <h3>Elegí cómo pagar</h3>
+                    <span>PAGO DE EJEMPLO</span>
+                </div>
+
+                <div class="checkout-metodo">
+                    <span>●</span> Tarjeta de débito o crédito
+                </div>
+
+                <div class="checkout-campo">
+                    <label>Número de tarjeta de muestra</label>
+                    <div>•••• &nbsp;•••• &nbsp;•••• &nbsp;0000</div>
+                </div>
+
+                <div class="checkout-campos-dobles">
+                    <div class="checkout-campo">
+                        <label>Titular</label>
+                        <div>Nombre del titular</div>
+                    </div>
+                    <div class="checkout-campo">
+                        <label>Vencimiento</label>
+                        <div>MM / AA</div>
+                    </div>
+                    <div class="checkout-campo">
+                        <label>Código de seguridad</label>
+                        <div>•••</div>
+                    </div>
+                </div>
+
+                <p class="checkout-aclaracion">
+                    Datos ficticios. Este proyecto utiliza un flujo de pago de demostración y no procesa información financiera.
                 </p>
+            </article>
+        </div>
 
-                <p>
-                    <strong>Horario:</strong>
-                    {{ funcion.horario }}
-                </p>
+        <aside class="checkout-lateral">
+            <article class="checkout-panel checkout-total">
+                <p class="checkout-etiqueta">EL ÚLTIMO PASO</p>
+                <h3>Tu compra</h3>
 
-                <p>
-                    <strong>Cine:</strong>
-                    {{ funcion.local_nombre }}
-                </p>
+                {% for butaca in detalle_butacas %}
+                <div class="checkout-linea">
+                    <span>{{ butaca }}</span>
+                    <span>{{ dinero(precio_unitario) }}</span>
+                </div>
+                {% endfor %}
 
-                <p>
-                    <strong>Sala:</strong>
-                    {{ funcion.sala_nombre }}
-                </p>
+                <div class="checkout-subtotal">
+                    <span>{{ detalle_butacas|length }} entrada(s)</span>
+                    <strong>{{ dinero(total) }}</strong>
+                </div>
 
-                <p>
-                    <strong>Duración:</strong>
-                    {{ funcion.duracion_minutos }} minutos
-                </p>
+                <div class="checkout-total-final">
+                    <span>Total</span>
+                    <strong>{{ dinero(total) }}</strong>
+                </div>
 
-                <p>
-                    <strong>Clasificación:</strong>
-                    {{ funcion.clasificacion }}
-                </p>
+                <form method="POST" action="{{ url_for('procesar_compra') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <input type="hidden" name="id_funcion" value="{{ id_funcion }}">
+                    <input type="hidden" name="butacas" value="{{ butacas|join(',') }}">
 
+                    <label class="checkout-confirmacion">
+                        <input type="checkbox" required>
+                        Revisé la función, las butacas y mis datos de contacto.
+                    </label>
+
+                    <button type="submit" class="checkout-boton">
+                        Confirmar compra · {{ dinero(total) }} →
+                    </button>
+                </form>
+
+                <a class="checkout-volver-servicios" href="{{ url_for('ver_servicios') }}">Volver a Servicios</a>
+            </article>
+
+            <div class="checkout-ayuda">
+                <strong>✦ Tus entradas, donde estés</strong>
+                <p>Después de confirmar, podrás consultar tus entradas desde Mis compras.</p>
             </div>
 
-        </div>
-
-        <h3>Butacas seleccionadas</h3>
-
-        <ul>
-            {% for butaca in detalle_butacas %}
-                <li>Butaca {{ butaca }}</li>
-            {% endfor %}
-        </ul>
-
-        <div class="detalle-precio">
-
-            <p>
-                <strong>Precio por butaca:</strong>
-                ${{ "%.2f"|format(precio_unitario) }}
-            </p>
-
-            <p>
-                <strong>Cantidad de butacas:</strong>
-                {{ detalle_butacas|length }}
-            </p>
-
-            <p class="total-butacas">
-                <strong>Total:</strong>
-                ${{ "%.2f"|format(total) }}
-            </p>
-
-        </div>
-
-        <p>
-            Revisá los datos antes de confirmar.
-            La compra todavía no se realizó.
-        </p>
-
-        <form method="POST" action="{{ url_for('procesar_compra') }}">
-
-            <input
-                type="hidden"
-                name="csrf_token"
-                value="{{ csrf_token }}"
-            >
-
-            <input
-                type="hidden"
-                name="id_funcion"
-                value="{{ id_funcion }}"
-            >
-
-            <input
-                type="hidden"
-                name="butacas"
-                value="{{ butacas|join(',') }}"
-            >
-
-            <button type="submit">Confirmar compra</button>
-
-        </form>
-
+            <a class="checkout-cancelar" href="{{ url_for('index') }}">Cancelar compra y volver a Cartelera</a>
+        </aside>
+    </div>
     {% endif %}
-
 </section>
 {% endblock %}

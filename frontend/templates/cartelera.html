@@ -46,8 +46,8 @@
                     <h3>{{ pelicula.titulo }}</h3>
 
                     <p class="sinopsis-pelicula">{{ (ficha.sinopsis if ficha else pelicula.sinopsis) or 'Sinopsis no disponible.' }}</p>
-                    <a href="{{ url_for('ver_funciones', id_pelicula=pelicula.id_pelicula) }}">
-                        Ver funciones
+                    <a class="enlace-ver-funciones" href="{{ url_for('ver_funciones', id_pelicula=pelicula.id_pelicula) }}">
+                        <span>Ver funciones</span>
                     </a>
                 </div>
             {% else %}
