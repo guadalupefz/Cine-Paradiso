@@ -1693,3 +1693,789 @@ body.sitio-publico .pie-sitio .lema-sitio {
         text-align: center;
     }
 }
+
+
+/* Fichas compactas como en la referencia Figma */
+body.sitio-publico .meta-pelicula {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin: 8px 0 5px;
+}
+
+body.sitio-publico .meta-pelicula .genero-pelicula,
+body.sitio-publico .meta-pelicula .datos-ficha {
+    display: inline;
+    margin: 0;
+    font-size: 9px;
+    line-height: 1.4;
+}
+
+body.sitio-publico .meta-pelicula .genero-pelicula {
+    color: #702b38;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+body.sitio-publico .meta-pelicula .datos-ficha {
+    color: #827466;
+}
+
+body.sitio-publico .pelicula h3 {
+    min-height: 2.3em;
+    margin: 7px 0;
+}
+
+body.sitio-publico .pelicula .sinopsis-pelicula {
+    min-height: 4.2em;
+}
+
+
+/* === AJUSTE FINAL DE TARJETAS SEGUN FIGMA === */
+
+/* Pósteres con proporción más compacta */
+body.sitio-publico .peliculas .pelicula > img {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 4 / 5 !important;
+    object-fit: cover;
+    margin: 0 0 8px !important;
+    border: 1px solid #d8c7a9;
+}
+
+/* Tarjetas sin cajas independientes */
+body.sitio-publico .peliculas .pelicula {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Información más cercana al póster */
+body.sitio-publico .peliculas .meta-pelicula {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    gap: 5px;
+}
+
+body.sitio-publico .peliculas .pelicula h3 {
+    font-size: 18px;
+    line-height: 1.15;
+    margin: 5px 0 7px;
+    min-height: 2.3em;
+}
+
+body.sitio-publico .peliculas .pelicula .sinopsis-pelicula {
+    font-size: 11px;
+    line-height: 1.35;
+    margin-bottom: 8px;
+    min-height: 4em;
+}
+
+/* Enlaces sencillos, sin botones */
+body.sitio-publico .peliculas .pelicula a {
+    align-self: stretch;
+    border-top: 1px solid #d8c7a9;
+    padding-top: 8px;
+    margin-top: auto;
+    background: transparent !important;
+    color: #702b38;
+}
+
+/* Separación entre las cinco películas */
+body.sitio-publico .peliculas {
+    align-items: stretch;
+    column-gap: 22px;
+    row-gap: 25px;
+}
+
+
+/* === ENCABEZADO Y COMPOSICION GENERAL FIGMA === */
+
+body.sitio-publico .cabecera-sitio {
+    min-height: 68px;
+    padding: 0 7%;
+    border-bottom: 1px solid #dfd2bd;
+    background: #f7f1e4;
+}
+
+body.sitio-publico .marca-sitio {
+    font-family: Georgia, serif;
+    font-size: 23px;
+    font-weight: 700;
+    color: #702b38;
+}
+
+body.sitio-publico .navegacion-sitio {
+    gap: 24px;
+}
+
+body.sitio-publico .navegacion-sitio a {
+    font-size: 11px;
+    color: #382b27;
+}
+
+body.sitio-publico main {
+    width: 90%;
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 34px 0 45px;
+}
+
+body.sitio-publico .cabecera-cartelera {
+    padding: 15px 0 22px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid #dfd2bd;
+}
+
+body.sitio-publico .cabecera-cartelera h2 {
+    font-size: clamp(38px, 4vw, 52px);
+    margin: 8px 0 5px;
+}
+
+body.sitio-publico .introduccion {
+    font-size: 12px;
+}
+
+body.sitio-publico .barra-filtros {
+    margin: 18px 0 25px;
+}
+
+body.sitio-publico .filtros-cartelera button {
+    font-size: 10px;
+    padding: 8px 14px;
+}
+
+body.sitio-publico .cantidad-cartelera {
+    font-size: 10px;
+}
+
+body.sitio-publico .peliculas {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 20px;
+}
+
+body.sitio-publico .pelicula > img {
+    aspect-ratio: 4 / 5;
+}
+
+body.sitio-publico .sello-cartelera {
+    margin-right: 5px;
+}
+
+body.sitio-publico .pie-sitio {
+    padding: 14px 7%;
+    font-size: 10px;
+}
+
+@media (max-width: 850px) {
+    body.sitio-publico .peliculas {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 600px) {
+    body.sitio-publico main {
+        width: 92%;
+    }
+    body.sitio-publico .peliculas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+
+/* === TERMINACION EDITORIAL DE CARTELERA === */
+
+/* Contenido de las fichas */
+body.sitio-publico .pelicula {
+    min-height: 0;
+    justify-content: flex-start;
+}
+
+body.sitio-publico .pelicula > img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border: 1px solid #d9c9aa;
+    margin-bottom: 7px;
+}
+
+body.sitio-publico .pelicula .meta-pelicula {
+    min-height: 20px;
+    justify-content: flex-start;
+}
+
+body.sitio-publico .pelicula h3 {
+    font-family: Georgia, serif;
+    font-size: 17px;
+    font-weight: 400;
+    color: #702b38;
+    line-height: 1.15;
+    margin: 5px 0 7px;
+    min-height: 39px;
+}
+
+body.sitio-publico .pelicula .sinopsis-pelicula {
+    color: #75665c;
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    line-height: 1.45;
+    min-height: 55px;
+    margin: 0 0 7px;
+}
+
+/* Enlace de funciones */
+body.sitio-publico .pelicula a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .2px;
+    border-top: 1px solid #d9c9aa;
+    padding: 8px 0 0;
+    color: #702b38;
+    text-decoration: none;
+}
+
+body.sitio-publico .pelicula a::after {
+    content: "↗";
+    font-size: 15px;
+}
+
+body.sitio-publico .pelicula a:hover {
+    color: #a52d35;
+}
+
+/* Filtros más discretos */
+body.sitio-publico .filtros-cartelera button {
+    font-family: Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 400;
+    border-color: #ddceb5;
+    color: #4d4036;
+    background: transparent;
+}
+
+body.sitio-publico .filtros-cartelera button.activo {
+    background: #702b38;
+    border-color: #702b38;
+    color: #fff8ed;
+}
+
+/* Sello editorial */
+body.sitio-publico .sello-cartelera {
+    color: #702b38;
+}
+
+body.sitio-publico .sello-cartelera p {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .5px;
+}
+
+body.sitio-publico .sello-cartelera small {
+    font-family: Georgia, serif;
+    font-size: 8px;
+    margin-top: 4px;
+}
+
+/* Pie de página */
+body.sitio-publico .pie-sitio {
+    min-height: 52px;
+    border-top: 1px solid #ddceb5;
+    background: #f7f1e4;
+}
+
+body.sitio-publico .pie-sitio p {
+    font-size: 9px;
+}
+
+body.sitio-publico .pie-sitio .lema-sitio {
+    font-family: Georgia, serif;
+    font-style: italic;
+    font-size: 13px;
+    color: #702b38;
+}
+
+/* CARTELERA - FICHAS SEGUN FIGMA */
+.sitio-publico .peliculas {
+    align-items: stretch;
+    column-gap: 18px;
+    row-gap: 30px;
+}
+
+.sitio-publico .pelicula {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto auto 1fr auto;
+    align-content: stretch;
+    gap: 0 8px;
+    min-width: 0;
+}
+
+.sitio-publico .pelicula > img {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    margin-bottom: 14px;
+}
+
+.sitio-publico .pelicula .genero-pelicula {
+    grid-column: 1;
+    grid-row: 2;
+    margin: 0 0 7px;
+    align-self: center;
+}
+
+.sitio-publico .pelicula .datos-ficha {
+    grid-column: 2;
+    grid-row: 2;
+    margin: 0 0 7px;
+    white-space: nowrap;
+    text-align: right;
+    align-self: center;
+}
+
+.sitio-publico .pelicula h3 {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    margin: 5px 0 10px;
+    min-height: 0;
+}
+
+.sitio-publico .pelicula .sinopsis-pelicula {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    margin: 0 0 14px;
+    line-height: 1.45;
+}
+
+.sitio-publico .pelicula > a {
+    grid-column: 1 / -1;
+    grid-row: 5;
+    align-self: end;
+    display: block;
+    border-top: 1px solid #dfcdb0;
+    padding-top: 10px;
+    margin-top: 0;
+}
+
+@media (max-width: 650px) {
+    .sitio-publico .peliculas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px 14px;
+    }
+}
+
+
+/* CARTELERA - TERMINACION VISUAL FIEL A FIGMA */
+.sitio-publico .peliculas {
+    gap: 24px 18px;
+    align-items: stretch;
+}
+
+.sitio-publico .pelicula {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto 1fr auto;
+    gap: 0 6px;
+    padding: 0 12px 12px;
+    background: #fffaf1;
+    border: 1px solid #e3d1b5;
+    border-radius: 2px;
+    box-shadow: none;
+    text-align: left;
+}
+
+.sitio-publico .pelicula > img {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    width: calc(100% + 24px);
+    max-width: none;
+    margin: 0 0 12px -12px;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+}
+
+.sitio-publico .pelicula .genero-pelicula {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: start;
+    text-align: left;
+    margin: 0 0 8px;
+}
+
+.sitio-publico .pelicula .datos-ficha {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: end;
+    text-align: right;
+    white-space: nowrap;
+    margin: 0 0 8px;
+}
+
+.sitio-publico .pelicula h3 {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    text-align: left;
+    margin: 3px 0 10px;
+}
+
+.sitio-publico .pelicula .sinopsis-pelicula {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    text-align: left;
+    margin: 0 0 14px;
+    line-height: 1.45;
+}
+
+.sitio-publico .pelicula > a {
+    grid-column: 1 / -1;
+    grid-row: 5;
+    text-align: left;
+    border-top: 1px solid #dfcdb0;
+    padding-top: 10px;
+    margin: 0;
+    align-self: end;
+}
+
+@media (max-width: 650px) {
+    .sitio-publico .pelicula {
+        padding-left: 9px;
+        padding-right: 9px;
+    }
+
+    .sitio-publico .pelicula > img {
+        width: calc(100% + 18px);
+        margin-left: -9px;
+    }
+}
+
+/* PIE DE PAGINA - CARTELERA */
+.sitio-publico .pie-sitio {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    padding: 18px 5%;
+    border-top: 1px solid #dfcdb0;
+    background: #f7f0e3;
+}
+
+.sitio-publico .pie-sitio .lema-sitio,
+.sitio-publico .pie-sitio .datos-pie {
+    margin: 0;
+}
+
+.sitio-publico .pie-sitio .datos-pie {
+    font-size: 10px;
+    color: #887968;
+}
+
+/* LINEA SEPARADORA DE LOS FILTROS */
+.sitio-publico .barra-filtros {
+    border-bottom: 1px solid #dfcdb0;
+    padding-bottom: 16px;
+    margin-bottom: 28px;
+}
+
+/* ===== CARTELERA: AJUSTE INTEGRAL SEGUN FIGMA ===== */
+
+/* Separación de los filtros y línea inferior */
+.sitio-publico .barra-filtros {
+    border-bottom: 1px solid #dfcdb0 !important;
+    padding-bottom: 16px !important;
+    margin-bottom: 28px !important;
+}
+
+/* Cinco fichas alineadas, sin cajas exteriores */
+.sitio-publico .peliculas {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 24px 18px !important;
+    align-items: stretch !important;
+}
+
+.sitio-publico .pelicula {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    grid-template-rows: auto auto auto 1fr auto !important;
+    gap: 0 6px !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    text-align: left !important;
+}
+
+/* Póster */
+.sitio-publico .pelicula > img {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+    display: block !important;
+    width: 100% !important;
+    aspect-ratio: 4 / 5 !important;
+    height: auto !important;
+    object-fit: cover !important;
+    margin: 0 0 9px !important;
+}
+
+/* Género */
+.sitio-publico .pelicula .genero-pelicula {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    margin: 0 0 7px !important;
+    text-align: left !important;
+    align-self: center !important;
+}
+
+/* Duración y clasificación */
+.sitio-publico .pelicula .datos-ficha {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    margin: 0 0 7px !important;
+    text-align: right !important;
+    white-space: nowrap !important;
+    align-self: center !important;
+}
+
+/* Título */
+.sitio-publico .pelicula h3 {
+    grid-column: 1 / -1 !important;
+    grid-row: 3 !important;
+    margin: 2px 0 9px !important;
+    text-align: left !important;
+}
+
+/* Sinopsis */
+.sitio-publico .pelicula .sinopsis-pelicula {
+    grid-column: 1 / -1 !important;
+    grid-row: 4 !important;
+    margin: 0 0 10px !important;
+    text-align: left !important;
+    line-height: 1.4 !important;
+}
+
+/* Ver funciones y línea corta */
+.sitio-publico .pelicula > a {
+    grid-column: 1 / -1 !important;
+    grid-row: 5 !important;
+    align-self: end !important;
+    display: block !important;
+    border: 0 !important;
+    border-top: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    text-align: left !important;
+}
+
+.sitio-publico .pelicula > a::before {
+    content: "";
+    display: block;
+    width: 72px;
+    border-top: 1px solid #dfcdb0;
+    margin-bottom: 9px;
+}
+
+/* Pie de página */
+.sitio-publico .pie-sitio {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 12px 24px !important;
+    padding: 18px 5% !important;
+    background: #f7f0e3 !important;
+    border-top: 1px solid #dfcdb0 !important;
+}
+
+.sitio-publico .pie-sitio .lema-sitio,
+.sitio-publico .pie-sitio .datos-pie {
+    margin: 0 !important;
+}
+
+.sitio-publico .pie-sitio .datos-pie {
+    color: #887968 !important;
+    font-size: 10px !important;
+}
+
+@media (max-width: 900px) {
+    .sitio-publico .peliculas {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 650px) {
+    .sitio-publico .peliculas {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 380px) {
+    .sitio-publico .peliculas {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ===== CARTELERA: AJUSTE INTEGRAL SEGUN FIGMA ===== */
+
+/* Separación de los filtros y línea inferior */
+.sitio-publico .barra-filtros {
+    border-bottom: 1px solid #dfcdb0 !important;
+    padding-bottom: 16px !important;
+    margin-bottom: 28px !important;
+}
+
+/* Cinco fichas alineadas, sin cajas exteriores */
+.sitio-publico .peliculas {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 24px 18px !important;
+    align-items: stretch !important;
+}
+
+.sitio-publico .pelicula {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    grid-template-rows: auto auto auto 1fr auto !important;
+    gap: 0 6px !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    text-align: left !important;
+}
+
+/* Póster */
+.sitio-publico .pelicula > img {
+    grid-column: 1 / -1 !important;
+    grid-row: 1 !important;
+    display: block !important;
+    width: 100% !important;
+    aspect-ratio: 4 / 5 !important;
+    height: auto !important;
+    object-fit: cover !important;
+    margin: 0 0 9px !important;
+}
+
+/* Género */
+.sitio-publico .pelicula .genero-pelicula {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    margin: 0 0 7px !important;
+    text-align: left !important;
+    align-self: center !important;
+}
+
+/* Duración y clasificación */
+.sitio-publico .pelicula .datos-ficha {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    margin: 0 0 7px !important;
+    text-align: right !important;
+    white-space: nowrap !important;
+    align-self: center !important;
+}
+
+/* Título */
+.sitio-publico .pelicula h3 {
+    grid-column: 1 / -1 !important;
+    grid-row: 3 !important;
+    margin: 2px 0 9px !important;
+    text-align: left !important;
+}
+
+/* Sinopsis */
+.sitio-publico .pelicula .sinopsis-pelicula {
+    grid-column: 1 / -1 !important;
+    grid-row: 4 !important;
+    margin: 0 0 10px !important;
+    text-align: left !important;
+    line-height: 1.4 !important;
+}
+
+/* Ver funciones y línea corta */
+.sitio-publico .pelicula > a {
+    grid-column: 1 / -1 !important;
+    grid-row: 5 !important;
+    align-self: end !important;
+    display: block !important;
+    border: 0 !important;
+    border-top: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    text-align: left !important;
+}
+
+.sitio-publico .pelicula > a::before {
+    content: "";
+    display: block;
+    width: 72px;
+    border-top: 1px solid #dfcdb0;
+    margin-bottom: 9px;
+}
+
+/* Pie de página */
+.sitio-publico .pie-sitio {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 12px 24px !important;
+    padding: 18px 5% !important;
+    background: #f7f0e3 !important;
+    border-top: 1px solid #dfcdb0 !important;
+}
+
+.sitio-publico .pie-sitio .lema-sitio,
+.sitio-publico .pie-sitio .datos-pie {
+    margin: 0 !important;
+}
+
+.sitio-publico .pie-sitio .datos-pie {
+    color: #887968 !important;
+    font-size: 10px !important;
+}
+
+@media (max-width: 900px) {
+    .sitio-publico .peliculas {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 650px) {
+    .sitio-publico .peliculas {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+@media (max-width: 380px) {
+    .sitio-publico .peliculas {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+
+/* Separador inferior de la barra de filtros */
+.sitio-publico .barra-filtros {
+    padding-bottom: 22px;
+    border-bottom: 1px solid #dfcfb5;
+    margin-bottom: 34px;
+}

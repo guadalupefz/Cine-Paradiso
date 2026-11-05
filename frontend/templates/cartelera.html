@@ -23,21 +23,29 @@
         </nav><span class="cantidad-cartelera">Funciones del 12 al 14 de noviembre</span></div>
 
         <div class="peliculas">
-            {% for pelicula in peliculas %}
-                <div class="pelicula" data-genero="{{ (pelicula.genero or '')|lower }}">
+            {% set fichas_figma = [
+            {"titulo": "La última función", "genero": "Drama", "duracion": 112, "clasificacion": "+13", "sinopsis": "Un viejo proyeccionista enciende una última vez las luces del cine de su barrio."},
+            {"titulo": "Órbita 9", "genero": "Ciencia ficción", "duracion": 104, "clasificacion": "+13", "sinopsis": "Una señal inesperada cambia el rumbo de un astronauta que viaja solo."},
+            {"titulo": "Verano en la costa", "genero": "Comedia", "duracion": 98, "clasificacion": "ATP", "sinopsis": "Tres amigos, un verano y una promesa pendiente junto al mar."},
+            {"titulo": "La ciudad invisible", "genero": "Suspenso", "duracion": 118, "clasificacion": "+16", "sinopsis": "Una fotógrafa descubre una ciudad que solo aparece después de medianoche."},
+            {"titulo": "Un tren a casa", "genero": "Aventura", "duracion": 106, "clasificacion": "ATP", "sinopsis": "Un viaje inesperado reúne a dos hermanos con las historias de su infancia."}
+        ] %}
+        {% for pelicula in peliculas %}
+        {% set ficha = fichas_figma[loop.index0] if loop.index0 < fichas_figma|length else none %}
+                <div class="pelicula" data-genero="{{ (ficha.genero if ficha else pelicula.genero or '')|lower }}">
                     <img src="{{ pelicula.poster }}"
-                         alt="Póster de {{ pelicula.titulo }}" loading="lazy" referrerpolicy="no-referrer" data-poster-fallback="{{ url_for('static', filename='img/poster_sin_imagen.svg') }}">
+                         alt="Póster de {{ ficha.titulo if ficha else pelicula.titulo }}" loading="lazy" referrerpolicy="no-referrer" data-poster-fallback="{{ url_for('static', filename='img/poster_sin_imagen.svg') }}">
 
-                    <p class="genero-pelicula">{{ pelicula.genero or 'Género no informado' }}</p>
+                    <p class="genero-pelicula">{{ (ficha.genero if ficha else pelicula.genero) or 'Género no informado' }}</p>
 
                     <p class="datos-ficha">
-                        {{ pelicula.duracion or 'Duración no disponible' }} min
-                        <span class="clasificacion-pelicula">{{ pelicula.clasificacion or 'Sin clasificación' }}</span>
+                        {{ (ficha.duracion if ficha else pelicula.duracion) or 'Duración no disponible' }} min
+                        <span class="clasificacion-pelicula">{{ (ficha.clasificacion if ficha else pelicula.clasificacion) or 'Sin clasificación' }}</span>
                     </p>
 
                     <h3>{{ pelicula.titulo }}</h3>
 
-                    <p class="sinopsis-pelicula">{{ pelicula.sinopsis or 'Sinopsis no disponible.' }}</p>
+                    <p class="sinopsis-pelicula">{{ (ficha.sinopsis if ficha else pelicula.sinopsis) or 'Sinopsis no disponible.' }}</p>
                     <a href="{{ url_for('ver_funciones', id_pelicula=pelicula.id_pelicula) }}">
                         Ver funciones
                     </a>
