@@ -12,9 +12,11 @@ servicios_bp = Blueprint("servicios", __name__)
 def validar_servicio(datos):
     if not isinstance(datos, dict):
         raise ValueError("Se esperaba un objeto JSON")
-    nombre, valor = datos.get("nombre"), datos.get("precio")
+    nombre, descripcion, valor = datos.get("nombre"), datos.get("descripcion"), datos.get("precio")
     if not isinstance(nombre, str) or not nombre.strip() or len(nombre.strip()) > 100 or not isinstance(valor, str):
         raise ValueError("Nombre o precio inválidos")
+    if not isinstance(descripcion, str) or not descripcion.strip() or len(descripcion.strip()) > 250:
+        raise ValueError("La descripción es inválida o supera los 250 caracteres")
     try:
         precio = Decimal(valor.strip())
     except InvalidOperation:
