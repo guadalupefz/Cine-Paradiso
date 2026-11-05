@@ -97,32 +97,28 @@ footer {
     font-size: 20px;
 }
 
-/* Descripción de la película */
+
 .pelicula p {
     font-size: 15px;
     text-align: left;
 }
 
-/* Efecto al pasar el cursor por una película */
 .pelicula:hover {
     background-color: #fff8e8;
 }
 
-/* Pantallas de funciones, butacas y servicios */
 .funciones,
 .butacas,
 .servicios {
     text-align: center;
 }
 
-/* Contenedores de las listas */
 .lista-funciones,
 .lista-butacas,
 .lista-servicios {
     text-align: center;
 }
 
-/* Elementos de cada lista */
 .funcion,
 .butaca,
 .servicio {
@@ -135,13 +131,11 @@ footer {
     vertical-align: top;
 }
 
-/* Mensajes de error */
 .mensaje-error {
     color: #c90000;
     text-align: center;
 }
 
-/* Mensajes de estado vacío */
 .mensaje-vacio {
     text-align: center;
     padding: 20px;
@@ -372,14 +366,12 @@ main button:focus-visible {
     opacity: 0.6;
 }
 
-/* Imágenes de películas */
 .pelicula img {
     display: block;
     object-fit: cover;
     border-radius: 6px;
 }
 
-/* Información que puede faltar */
 .poster-sin-imagen {
     display: flex;
     align-items: center;
@@ -396,7 +388,7 @@ main button:focus-visible {
     font-style: italic;
 }
 
-/* Funciones disponibles */
+
 .lista-funciones {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
@@ -416,7 +408,7 @@ main button:focus-visible {
     margin: 8px 0;
 }
 
-/* Servicios adicionales */
+
 .lista-servicios {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
@@ -436,7 +428,6 @@ main button:focus-visible {
     color: #c90000;
 }
 
-/* Mensajes de estado */
 .estado-vacio,
 .mensaje-vacio,
 .mensaje-error {
@@ -462,8 +453,41 @@ main button:focus-visible {
 
 /* Resumen de compra */
 .compra {
-    max-width: 700px;
-    margin: 0 auto;
+    max-width: 850px;
+    margin: 30px auto;
+    padding: 25px;
+    background: #fff;
+    border: 1px solid #e2d0c4;
+    border-radius: 12px;
+    box-sizing: border-box;
+}
+
+.compra h2 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.compra .informacion-funcion {
+    display: flex;
+    align-items: flex-start;
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.compra .poster-funcion {
+    width: 150px;
+    height: auto;
+    max-height: 220px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.compra .datos-funcion {
+    flex: 1;
+}
+
+.compra .datos-funcion h3 {
+    margin-top: 0;
 }
 
 .compra ul {
@@ -473,6 +497,52 @@ main button:focus-visible {
 .compra li {
     margin: 8px 0;
     overflow-wrap: anywhere;
+}
+
+.compra .detalle-precio {
+    margin: 25px 0;
+    padding: 18px;
+    background: #fff7f0;
+    border-radius: 8px;
+}
+
+.compra .total-butacas {
+    padding-top: 12px;
+    border-top: 1px solid #d5bdb0;
+    font-size: 1.25rem;
+}
+
+.compra form {
+    margin-top: 25px;
+    text-align: center;
+}
+
+.compra button {
+    padding: 12px 25px;
+    font-size: 1rem;
+}
+
+@media (max-width: 600px) {
+    .compra {
+        padding: 15px;
+    }
+
+    .compra .informacion-funcion {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .compra .poster-funcion {
+        width: 130px;
+    }
+
+    .compra .datos-funcion {
+        width: 100%;
+    }
+
+    .compra button {
+        width: 100%;
+    }
 }
 
 /* B19: adaptación de las pantallas a celulares */
