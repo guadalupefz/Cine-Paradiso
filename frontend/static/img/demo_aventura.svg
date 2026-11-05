@@ -1,22 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 750">
-<defs>
-  <linearGradient id="fondo" x1="0" y1="0" x2="1" y2="1">
-    <stop offset="0" stop-color="#17243a"/>
-    <stop offset="1" stop-color="#101827"/>
-  </linearGradient>
-  <radialGradient id="luz">
-    <stop offset="0" stop-color="#d7a84b" stop-opacity=".45"/>
-    <stop offset="1" stop-color="#d7a84b" stop-opacity="0"/>
-  </radialGradient>
-</defs>
-<rect width="600" height="750" fill="url(#fondo)"/>
-<circle cx="300" cy="300" r="245" fill="url(#luz)"/>
-<circle cx="300" cy="300" r="175" fill="none" stroke="#d7a84b" stroke-opacity=".55" stroke-width="2"/>
-<circle cx="300" cy="300" r="145" fill="none" stroke="#d7a84b" stroke-opacity=".3"/>
-<path d="M70 110 H530 M70 640 H530" stroke="#d7a84b" stroke-opacity=".65"/>
-<text x="300" y="170" text-anchor="middle" fill="#d7a84b" font-family="Georgia,serif" font-size="35">✦</text>
-<text x="300" y="330" text-anchor="middle" fill="#fff4df" font-family="Georgia,serif" font-size="48" letter-spacing="3">AVENTURA</text>
-<text x="300" y="390" text-anchor="middle" fill="#fff4df" font-family="Georgia,serif" font-size="48" letter-spacing="3">DE PRUEBA</text>
-<text x="300" y="585" text-anchor="middle" fill="#d7a84b" font-family="sans-serif" font-size="15" letter-spacing="5">CINE PARADISO</text>
-<text x="300" y="685" text-anchor="middle" fill="#fff4df" fill-opacity=".7" font-family="sans-serif" font-size="12" letter-spacing="3">UNA HISTORIA EN LA GRAN PANTALLA</text>
+
+<rect width="600" height="750" fill="#a52d35"/>
+<circle cx="300" cy="210" r="100" fill="#f4d15e"/>
+<path d="M100 440 L300 290 L500 440 Z" fill="#f5e6c9"/>
+<path d="M150 455 H450 L500 500 H100 Z" fill="#642c34"/>
+<path d="M90 535 H510" stroke="#f5e6c9" stroke-width="5"/>
+
+<text x="300" y="65" text-anchor="middle" fill="#fff4df" font-family="Georgia,serif" font-size="17" letter-spacing="4">CINE PARADISO PRESENTA</text>
+<text x="300" y="590" text-anchor="middle" fill="#fff4df" font-family="Georgia,serif" font-size="43">LA ÚLTIMA</text><text x="300" y="640" text-anchor="middle" fill="#fff4df" font-family="Georgia,serif" font-size="43">FUNCIÓN</text>
+<text x="300" y="700" text-anchor="middle" fill="#fff4df" font-family="Georgia,serif" font-size="14" letter-spacing="5">UNA HISTORIA EN LA GRAN PANTALLA</text>
 </svg>

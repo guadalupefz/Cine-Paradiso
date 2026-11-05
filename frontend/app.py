@@ -263,6 +263,19 @@ def index():
     for peli in lista(datos, "peliculas"):
         if peli["id_pelicula"] not in vistos:
             peli["duracion"] = peli.get("duracion_minutos")
+
+            # DATOS DE PRESENTACION FIGMA: conserva el ID de cada película
+            catalogo_demo = [
+                {"titulo": "La última función", "genero": "Drama", "duracion": 112, "clasificacion": "+13", "sinopsis": "Un viejo proyeccionista enciende una última vez las luces del cine de su barrio.", "poster": "static/img/demo_aventura.svg"},
+                {"titulo": "Órbita 9", "genero": "Ciencia ficción", "duracion": 104, "clasificacion": "+13", "sinopsis": "Una señal inesperada cambia el rumbo de un astronauta que viaja solo.", "poster": "static/img/demo_drama.svg"},
+                {"titulo": "Verano en la costa", "genero": "Comedia", "duracion": 98, "clasificacion": "ATP", "sinopsis": "Tres amigos, un verano y una promesa pendiente junto al mar.", "poster": "static/img/demo_romance.svg"},
+                {"titulo": "La ciudad invisible", "genero": "Suspenso", "duracion": 118, "clasificacion": "+16", "sinopsis": "Una fotógrafa descubre una ciudad que solo aparece después de medianoche.", "poster": "static/img/demo_comedia.svg"},
+                {"titulo": "Un tren a casa", "genero": "Aventura", "duracion": 106, "clasificacion": "ATP", "sinopsis": "Un viaje inesperado reúne a dos hermanos con las historias de su infancia.", "poster": "static/img/demo_ciencia.svg"}
+            ]
+            indice_demo = len(peliculas)
+            if indice_demo < len(catalogo_demo):
+                peli.update(catalogo_demo[indice_demo])
+
             poster = peli.get("poster", "")
             if poster and not poster.startswith(("http://", "https://")):
                 ruta_poster = poster.lstrip("/")
