@@ -50,7 +50,7 @@ def actualizar_servicio(id_usuario, id_servicio):
 
 def escribir_servicio(id_servicio=None):
     try:
-        nombre, precio = validar_servicio(request.get_json(silent=True))
+        nombre, descripcion, precio = validar_servicio(request.get_json(silent=True))
     except ValueError as error:
         return jsonify({"error": str(error)}), 400
     try:
@@ -58,12 +58,12 @@ def escribir_servicio(id_servicio=None):
         try:
             with conexion.cursor(dictionary=True) as cursor:
                 if id_servicio is None:
-                    id_servicio = crear_servicio(cursor, nombre, precio)
+                    id_servicio = crear_servicio(cursor, nombre, descripcion, precio)
                     estado = 201
                 else:
                     if obtener_servicio(cursor, id_servicio) is None:
                         return jsonify({"error": "Servicio inexistente"}), 404
-                    modificar_servicio(cursor, id_servicio, nombre, precio)
+                    modificar_servicio(cursor, id_servicio, nombre, descripcion, precio)
                     estado = 200
             conexion.commit()
         except mysql.connector.Error:
