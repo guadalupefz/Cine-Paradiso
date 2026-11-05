@@ -7,8 +7,8 @@ def obtener_cartelera(cursor):
         SELECT p.id_pelicula, p.titulo, p.sinopsis, p.poster,
                p.duracion_minutos, p.clasificacion, p.genero,
                f.id_funcion, f.fecha_hora_inicio, f.precio_base,
-               s.id_sala, s.nombre AS sala_nombre,
-               l.nombre AS local_nombre
+               s.id_sala, s.nombre AS sala_nombre, s.capacidad,
+               l.nombre AS local_nombre 
         FROM funcion f
         JOIN pelicula p ON f.id_pelicula = p.id_pelicula
         JOIN sala s ON f.id_sala = s.id_sala
