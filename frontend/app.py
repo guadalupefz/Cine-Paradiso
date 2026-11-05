@@ -310,6 +310,17 @@ def ver_funciones():
 
     pelicula = funciones[0].copy() if funciones else {}
 
+    if pelicula and not pelicula.get("poster"):
+        datos_peliculas, estado_peliculas = llamar_backend("GET", "/peliculas")
+        catalogo = lista(datos_peliculas, "peliculas")
+        ficha = next(
+            (p for p in catalogo
+             if p.get("id_pelicula") == id_pelicula),
+            {}
+        )
+        if ficha.get("poster"):
+            pelicula["poster"] = ficha["poster"]
+
     if pelicula:
         poster = pelicula.get("poster", "")
 
@@ -341,6 +352,14 @@ def ver_funciones():
                 "may.", "jun.", "jul.", "ago.",
                 "sep.", "oct.", "nov.", "dic."
             ]
+
+            meses_largos = [
+                "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre",
+                "Diciembre"
+            ]
+            funcion["mes_nombre"] = meses_largos[fecha.month - 1]
+            funcion["anio"] = fecha.year
 
             funcion["fecha"] = (
                 f"{fecha.day} {meses_cortos[fecha.month - 1]}"
