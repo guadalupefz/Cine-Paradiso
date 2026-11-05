@@ -1194,3 +1194,137 @@
         flex-direction: column;
     }
 }
+
+
+
+
+/* CARTELERA - AJUSTE FINAL DE PRESENTACION */
+.sitio-publico .cabecera-cartelera {
+    margin-bottom: 30px;
+    padding-bottom: 28px;
+}
+
+.sitio-publico .etiqueta-cartelera {
+    color: var(--vino);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.sitio-publico .peliculas {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 30px 20px;
+    align-items: stretch;
+}
+
+.sitio-publico .pelicula {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: visible;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.sitio-publico .pelicula:hover {
+    transform: translateY(-3px);
+    background: transparent;
+    box-shadow: none;
+}
+
+.sitio-publico .pelicula > img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    height: auto;
+    object-fit: cover;
+    background: #17243a;
+}
+
+.sitio-publico .pelicula .genero-pelicula {
+    margin: 13px 0 5px;
+    color: var(--vino);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.sitio-publico .pelicula .datos-ficha {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px;
+    color: var(--texto-suave);
+    font-size: 11px;
+}
+
+.sitio-publico .pelicula .clasificacion-pelicula {
+    padding: 3px 7px;
+    border: 1px solid var(--borde-publico);
+    border-radius: 2px;
+}
+
+.sitio-publico .pelicula h3 {
+    margin: 0 0 10px;
+    color: var(--tinta);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 20px;
+    line-height: 1.2;
+}
+
+.sitio-publico .pelicula .sinopsis-pelicula {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+    margin: 0 0 12px;
+    color: var(--texto-suave);
+    font-size: 11px;
+    line-height: 1.55;
+}
+
+.sitio-publico .pelicula a {
+    margin: auto 0 0;
+    padding: 12px 0 5px;
+    border-top: 1px solid var(--borde-publico);
+    color: var(--vino);
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.sitio-publico .barra-filtros {
+    margin: 26px 0 30px;
+}
+
+.sitio-publico .cantidad-cartelera {
+    color: var(--texto-suave);
+    font-size: 11px;
+}
+
+@media (max-width: 1050px) {
+    .sitio-publico .peliculas {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 650px) {
+    .sitio-publico .peliculas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 25px 15px;
+    }
+
+    .sitio-publico .pelicula h3 {
+        font-size: 17px;
+    }
+}
+
+@media (max-width: 380px) {
+    .sitio-publico .peliculas {
+        grid-template-columns: 1fr;
+    }
+}

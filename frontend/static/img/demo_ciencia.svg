@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 750">
+<defs>
+  <linearGradient id="fondo" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#263e58"/>
+    <stop offset="1" stop-color="#101827"/>
+  </linearGradient>
+  <radialGradient id="luz">
+    <stop offset="0" stop-color="#b6d5d6" stop-opacity=".45"/>
+    <stop offset="1" stop-color="#b6d5d6" stop-opacity="0"/>
+  </radialGradient>
+</defs>
+<rect width="600" height="750" fill="url(#fondo)"/>
+<circle cx="300" cy="300" r="245" fill="url(#luz)"/>
+<circle cx="300" cy="300" r="175" fill="none" stroke="#b6d5d6" stroke-opacity=".55" stroke-width="2"/>
+<circle cx="300" cy="300" r="145" fill="none" stroke="#b6d5d6" stroke-opacity=".3"/>
+<path d="M70 110 H530 M70 640 H530" stroke="#b6d5d6" stroke-opacity=".65"/>
+<text x="300" y="170" text-anchor="middle" fill="#b6d5d6" font-family="Georgia,serif" font-size="35">✧</text>
+<text x="300" y="330" text-anchor="middle" fill="#fff4df" font-family="Georgia,serif" font-size="48" letter-spacing="3">MÁS ALLÁ</text>
+<text x="300" y="390" text-anchor="middle" fill="#fff4df" font-family="Georgia,serif" font-size="48" letter-spacing="3">DEL TIEMPO</text>
+<text x="300" y="585" text-anchor="middle" fill="#b6d5d6" font-family="sans-serif" font-size="15" letter-spacing="5">CINE PARADISO</text>
+<text x="300" y="685" text-anchor="middle" fill="#fff4df" fill-opacity=".7" font-family="sans-serif" font-size="12" letter-spacing="3">UNA HISTORIA EN LA GRAN PANTALLA</text>
+</svg>

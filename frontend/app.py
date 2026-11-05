@@ -258,14 +258,24 @@ def logout():
 
 @app.get("/")
 def index():
-    datos, estado = llamar_backend("GET", "/cartelera")
+    datos, estado = llamar_backend("GET", "/peliculas")
     peliculas, vistos = [], set()
-    for peli in lista(datos, "cartelera"):
+    for peli in lista(datos, "peliculas"):
         if peli["id_pelicula"] not in vistos:
             peli["duracion"] = peli.get("duracion_minutos")
             poster = peli.get("poster", "")
             if poster and not poster.startswith(("http://", "https://")):
-                peli["poster"] = urljoin(BACKEND_ORIGEN + "/", poster.lstrip("/"))
+                ruta_poster = poster.lstrip("/")
+                if ruta_poster.startswith("static/img/demo_"):
+                    peli["poster"] = url_for(
+                        "static",
+                        filename=ruta_poster.removeprefix("static/")
+                    )
+                elif poster:
+                    peli["poster"] = urljoin(
+                        BACKEND_ORIGEN + "/",
+                        ruta_poster
+                    )
             peliculas.append(peli)
             vistos.add(peli["id_pelicula"])
     if estado != 200:

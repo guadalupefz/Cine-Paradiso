@@ -4,7 +4,7 @@
 
 {% block content %}
     <section>
-        <div class="cabecera-cartelera"><div><p class="etiqueta-cartelera">EN NUESTRA PANTALLA</p><h2>Cartelera</h2><p class="introduccion">Elegí una película, encontrá tu función y que empiece la magia.</p></div><div class="sello-cartelera"><p><span aria-hidden="true">✦</span>BUEN CINE, SIEMPRE.</p><small>{{ peliculas|length }} películas para descubrir</small></div></div>
+        <div class="cabecera-cartelera"><div><p class="etiqueta-cartelera">EN NUESTRA PANTALLA · NOVIEMBRE 2026</p><h2>Cartelera</h2><p class="introduccion">Elegí una película, encontrá tu función y que empiece la magia.</p></div><div class="sello-cartelera"><p><span aria-hidden="true">✦</span>BUEN CINE, SIEMPRE.</p><small>{{ peliculas|length }} películas para descubrir</small></div></div>
 
         {% if error %}<p class="mensaje-error">No pudimos cargar la cartelera. <a href="{{ url_for('index') }}">Volver a intentar</a>.</p>{% else %}
         <div class="barra-filtros"><nav class="filtros-cartelera" aria-label="Filtrar películas por género">
@@ -20,7 +20,7 @@
             <button type="button" class="filtro-genero" data-genero="otros">
                 Más géneros
             </button>
-        </nav><span class="cantidad-cartelera">{{ peliculas|length }} películas disponibles</span></div>
+        </nav><span class="cantidad-cartelera">Funciones del 12 al 14 de noviembre</span></div>
 
         <div class="peliculas">
             {% for pelicula in peliculas %}
@@ -30,12 +30,12 @@
 
                     <p class="genero-pelicula">{{ pelicula.genero or 'Género no informado' }}</p>
 
-                    <h3>{{ pelicula.titulo }}</h3>
-
                     <p class="datos-ficha">
                         {{ pelicula.duracion or 'Duración no disponible' }} min
                         <span class="clasificacion-pelicula">{{ pelicula.clasificacion or 'Sin clasificación' }}</span>
                     </p>
+
+                    <h3>{{ pelicula.titulo }}</h3>
 
                     <p class="sinopsis-pelicula">{{ pelicula.sinopsis or 'Sinopsis no disponible.' }}</p>
                     <a href="{{ url_for('ver_funciones', id_pelicula=pelicula.id_pelicula) }}">
