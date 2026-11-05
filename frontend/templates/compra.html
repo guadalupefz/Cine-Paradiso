@@ -4,43 +4,124 @@
 
 {% block content %}
 <section class="compra">
+
     <h2>Resumen de tu compra</h2>
 
     {% if error %}
+
         <p class="mensaje-error">
-            No se recibió una función o una selección de butacas válida.
+            No se pudo recuperar la información de la función o de las butacas.
         </p>
 
         <a href="{{ url_for('index') }}">Volver a la cartelera</a>
 
     {% else %}
-        <p><strong>Función:</strong> {{ id_funcion }}</p>
+
+        <div class="informacion-funcion">
+
+            {% if funcion.poster %}
+                <img
+                    src="{{ funcion.poster }}"
+                    alt="Póster de {{ funcion.titulo }}"
+                    class="poster-funcion"
+                >
+            {% endif %}
+
+            <div class="datos-funcion">
+
+                <h3>{{ funcion.titulo }}</h3>
+
+                <p>
+                    <strong>Fecha:</strong>
+                    {{ funcion.fecha }}
+                </p>
+
+                <p>
+                    <strong>Horario:</strong>
+                    {{ funcion.horario }}
+                </p>
+
+                <p>
+                    <strong>Cine:</strong>
+                    {{ funcion.local_nombre }}
+                </p>
+
+                <p>
+                    <strong>Sala:</strong>
+                    {{ funcion.sala_nombre }}
+                </p>
+
+                <p>
+                    <strong>Duración:</strong>
+                    {{ funcion.duracion_minutos }} minutos
+                </p>
+
+                <p>
+                    <strong>Clasificación:</strong>
+                    {{ funcion.clasificacion }}
+                </p>
+
+            </div>
+
+        </div>
 
         <h3>Butacas seleccionadas</h3>
 
         <ul>
-            {% for butaca in butacas %}
+            {% for butaca in detalle_butacas %}
                 <li>Butaca {{ butaca }}</li>
             {% endfor %}
         </ul>
 
-        <p>
-            <strong>Total de butacas:</strong> {{ butacas|length }}
-        </p>
-        
-        <p>
-            Revisá los datos antes de confirmar. La compra todavía no
-            se realizó.
-        </p>
-        
-        <form method="POST" action="{{ url_for('procesar_compra') }}">
-             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-             <input type="hidden" name="id_funcion" value="{{ id_funcion }}">
-             <input type="hidden" name="butacas" value="{{ butacas|join(',') }}">
+        <div class="detalle-precio">
 
-             <button type="submit">Confirmar compra</button>
+            <p>
+                <strong>Precio por butaca:</strong>
+                ${{ "%.2f"|format(precio_unitario) }}
+            </p>
+
+            <p>
+                <strong>Cantidad de butacas:</strong>
+                {{ detalle_butacas|length }}
+            </p>
+
+            <p class="total-butacas">
+                <strong>Total:</strong>
+                ${{ "%.2f"|format(total) }}
+            </p>
+
+        </div>
+
+        <p>
+            Revisá los datos antes de confirmar.
+            La compra todavía no se realizó.
+        </p>
+
+        <form method="POST" action="{{ url_for('procesar_compra') }}">
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token }}"
+            >
+
+            <input
+                type="hidden"
+                name="id_funcion"
+                value="{{ id_funcion }}"
+            >
+
+            <input
+                type="hidden"
+                name="butacas"
+                value="{{ butacas|join(',') }}"
+            >
+
+            <button type="submit">Confirmar compra</button>
+
         </form>
-        
+
     {% endif %}
+
 </section>
 {% endblock %}
