@@ -299,16 +299,42 @@ def ver_funciones():
     for funcion in funciones:
         try:
             fecha = datetime.strptime(
-                funcion["fecha_hora_inicio"],
-                "%a, %d %b %Y %H:%M:%S GMT"
+            funcion["fecha_hora_inicio"],
+            "%a, %d %b %Y %H:%M:%S GMT"
             )
 
-            funcion["fecha"] = fecha.strftime("%d/%m/%Y")
+            dias = [
+                "lunes", "martes", "miércoles", "jueves",
+                "viernes", "sábado", "domingo"
+            ]
+
+            meses_cortos = [
+                "Ene", "Feb", "Mar", "Abr", "May", "Jun",
+                "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"
+            ]
+
+            meses_cortos2 = [
+                "ene.", "feb.", "mar.", "abr.",
+                "may.", "jun.", "jul.", "ago.",
+                "sep.", "oct.", "nov.", "dic."
+            ]
+
+            funcion["fecha"] = (
+                f"{fecha.day} {meses_cortos[fecha.month - 1]}"
+            )
+
+            funcion["fecha_completa"] = (
+                f"{dias[fecha.weekday()].capitalize()} "
+                f"{fecha.day} de {meses_cortos2[fecha.month - 1]}"
+            )
+
             funcion["horario"] = fecha.strftime("%H:%M")
 
         except (ValueError, TypeError):
             funcion["fecha"] = funcion.get("fecha_hora_inicio", "")
+            funcion["fecha_completa"] = funcion["fecha"]
             funcion["horario"] = ""
+
 
     return render_template(
         "funciones.html",
