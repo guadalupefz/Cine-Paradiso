@@ -65,9 +65,11 @@
                                             id_pelicula=id_pelicula
                                         ) }}"
                                         data-fecha="{{ funcion.fecha }}"
+                                        data-fecha-completa="{{ funcion.fecha_completa }}"
                                         data-horario="{{ funcion.horario }}"
                                         data-local="{{ funcion.local_nombre }}"
                                         data-sala="{{ funcion.sala_nombre }}"
+                                        data-capacidad="{{ funcion.capacidad }}"
                                         data-precio="{{ funcion.precio_base }}"
                                     >
 
@@ -132,9 +134,29 @@
         'btn-elegir-butacas'
     );
 
+    const detalleFuncion = document.getElementById('detalle-funcion');
+    const precioFuncion = document.getElementById('precio-funcion');
+    const datosFuncion = document.getElementById(
+        'datos-funcion-seleccionada'
+    );
+
     opcionesFuncion.forEach(function(opcion) {
         opcion.addEventListener('change', function() {
+
             botonButacas.disabled = false;
+
+            const precio = Number(opcion.dataset.precio || 0);
+
+            precioFuncion.textContent = '$' + precio.toLocaleString(
+                'es-AR',
+                { minimumFractionDigits: 2 }
+            );
+
+            datosFuncion.textContent =
+                opcion.dataset.fechaCompleta + ' · ' +
+                opcion.dataset.horario + ' hs · ' +
+                opcion.dataset.sala;
+            detalleFuncion.hidden = false;
         });
     });
 
