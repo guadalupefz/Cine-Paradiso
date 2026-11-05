@@ -2972,3 +2972,742 @@ body.sitio-publico .pelicula > a.enlace-ver-funciones::after {
     position: static !important;
     margin: 0 !important;
 }
+
+
+/* =====================================================
+   U8 - PELICULAS Y FUNCION - DISEÑO FIGMA
+   ===================================================== */
+
+body.pagina-funciones {
+    background: #f7f0df !important;
+    color: #39251f !important;
+}
+
+body.pagina-funciones main {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 24px 4.5% 55px;
+}
+
+body.pagina-funciones .volver-funciones {
+    display: inline-block;
+    margin: 0 0 24px;
+    color: #766858;
+    font-size: 11px;
+    text-decoration: none;
+}
+
+body.pagina-funciones .volver-funciones:hover {
+    color: #922632;
+}
+
+.detalle-funciones-principal {
+    display: grid;
+    grid-template-columns: minmax(190px, 270px) minmax(0, 1fr);
+    gap: 42px;
+    align-items: start;
+}
+
+.poster-funciones img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    background: #eadfc9;
+    border: 1px solid #dfd1b8;
+}
+
+.poster-datos {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 10px;
+    color: #857565;
+    font-size: 10px;
+}
+
+.info-pelicula-funciones {
+    padding: 0 0 24px;
+    border-bottom: 1px solid #dfd1b8;
+}
+
+.etiqueta-pelicula {
+    margin: 0 0 12px;
+    color: #922632;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.info-pelicula-funciones h1 {
+    margin: 0 0 12px;
+    color: #30211c;
+    font-family: Georgia, serif;
+    font-size: clamp(34px, 4vw, 52px);
+    font-weight: 400;
+    line-height: 1.08;
+}
+
+.sinopsis-funciones {
+    max-width: 760px;
+    margin: 0;
+    color: #77695b;
+    font-size: 12px;
+    line-height: 1.7;
+}
+
+.bloque-horarios {
+    padding-top: 22px;
+}
+
+.titulo-horarios {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.titulo-horarios h2 {
+    margin: 0;
+    color: #39251f;
+    font-family: Georgia, serif;
+    font-size: 29px;
+    font-weight: 400;
+}
+
+.titulo-horarios > span {
+    color: #887968;
+    font-size: 10px;
+}
+
+.instruccion-horarios {
+    margin: 7px 0 20px;
+    color: #887968;
+    font-size: 11px;
+}
+
+.grupos-horarios {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.grupo-horario {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.fecha-grupo {
+    color: #922632;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.horarios-del-dia {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.opcion-horario {
+    display: block;
+    cursor: pointer;
+}
+
+.opcion-horario input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+}
+
+.circulo-horario {
+    display: flex;
+    width: 88px;
+    height: 88px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid #dfd1b8;
+    border-radius: 50%;
+    background: transparent;
+    color: #39251f;
+    transition: background .18s ease, color .18s ease, border-color .18s ease;
+}
+
+.circulo-horario small {
+    color: #897967;
+    font-size: 9px;
+}
+
+.circulo-horario strong {
+    font-family: Georgia, serif;
+    font-size: 19px;
+    font-weight: 400;
+}
+
+.circulo-horario em {
+    color: #897967;
+    font-size: 7px;
+    font-style: normal;
+    letter-spacing: .04em;
+}
+
+.opcion-horario:hover .circulo-horario {
+    border-color: #922632;
+}
+
+.opcion-horario input:checked + .circulo-horario {
+    border-color: #922632;
+    background: #922632;
+    color: #fff7e8;
+}
+
+.opcion-horario input:checked + .circulo-horario small,
+.opcion-horario input:checked + .circulo-horario em {
+    color: #f5dfc1;
+}
+
+.opcion-horario input:focus-visible + .circulo-horario {
+    outline: 3px solid #c89b4b;
+    outline-offset: 3px;
+}
+
+.resumen-funcion {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-top: 24px;
+    padding: 14px 16px;
+    border: 1px solid #dfd1b8;
+    background: #fff9ec;
+}
+
+.resumen-funcion[hidden] {
+    display: none !important;
+}
+
+.resumen-funcion > div {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 5px;
+}
+
+.resumen-funcion > div > strong {
+    color: #39251f;
+    font-size: 14px;
+}
+
+.resumen-funcion > div > span {
+    color: #766858;
+    font-size: 11px;
+}
+
+.resumen-funcion > div > small {
+    display: block;
+    flex-basis: 100%;
+    margin-top: 5px;
+    color: #887968;
+    font-size: 10px;
+}
+
+.resumen-funcion button {
+    display: inline-flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 17px;
+    border: 1px solid #e5c36e;
+    border-radius: 2px;
+    background: #edcf78;
+    color: #39251f;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.resumen-funcion button:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
+.resumen-funcion button:not(:disabled):hover {
+    background: #e2bd5d;
+}
+
+.resumen-funcion button span {
+    font-size: 17px;
+}
+
+.nota-funciones {
+    margin: 16px 0 0;
+    color: #887968;
+    font-size: 10px;
+}
+
+body.pagina-funciones .pie-sitio {
+    margin-top: 30px;
+}
+
+@media (max-width: 700px) {
+    body.pagina-funciones main {
+        padding: 20px 5% 35px;
+    }
+
+    .detalle-funciones-principal {
+        grid-template-columns: minmax(105px, 34%) minmax(0, 1fr);
+        gap: 18px;
+    }
+
+    .info-pelicula-funciones h1 {
+        font-size: 30px;
+    }
+
+    .etiqueta-pelicula {
+        font-size: 8px;
+    }
+
+    .sinopsis-funciones {
+        font-size: 10px;
+    }
+
+    .titulo-horarios h2 {
+        font-size: 25px;
+    }
+
+    .horarios-del-dia {
+        gap: 8px;
+    }
+
+    .circulo-horario {
+        width: 72px;
+        height: 72px;
+    }
+
+    .circulo-horario strong {
+        font-size: 16px;
+    }
+
+    .resumen-funcion {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .resumen-funcion button {
+        justify-content: space-between;
+    }
+}
+
+@media (max-width: 420px) {
+    .detalle-funciones-principal {
+        grid-template-columns: 1fr;
+    }
+
+    .poster-funciones {
+        width: min(68%, 230px);
+    }
+
+    .info-pelicula-funciones h1 {
+        font-size: 36px;
+    }
+}
+
+
+/* Ajustes finales U8 - horarios y calendario */
+body.pagina-funciones .titulo-horarios > span {
+    color: #887968;
+    font-size: 10px;
+    text-transform: none;
+}
+
+body.pagina-funciones .horarios-del-dia {
+    align-items: flex-start;
+    gap: 13px;
+}
+
+body.pagina-funciones .opcion-horario {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+}
+
+body.pagina-funciones .circulo-horario {
+    width: 82px;
+    height: 82px;
+}
+
+body.pagina-funciones .dia-horario {
+    color: #887968;
+    font-size: 9px;
+    text-align: center;
+}
+
+body.pagina-funciones .poster-funciones img {
+    object-position: center;
+}
+
+@media (max-width: 700px) {
+    body.pagina-funciones .circulo-horario {
+        width: 72px;
+        height: 72px;
+    }
+}
+
+
+/* =====================================================
+   U8 - PELICULAS Y FUNCION - DISEÑO FIGMA
+   ===================================================== */
+
+body.pagina-funciones {
+    background: #f7f0df !important;
+    color: #302019;
+}
+
+body.pagina-funciones main {
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 25px 4.8% 70px;
+    box-sizing: border-box;
+}
+
+.u8-funciones {
+    width: 100%;
+    min-height: 620px;
+}
+
+.u8-volver {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 25px;
+    margin: 0 0 30px;
+}
+
+.u8-volver > a {
+    color: #806e5b;
+    font-size: 12px;
+    text-decoration: none;
+}
+
+.u8-pasos {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #887967;
+    font-size: 12px;
+}
+
+.u8-pasos .paso {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.u8-pasos b {
+    display: grid;
+    place-items: center;
+    width: 25px;
+    height: 25px;
+    border: 1px solid #dfcdb0;
+    border-radius: 50%;
+    font-weight: 400;
+}
+
+.u8-pasos .activo {
+    color: #922632;
+    font-weight: 700;
+}
+
+.u8-pasos .activo b {
+    background: #922632;
+    color: #fff8e9;
+    border-color: #922632;
+}
+
+.u8-pasos i {
+    display: block;
+    width: 35px;
+    border-top: 1px solid #dfcdb0;
+}
+
+.u8-contenido {
+    display: grid;
+    grid-template-columns: minmax(190px, 29%) minmax(0, 1fr);
+    gap: 4.2%;
+    align-items: start;
+}
+
+.u8-poster img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    object-fit: cover;
+    border: 1px solid #dfcdb0;
+    background: #922632;
+}
+
+.u8-poster-datos {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin-top: 10px;
+    color: #887967;
+    font-size: 11px;
+}
+
+.u8-etiqueta {
+    margin: 0 0 10px;
+    color: #922632;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .4px;
+}
+
+.u8-info-pelicula h1 {
+    margin: 0 0 8px;
+    color: #2d1b16;
+    font-family: Georgia, serif;
+    font-size: clamp(36px, 4.2vw, 58px);
+    font-weight: 400;
+    line-height: 1.08;
+}
+
+.u8-sinopsis {
+    max-width: 850px;
+    margin: 0;
+    color: #75695e;
+    font-size: 13px;
+    line-height: 1.65;
+}
+
+.u8-seleccion {
+    margin-top: 24px;
+    padding-top: 19px;
+    border-top: 1px solid #dfd1b8;
+}
+
+.u8-titulo-funciones {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.u8-titulo-funciones h2 {
+    margin: 0;
+    color: #2d1b16;
+    font-family: Georgia, serif;
+    font-size: 28px;
+    font-weight: 400;
+}
+
+.u8-titulo-funciones > span {
+    color: #887967;
+    font-size: 11px;
+}
+
+.u8-horarios {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 13px;
+}
+
+.u8-opcion {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+}
+
+.u8-opcion input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.u8-circulo {
+    width: clamp(76px, 8.4vw, 105px);
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border: 1px solid #dfcdb0;
+    border-radius: 50%;
+    color: #2d1b16;
+    transition: background .2s, color .2s;
+}
+
+.u8-circulo small {
+    font-size: 10px;
+}
+
+.u8-circulo strong {
+    font-family: Georgia, serif;
+    font-size: clamp(20px, 2.2vw, 27px);
+    font-weight: 400;
+}
+
+.u8-circulo em {
+    display: none;
+    font-size: 8px;
+    font-style: normal;
+    font-weight: 700;
+}
+
+.u8-opcion.seleccionada .u8-circulo {
+    background: #922632;
+    border-color: #922632;
+    color: #fff8e9;
+}
+
+.u8-opcion.seleccionada .u8-circulo strong {
+    color: #f5cf62;
+}
+
+.u8-opcion.seleccionada .u8-circulo em {
+    display: block;
+}
+
+.u8-dia {
+    color: #806e5b;
+    font-size: 10px;
+}
+
+.u8-resumen {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin-top: 20px;
+    padding: 12px 13px 12px 18px;
+    border: 1px solid #dfcdb0;
+    border-radius: 4px;
+}
+
+.u8-resumen[hidden] {
+    display: none;
+}
+
+.u8-resumen > div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.u8-resumen > div strong {
+    color: #2d1b16;
+    font-size: 14px;
+}
+
+.u8-resumen > div span {
+    color: #806e5b;
+    font-size: 11px;
+}
+
+.u8-resumen button {
+    padding: 13px 20px;
+    border: 0;
+    border-radius: 4px;
+    background: #f2ca5c;
+    color: #302019;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.u8-resumen button span {
+    margin-left: 12px;
+    font-size: 18px;
+}
+
+.u8-resumen button:hover {
+    background: #e8b943;
+}
+
+.u8-frase {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 16px 0 0;
+    color: #806e5b;
+    font-size: 11px;
+}
+
+.u8-frase span {
+    color: #922632;
+    font-size: 20px;
+}
+
+body.pagina-funciones .pie-sitio {
+    margin-top: 0;
+    border-top: 1px solid #dfd1b8;
+    background: #f7f0df;
+}
+
+@media (max-width: 700px) {
+    body.pagina-funciones main {
+        padding: 20px 5% 45px;
+    }
+
+    .u8-volver {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .u8-pasos {
+        width: 100%;
+        justify-content: space-between;
+        gap: 5px;
+    }
+
+    .u8-pasos i {
+        width: 15px;
+    }
+
+    .u8-contenido {
+        grid-template-columns: 115px minmax(0, 1fr);
+        gap: 18px;
+    }
+
+    .u8-info-pelicula h1 {
+        font-size: 30px;
+    }
+
+    .u8-sinopsis {
+        font-size: 11px;
+    }
+
+    .u8-titulo-funciones h2 {
+        font-size: 23px;
+    }
+
+    .u8-horarios {
+        gap: 10px;
+    }
+
+    .u8-circulo {
+        width: 72px;
+    }
+
+    .u8-resumen {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .u8-resumen button {
+        width: 100%;
+    }
+}

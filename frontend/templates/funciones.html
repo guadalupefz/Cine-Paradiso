@@ -1,178 +1,165 @@
 {% extends "base.html" %}
 
 {% block title %}{{ pelicula.titulo }} - Cine Paradiso{% endblock %}
+{% block clase_pagina %}pagina-funciones{% endblock %}
 
 {% block content %}
-<section class="detalle-pelicula">
+<section class="u8-funciones">
+
+    <div class="u8-volver">
+        <a href="{{ url_for('index') }}">← Volver a Cartelera</a>
+        <div class="u8-pasos">
+            <span class="paso activo"><b>1</b> Función</span>
+            <i></i>
+            <span class="paso"><b>2</b> Butacas</span>
+            <i></i>
+            <span class="paso"><b>3</b> Servicios</span>
+        </div>
+    </div>
 
     {% if error %}
-        <p class="mensaje-error">
-            No se pudieron cargar las funciones.
-            Intentá nuevamente más tarde.
-        </p>
-
+        <p class="mensaje-error">No se pudieron cargar las funciones. Intentá nuevamente más tarde.</p>
     {% else %}
 
-        <div class="detalle-pelicula-principal">
+    <div class="u8-contenido">
 
-            <!-- Póster -->
-            <div class="detalle-pelicula-poster">
-                <img
-                    src="{{ pelicula.poster or url_for('static', filename='img/poster_sin_imagen.svg') }}"
-                    alt="Póster de {{ pelicula.titulo }}"
-                    referrerpolicy="no-referrer"
-                >
+        <aside class="u8-poster">
+            <img
+                src="{{ pelicula.poster or url_for('static', filename='img/poster_sin_imagen.svg') }}"
+                alt="Póster de {{ pelicula.titulo }}"
+                onerror="this.onerror=null;this.src='{{ url_for('static', filename='img/poster_sin_imagen.svg') }}';"
+            >
+            <div class="u8-poster-datos">
+                <span>Argentina · 2026</span>
+                <span>2D · En español</span>
             </div>
+        </aside>
 
-            <!-- Información de la película -->
-            <div class="detalle-pelicula-info">
+        <div class="u8-detalle">
 
-                <p class="etiqueta-cartelera">EN NUESTRA PANTALLA</p>
-
-                <h2>{{ pelicula.titulo }}</h2>
-
-                <div class="datos-pelicula">
-                    <span>{{ pelicula.genero or 'Género no disponible' }}</span>
-                    <span>{{ pelicula.duracion_minutos }} min</span>
-                    <span>{{ pelicula.clasificacion }}</span>
-                </div>
-
-                <p class="sinopsis-detalle">
-                    {{ pelicula.sinopsis or 'Sinopsis no disponible.' }}
+            <div class="u8-info-pelicula">
+                <p class="u8-etiqueta">
+                    {{ pelicula.genero or 'CINE' }} ·
+                    {{ pelicula.duracion_minutos or pelicula.duracion or '—' }} MIN ·
+                    {{ pelicula.clasificacion or 'CLASIFICACIÓN PENDIENTE' }}
                 </p>
 
-                <div class="seleccion-funcion">
+                <h1>{{ pelicula.titulo }}</h1>
 
-                    <h3>Funciones</h3>
+                <p class="u8-sinopsis">
+                    {{ pelicula.sinopsis or 'Una historia que merece ser vista en la gran pantalla.' }}
+                </p>
+            </div>
 
-                    <p>Elegí el horario que prefieras para continuar.</p>
-
-                    {% if funciones %}
-
-                        <div class="lista-funciones">
-
-                            {% for funcion in funciones %}
-
-                                <label class="funcion-opcion">
-
-                                    <input
-                                        type="radio"
-                                        name="funcion_seleccionada"
-                                        value="{{ funcion.id_funcion }}"
-                                        data-url="{{ url_for(
-                                            'ver_butacas',
-                                            id_funcion=funcion.id_funcion,
-                                            id_pelicula=id_pelicula
-                                        ) }}"
-                                        data-fecha="{{ funcion.fecha }}"
-                                        data-fecha-completa="{{ funcion.fecha_completa }}"
-                                        data-horario="{{ funcion.horario }}"
-                                        data-local="{{ funcion.local_nombre }}"
-                                        data-sala="{{ funcion.sala_nombre }}"
-                                        data-capacidad="{{ funcion.capacidad }}"
-                                        data-precio="{{ funcion.precio_base }}"
-                                    >
-
-                                    <span class="funcion-opcion-datos">
-                                        <span>{{ funcion.fecha }}</span>
-                                        <strong>{{ funcion.horario }}</strong>
-                                        <small>SELECCIONAR</small>
-                                    </span>
-
-                                </label>
-
-                            {% endfor %}
-
-                        </div>
-
-                        <div id="detalle-funcion" hidden>
-
-                            <p>
-                                <strong id="precio-funcion"></strong>
-                                por entrada
-                            </p>
-
-                            <p id="datos-funcion-seleccionada"></p>
-
-                        </div>
-
-                        <button
-                            type="button"
-                            id="btn-elegir-butacas"
-                            disabled
-                        >
-                            Elegir butacas →
-                        </button>
-
-                    {% else %}
-
-                        <p class="mensaje-vacio">
-                        No hay funciones disponibles para esta película.
-                        </p>
-
-                    {% endif %}
-
+            <section class="u8-seleccion">
+                <div class="u8-titulo-funciones">
+                    <h2>Funciones</h2>
+                    <span>
+                        {{ funciones[0].mes_nombre if funciones else '' }}
+                        {{ funciones[0].anio if funciones else '' }}
+                    </span>
                 </div>
 
-            </div>
+                {% if funciones %}
+                <div class="u8-horarios">
+                    {% for funcion in funciones %}
+                    <label class="u8-opcion">
+                        <input
+                            type="radio"
+                            name="funcion_seleccionada"
+                            value="{{ funcion.id_funcion }}"
+                            data-url="{{ url_for('ver_butacas', id_funcion=funcion.id_funcion, id_pelicula=id_pelicula) }}"
+                            data-fecha="{{ funcion.fecha }}"
+                            data-dia="{{ funcion.fecha_completa.split(' ')[0] }}"
+                            data-fecha-completa="{{ funcion.fecha_completa }}"
+                            data-horario="{{ funcion.horario }}"
+                            data-sala="{{ funcion.sala_nombre or 'Sala 1' }}"
+                            data-precio="{{ funcion.precio_base or 0 }}"
+                        >
+                        <span class="u8-circulo">
+                            <small>{{ funcion.fecha }}</small>
+                            <strong>{{ funcion.horario }}</strong>
+                            <em>SELECCIONAR</em>
+                        </span>
+                        <span class="u8-dia">
+                            {{ funcion.fecha_completa.split(' ')[0] }}
+                        </span>
+                    </label>
+                    {% endfor %}
+                </div>
+
+                <div class="u8-resumen" id="detalle-funcion" hidden>
+                    <div>
+                        <strong id="precio-funcion"></strong>
+                        <span id="datos-funcion-seleccionada"></span>
+                    </div>
+                    <button type="button" id="btn-elegir-butacas">
+                        Elegir butacas <span>→</span>
+                    </button>
+                </div>
+
+                <p class="u8-frase">
+                    <span>▤</span>
+                    Tu próxima gran historia empieza con una entrada.
+                </p>
+
+                {% else %}
+                    <p class="mensaje-vacio">No hay funciones disponibles para esta película.</p>
+                {% endif %}
+            </section>
         </div>
-
+    </div>
     {% endif %}
-
-    <a href="{{ url_for('index') }}" class="volver-cartelera">
-        Volver a cartelera
-    </a>
-
 </section>
 
 <script>
-    const opcionesFuncion = document.querySelectorAll(
+document.addEventListener("DOMContentLoaded", function () {
+    const opciones = document.querySelectorAll(
         'input[name="funcion_seleccionada"]'
     );
+    const resumen = document.getElementById("detalle-funcion");
+    const precio = document.getElementById("precio-funcion");
+    const datos = document.getElementById("datos-funcion-seleccionada");
+    const boton = document.getElementById("btn-elegir-butacas");
 
-    const botonButacas = document.getElementById(
-        'btn-elegir-butacas'
-    );
+    function actualizar(opcion) {
+        if (!opcion) return;
 
-    const detalleFuncion = document.getElementById('detalle-funcion');
-    const precioFuncion = document.getElementById('precio-funcion');
-    const datosFuncion = document.getElementById(
-        'datos-funcion-seleccionada'
-    );
-
-    opcionesFuncion.forEach(function(opcion) {
-        opcion.addEventListener('change', function() {
-
-            botonButacas.disabled = false;
-
-            const precio = Number(opcion.dataset.precio || 0);
-
-            precioFuncion.textContent = '$' + precio.toLocaleString(
-                'es-AR',
-                { minimumFractionDigits: 2 }
+        opciones.forEach(function (otra) {
+            otra.closest(".u8-opcion").classList.toggle(
+                "seleccionada", otra === opcion
             );
+        });
 
-            datosFuncion.textContent =
-                opcion.dataset.fechaCompleta + ' · ' +
-                opcion.dataset.horario + ' hs · ' +
-                opcion.dataset.sala;
-            detalleFuncion.hidden = false;
+        const valor = Number(opcion.dataset.precio || 0);
+        precio.textContent = "ARS " + valor.toLocaleString("es-AR") + " por entrada";
+        datos.textContent =
+            opcion.dataset.fechaCompleta + " · " +
+            opcion.dataset.horario + " · " +
+            opcion.dataset.sala + " · 2D";
+
+        resumen.hidden = false;
+        boton.dataset.url = opcion.dataset.url;
+    }
+
+    opciones.forEach(function (opcion) {
+        opcion.addEventListener("change", function () {
+            actualizar(opcion);
         });
     });
 
-    if (botonButacas) {
-        botonButacas.addEventListener('click', function() {
+    if (opciones.length) {
+        opciones[0].checked = true;
+        actualizar(opciones[0]);
+    }
 
-            const seleccionada = document.querySelector(
-                'input[name="funcion_seleccionada"]:checked'
-            );
-
-            if (seleccionada) {
-                window.location.href = seleccionada.dataset.url;
+    if (boton) {
+        boton.addEventListener("click", function () {
+            if (boton.dataset.url) {
+                window.location.href = boton.dataset.url;
             }
-
         });
     }
+});
 </script>
-
 {% endblock %}
