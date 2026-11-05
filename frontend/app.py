@@ -389,9 +389,110 @@ def ver_butacas(id_funcion):
 @app.get("/compra")
 @requiere_usuario
 def ver_compra():
-    id_funcion = request.args.get("id_funcion",type=int)
-    butacas = [b.strip() for b in request.args.get("butacas", "").split(",") if b.strip()]
-    return render_template("compra.html", id_funcion=id_funcion, butacas=butacas, error=not id_funcion or not butacas)
+    id_funcion = request.args.get("id_funcion", type=int)
+
+    ids_butacas = [
+        b.strip()
+        for b in request.args.get("butacas", "").split(",")
+        if b.strip()
+    ]
+
+    if not id_funcion or id_funcion <= 0 or not ids_butacas:
+        return render_template(
+            "compra.html",
+            error=True,
+            id_funcion=id_funcion,
+            butacas=ids_butacas
+        )
+
+    datos_cartelera, estado_cartelera = llamar_backend(
+        "GET", "/cartelera"
+    )
+    funciones = lista(datos_cartelera, "cartelera")
+
+    funcion = next(
+        (
+            f for f in funciones
+            if f.get("id_funcion") == id_funcion
+        ),
+        None
+    )
+
+    if estado_cartelera != 200 or not funcion:
+        return render_template(
+            "compra.html",
+            error=True,
+            id_funcion=id_funcion,
+            butacas=ids_butacas
+        )
+
+    
+    poster = funcion.get("poster", "")
+    if poster and not poster.startswith(("http://", "https://")):
+        funcion["poster"] = urljoin(
+            BACKEND_ORIGEN + "/",
+            poster.lstrip("/")
+        )
+
+    
+    try:
+        fecha = datetime.strptime(
+            funcion["fecha_hora_inicio"],
+            "%a, %d %b %Y %H:%M:%S GMT"
+        )
+
+        dias = [
+            "lunes", "martes", "miércoles", "jueves",
+            "viernes", "sábado", "domingo"
+        ]
+        meses = [
+            "enero", "febrero", "marzo", "abril",
+            "mayo", "junio", "julio", "agosto",
+            "septiembre", "octubre", "noviembre", "diciembre"
+        ]
+
+        funcion["fecha"] = (
+            f"{dias[fecha.weekday()]} {fecha.day} "
+            f"de {meses[fecha.month - 1]} de {fecha.year}"
+        )
+        funcion["horario"] = fecha.strftime("%H:%M")
+
+    except (ValueError, TypeError, KeyError):
+        funcion["fecha"] = funcion.get("fecha_hora_inicio", "")
+        funcion["horario"] = ""
+
+    
+    datos_butacas, estado_butacas = llamar_backend(
+        "GET",
+        f"/funciones/{id_funcion}/butacas"
+    )
+    butacas_disponibles = lista(datos_butacas, "butacas")
+
+    
+    mapa_butacas = {
+        str(b.get("id_butaca")): f"{b.get('fila')}{b.get('numero')}"
+        for b in butacas_disponibles
+    }
+
+    detalle_butacas = [
+        mapa_butacas.get(id_butaca, id_butaca)
+        for id_butaca in ids_butacas
+    ]
+
+    # Calcular el importe del resumen.
+    precio_unitario = float(funcion.get("precio_base") or 0)
+    total = precio_unitario * len(ids_butacas)
+
+    return render_template(
+        "compra.html",
+        id_funcion=id_funcion,
+        butacas=ids_butacas,
+        detalle_butacas=detalle_butacas,
+        funcion=funcion,
+        precio_unitario=precio_unitario,
+        total=total,
+        error=estado_butacas != 200
+    )
 
 @app.post("/procesar-compra")
 @requiere_usuario
