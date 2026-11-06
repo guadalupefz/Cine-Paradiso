@@ -24,16 +24,14 @@
     <div class="u8-contenido">
 
         <aside class="u8-poster">
-            <img
-                src="{{ pelicula.poster or url_for('static', filename='img/poster_sin_imagen.svg') }}"
-                alt="Póster de {{ pelicula.titulo }}"
-                onerror="this.onerror=null;this.src='{{ url_for('static', filename='img/poster_sin_imagen.svg') }}';"
-            >
-            <div class="u8-poster-datos">
-                <span>Argentina · 2026</span>
-                <span>2D · En español</span>
-            </div>
-        </aside>
+        <img
+            src="{{ pelicula.poster or url_for('static', filename='img/poster_sin_imagen.svg') }}"
+            alt="Póster de {{ pelicula.titulo }}"
+        >
+       <div class="u8-poster-datos">
+            <span>Argentina · 2026</span>
+            <span>2D · En español</span>
+        </div>
 
         <div class="u8-detalle">
 
