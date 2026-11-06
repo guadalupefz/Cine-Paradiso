@@ -120,6 +120,10 @@
                                         'no disponible'
                                     ] %}
 
+                                    {% if butaca.numero == 6 %}
+                                         <span class="pasillo-butacas" aria-hidden="true"></span>
+                                    {% endif %}
+                                    
                                     <button
                                         type="button"
                                         class="butaca {% if ocupada %}ocupada{% else %}disponible{% endif %}"
