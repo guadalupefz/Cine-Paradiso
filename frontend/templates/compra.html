@@ -1,11 +1,12 @@
+
 {% extends "base.html" %}
 
-{% block title %}Resumen de compra - Cine Paradiso{% endblock %}
+{% block title %}Resumen y pago - Cine Paradiso{% endblock %}
 
 {% block content %}
-<section class="compra">
+<div class="compra">
 
-    <h2>Resumen de tu compra</h2>
+    <h2>Resumen y pago</h2>
 
     {% if error %}
 
@@ -16,86 +17,6 @@
         <a href="{{ url_for('index') }}">Volver a la cartelera</a>
 
     {% else %}
-
-        <div class="informacion-funcion">
-
-            {% if funcion.poster %}
-                <img
-                    src="{{ funcion.poster }}"
-                    alt="Póster de {{ funcion.titulo }}"
-                    class="poster-funcion"
-                >
-            {% endif %}
-
-            <div class="datos-funcion">
-
-                <h3>{{ funcion.titulo }}</h3>
-
-                <p>
-                    <strong>Fecha:</strong>
-                    {{ funcion.fecha }}
-                </p>
-
-                <p>
-                    <strong>Horario:</strong>
-                    {{ funcion.horario }}
-                </p>
-
-                <p>
-                    <strong>Cine:</strong>
-                    {{ funcion.local_nombre }}
-                </p>
-
-                <p>
-                    <strong>Sala:</strong>
-                    {{ funcion.sala_nombre }}
-                </p>
-
-                <p>
-                    <strong>Duración:</strong>
-                    {{ funcion.duracion_minutos }} minutos
-                </p>
-
-                <p>
-                    <strong>Clasificación:</strong>
-                    {{ funcion.clasificacion }}
-                </p>
-
-            </div>
-
-        </div>
-
-        <h3>Butacas seleccionadas</h3>
-
-        <ul>
-            {% for butaca in detalle_butacas %}
-                <li>Butaca {{ butaca }}</li>
-            {% endfor %}
-        </ul>
-
-        <div class="detalle-precio">
-
-            <p>
-                <strong>Precio por butaca:</strong>
-                ${{ "%.2f"|format(precio_unitario) }}
-            </p>
-
-            <p>
-                <strong>Cantidad de butacas:</strong>
-                {{ detalle_butacas|length }}
-            </p>
-
-            <p class="total-butacas">
-                <strong>Total:</strong>
-                ${{ "%.2f"|format(total) }}
-            </p>
-
-        </div>
-
-        <p>
-            Revisá los datos antes de confirmar.
-            La compra todavía no se realizó.
-        </p>
 
         <form method="POST" action="{{ url_for('procesar_compra') }}">
 
@@ -117,11 +38,135 @@
                 value="{{ butacas|join(',') }}"
             >
 
-            <button type="submit">Confirmar compra</button>
+            <div class="contenido-compra">
+
+                <div class="datos-compra">
+
+                    <div class="informacion-funcion">
+
+                        {% if funcion.poster %}
+                            <img
+                                src="{{ funcion.poster }}"
+                                alt="Póster de {{ funcion.titulo }}"
+                                class="poster-funcion"
+                            >
+                        {% endif %}
+
+                        <div class="datos-funcion">
+
+                            <h3>{{ funcion.titulo }}</h3>
+
+                            <p>
+                                Fecha: {{ funcion.fecha }}
+                            </p>
+
+                            <p>
+                                Horario: {{ funcion.horario }}
+                            </p>
+
+                            <p>
+                                Cine: {{ funcion.local_nombre }}
+                            </p>
+
+                            <p>
+                                Sala: {{ funcion.sala_nombre }}
+                            </p>
+
+                            <p>
+                                Duración: {{ funcion.duracion_minutos }} minutos
+                            </p>
+
+                            <p>
+                                Clasificación: {{ funcion.clasificacion }}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="datos-contacto">
+
+                        <h3>Tus datos de contacto</h3>
+
+                        <p>
+                            Nombre y apellido:
+                            {{ usuario_actual.nombre }} {{ usuario_actual.apellido }}
+                        </p>
+
+                        <p>
+                            Correo electrónico:
+                            {{ usuario_actual.email }}
+                        </p>
+
+                    </div>
+
+                    <div class="forma-pago">
+
+                        <h3>Elegí cómo pagar</h3>
+
+                        <p>Pago</p>
+
+                        <label>
+                            <input
+                                type="radio"
+                                name="metodo_pago"
+                                value="tarjeta"
+                                checked
+                            >
+                            Tarjeta de débito o crédito
+                        </label>
+
+                    </div>
+
+                </div>
+
+                <div class="resumen-compra">
+
+                    <h3>Tu compra</h3>
+
+                    <h3>Butacas seleccionadas</h3>
+
+                    <div class="butacas-compra">
+
+                        {% for butaca in detalle_butacas %}
+                            <p>Butaca {{ butaca }}</p>
+                        {% endfor %}
+
+                    </div>
+
+                    <div class="detalle-precio">
+
+                        <p>
+                            Precio por butaca:
+                            ${{ "%.2f"|format(precio_unitario) }}
+                        </p>
+
+                        <p>
+                            Cantidad de butacas:
+                            {{ detalle_butacas|length }}
+                        </p>
+
+                        <p class="total-butacas">
+                            Total:
+                            ${{ "%.2f"|format(total) }}
+                        </p>
+
+                    </div>
+
+                    <p>
+                        Revisá los datos antes de confirmar.
+                        La compra todavía no se realizó.
+                    </p>
+
+                    <button type="submit">Confirmar compra</button>
+
+                </div>
+
+            </div>
 
         </form>
 
     {% endif %}
 
-</section>
+</div>
 {% endblock %}
