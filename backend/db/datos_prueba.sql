@@ -55,16 +55,16 @@ INSERT INTO funcion (id_pelicula, id_sala, fecha_hora_inicio, precio_base)
 VALUES (@pelicula_prueba, @sala_azul, DATE_ADD(DATE_ADD(NOW(), INTERVAL 7 DAY), INTERVAL 3 HOUR), 8000.00);
 SET @funcion_segunda = LAST_INSERT_ID();
 
-INSERT INTO servicio_adicional (nombre, precio)
-VALUES ('Pochoclos Demo', 5000.00);
+INSERT INTO servicio_adicional (nombre, descripcion, precio)
+VALUES ('Pochoclos Demo', 'Balde grande de pochoclos salados para desarrollo.', 5000.00);
 SET @servicio_pochoclos = LAST_INSERT_ID();
 
-INSERT INTO servicio_adicional (nombre, precio)
-VALUES ('Agua Demo', 2000.00);
+INSERT INTO servicio_adicional (nombre, descripcion, precio)
+VALUES ('Agua Demo', 'Botella de agua mineral sin gas 500ml.', 2000.00);
 SET @servicio_agua = LAST_INSERT_ID();
 
-INSERT INTO servicio_adicional (nombre, precio)
-VALUES ('Caramelos Demo', 1000.00);
+INSERT INTO servicio_adicional (nombre, descripcion, precio)
+VALUES ('Caramelos Demo', 'Bolsa de caramelos masticables.', 1000.00);
 -- Caramelos queda sin compras para comprobar LEFT JOIN/COUNT.
 
 -- Una entrada de8000 + dos pochoclos a4500 historicos + un agua a2000 =19000.
