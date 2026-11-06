@@ -552,64 +552,85 @@
 }
 
 .sitio-publico .seleccion-butacas > h2 {
-    margin-bottom: 30px;
+    display: none;
 }
 
 .sitio-publico .contenido-seleccion-butacas {
     display: grid;
-    grid-template-columns: minmax(0, 1.6fr) minmax(260px, .8fr);
-    gap: 35px;
+    grid-template-columns: 190px minmax(0, 1fr) 270px;
+    gap: 25px;
     align-items: start;
 }
 
+.sitio-publico .sector-mapa {
+    display: contents;
+}
+
 .sitio-publico .informacion-funcion {
+    grid-column: 1;
     display: flex;
+    flex-direction: column;
     align-items: flex-start;
-    gap: 22px;
-    margin-bottom: 35px;
-    padding: 20px;
-    background: var(--papel);
-    border: 1px solid var(--borde-publico);
-    border-radius: 8px;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    border: none;
 }
 
 .sitio-publico .poster-funcion {
-    width: 125px;
+    width: 100%;
+    max-width: 180px;
     aspect-ratio: 2 / 3;
     object-fit: cover;
-    border-radius: 5px;
+    border-radius: 2px;
 }
 
 .sitio-publico .datos-funcion h3 {
-    margin: 0 0 15px;
-    color: var(--vino);
+    margin: 12px 0;
+    color: var(--tinta);
+    font-family: Georgia, serif;
     font-size: 25px;
 }
 
 .sitio-publico .datos-funcion p {
-    margin: 7px 0;
-    font-size: 13px;
+    margin: 9px 0;
+    font-size: 12px;
+    line-height: 1.5;
 }
 
 .sitio-publico .mapa-cine {
-    padding: 25px 15px;
-    background: var(--papel);
+    grid-column: 2;
+    padding: 25px 18px;
+    background: #fffdf8;
     border: 1px solid var(--borde-publico);
     border-radius: 8px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, .06);
+}
+
+.sitio-publico .mapa-cine::before {
+    content: "Seleccioná tus butacas";
+    display: block;
+    margin-bottom: 8px;
+    color: var(--vino);
+    font-family: Georgia, serif;
+    font-size: 25px;
+    font-weight: bold;
 }
 
 .sitio-publico .pantalla-cine {
-    max-width: 75%;
-    margin: 0 auto 35px;
-    padding: 12px;
-    background: #e9dfce;
-    border-radius: 50% 50% 5px 5px;
+    width: 75%;
+    max-width: 420px;
+    margin: 10px auto 40px;
+    padding: 14px;
+    background: linear-gradient(to bottom, #f5ead7, #dfceb2);
+    border-radius: 50% 50% 8px 8px / 100% 100% 8px 8px;
     color: var(--tinta);
     font-size: 12px;
     font-weight: bold;
-    letter-spacing: 3px;
+    letter-spacing: 4px;
     text-align: center;
-    box-shadow: 0 5px 12px rgba(0, 0, 0, .12);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, .13);
 }
 
 .sitio-publico .leyenda-butacas {
@@ -661,8 +682,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 5px;
     width: 100%;
+}
+
+.sitio-publico .pasillo-butacas {
+    display: block;
+    flex: 0 0 28px;
+    height: 1px;
 }
 
 .sitio-publico .nombre-fila {
@@ -673,9 +700,9 @@
 }
 
 .sitio-publico button.butaca {
-    width: 38px;
+    width: 34px;
     min-width: 0;
-    min-height: 38px;
+    min-height: 34px;
     margin: 0;
     padding: 5px;
     border: 1px solid #568b5b;
@@ -702,12 +729,14 @@
 }
 
 .sitio-publico .resumen-butacas {
+    grid-column: 3;
     position: sticky;
     top: 20px;
-    padding: 25px;
-    background: var(--papel);
+    padding: 22px;
+    background: #fffdf8;
     border: 1px solid var(--borde-publico);
     border-radius: 8px;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, .06);
 }
 
 .sitio-publico .resumen-butacas h3 {
