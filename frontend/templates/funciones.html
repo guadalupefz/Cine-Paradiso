@@ -146,11 +146,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    if (opciones.length) {
-        opciones[0].checked = true;
-        actualizar(opciones[0]);
-    }
-
     if (boton) {
         boton.addEventListener("click", function () {
             if (boton.dataset.url) {
