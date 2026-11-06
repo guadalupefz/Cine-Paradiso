@@ -3,35 +3,88 @@
 {% block title %}Servicios - Cine Paradiso{% endblock %}
 
 {% block content %}
-    <section class="servicios">
-        <h2>Comprar</h2>
-        <h3>Servicios adicionales</h3>
+    <div class="envoltura-servicios">
+        <!-- Indicador de pasos -->
+        <div class="pasos-compra">
+            <span class="paso">1 · Función</span>
+            <span class="separador-paso"></span>
+            <span class="paso">2 · Butacas</span>
+            <span class="separador-paso"></span>
+            <span class="paso activo">3 · Servicios</span>
+        </div>
 
-        {% if error %}
-            <p class="mensaje-error">
-                No se pudieron cargar los servicios.
-            </p>
-
-        {% elif servicios %}
-            <div class="lista-servicios">
-                {% for servicio in servicios %}
-                    <div class="servicio">
-                        <!-- Analizar si vale la pena la ilustracion -->
-                        <div class="servicio-info">
-                            <h4>{{ servicio.nombre }}</h4>
-                            <p>{{ servicio.descripcion }}</p>
-                        </div>
-                        <div class="servicio-footer">
-                            <span class="precio">ARS {{ servicio.precio }}</span>
-                            <button class="btn-agregar" data-id="{{ servicio.id_servicio }}">Agregar</button>
-                        </div>
-                    </div>
-                {% endfor %}
+        <!-- Función seleccionada -->
+        <div class="info-funcion-seleccionada">
+            <span class="icono-ticket">🎟️</span>
+            <div>
+                <strong> </strong> <!-- Nombre de pelicula seleccionada -->
+                <p> </p> <!-- Fecha · Hora · Sala · Butacas elegidas -->
             </div>
-        {% else %}
-            <p class="mensaje-vacio">
-                No hay servicios disponibles en este momento.
-            </p>
-        {% endif %}
-    </section>
+        </div>
+
+        <section class="seccion-servicios">
+            <div class="encabezado-seccion-servicios">
+                <h2>Comprar</h2>
+                <h3 class="subtitulo">Servicios</h3>
+                <p class="descripcion-servicios">El mejor acompañamiento para una gran historia. Elegí tus favoritos.</p>
+            </div>
+
+            {% if error %}
+                <p class="mensaje-error">
+                    No se pudieron cargar los servicios.
+                </p>
+            {% elif servicios %}
+                <div class="lista-servicios">
+                    {% for servicio in servicios %}
+                        <div class="tarjeta-servicio">
+                            <!-- Contenedor de la ilustración de muestra (despues ver si lo agrego) -->
+                            <div class="ilustracion-servicio">
+                                <div class="circulo-icono">
+                                    <!-- Acá iría el icono o ilustración vectorial en el futuro -->
+                                </div>
+                            </div>
+                            <!-- Información del servicio -->
+                            <div class="cuerpo-servicio">
+                                <h4>{{ servicio.nombre }}</h4>
+                                <p>{{ servicio.descripcion }}</p>
+                            </div>
+                            <!-- Precio y botón -->
+                            <div class="pie-tarjeta-servicio">
+                                <span class="precio-servicio">ARS {{ servicio.precio }}</span>
+                                <button class="btn-agregar" data-id="{{ servicio.id_servicio }}">Agregar</button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="mensaje-vacio">
+                    No hay servicios disponibles en este momento.
+                </p>
+            {% endif %}
+        </section>
+
+        <!-- Resumen -->
+        <div class="barra-resumen-compra">
+            <div class="resumen-izquierda">
+                <div class="item-resumen">
+                    <span> </span> <!-- nro de entradas · precio de c/u -->
+                    <strong> </strong> <!-- ARS precio total de entradas -->
+                </div>
+                <div class="divisor-resumen"></div>
+                <div class="item-resumen">
+                    <span> </span> <!-- Servicios agregados: cantidad de servicios agregados -->
+                    <strong> </strong> <!-- ARS precio final servicios -->
+                </div>
+            </div>
+            <div class="resumen-derecha">
+                <div class="total-visita">
+                    <small>Total de tu visita</small>
+                    <span class="monto-total"> </span> <!-- ARS PRECIO FINAL -->
+                </div>
+                <a href="#" class="btn-continuar-extras">Continuar</a>
+            </div>
+        </div>
+
+        <p class="nota-pie-servicios">Retirá tus pochoclos y bebidas en el mostrador antes de la función. <span class="opcional">Los servicios son opcionales.</span></p>
+    </div>
 {% endblock %}
