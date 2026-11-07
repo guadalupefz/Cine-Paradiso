@@ -30,8 +30,15 @@ def configurar_butacas(id_usuario, id_sala):
         fila = butaca.get("fila")
         numero = butaca.get("numero")
 
-        if not isinstance(fila, str) or not fila.strip() or len(fila.strip()) > 5:
-            return jsonify({"error": "La fila debe tener entre 1 y 5 caracteres."}), 400
+        if (
+            not isinstance(fila, str)
+            or not fila.strip()
+            or len(fila.strip()) > 5
+            or not fila.strip().isalpha()
+        ):
+            return jsonify({
+                "error": "La fila debe contener entre 1 y 5 letras."
+            }), 400
 
         if type(numero) is not int or numero <= 0:
             return jsonify({"error": "El número de butaca debe ser positivo."}), 400
