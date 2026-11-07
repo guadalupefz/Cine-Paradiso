@@ -749,30 +749,54 @@ def procesar_compra():
         id_compra=id_compra
     ))
 
-@app.get("/servicios")
+@app.route("/servicios", methods=["GET", "POST"])
 @requiere_usuario
 def ver_servicios():
-    id_funcion = request.args.get("id_funcion", type=int)
-    ids_butacas = [
-        b.strip()
-        for b in request.args.get("butacas", "").split(",")
-        if b.strip().isdigit()
-    ]
+    id_funcion = request.values.get("id_funcion", type=int)
+    bruto_butacas = request.values.get("butacas", "")
+ 
+    if isinstance(bruto_butacas, str):
+        ids_butacas = [b.strip() for b in bruto_butacas.split(",") if b.strip()]
+    else:
+        ids_butacas = bruto_butacas
 
     if not id_funcion or not ids_butacas:
         return redirect(url_for("ver_funciones"))
 
-    servicios_seleccionados = request.args.getlist("servicios")
+    datos_cartelera, estado_cartelera = llamar_backend("GET", "/cartelera")
+    funciones = lista(datos_cartelera, "cartelera")
+    funcion = next((f for f in funciones if f.get("id_funcion") == id_funcion), None)
+
+    if funcion:
+        try:
+            fecha = datetime.strptime(funcion["fecha_hora_inicio"], "%a, %d %b %Y %H:%M:%S GMT")
+            dias_cortos = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+            meses_cortos = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
+            funcion["fecha_corta"] = f"{dias_cortos[fecha.weekday()]} {fecha.day} {meses_cortos[fecha.month - 1].capitalize()} · {fecha.strftime('%H:%M')}"
+        except (ValueError, TypeError):
+            funcion["fecha_corta"] = funcion.get("fecha_hora_inicio", "")
+
+    datos_butacas, estado_butacas = llamar_backend("GET", f"/funciones/{id_funcion}/butacas")
+    butacas_disponibles = lista(datos_butacas, "butacas")
+    mapa_butacas = {
+        str(b.get("id_butaca")): f"{b.get('fila')}{b.get('numero')}"
+        for b in butacas_disponibles
+    }
+    detalle_butacas = [mapa_butacas.get(id_b, id_b) for id_b in ids_butacas]
+
+    servicios_seleccionados = request.values.getlist("servicios")
     datos, estado = llamar_backend("GET", "/servicios")
     servicios = lista(datos, "servicios")
 
     return render_template(
         "servicios.html",
         servicios=servicios,
+        funcion=funcion,
         id_funcion=id_funcion,
-        ids_butacas=ids_butacas,
+        ids_butacas=ids_butacas,         
+        detalle_butacas=detalle_butacas, 
         servicios_seleccionados=servicios_seleccionados,
-        error=estado != 200
+        error=estado != 200 or estado_cartelera != 200
     )
 
 @app.get("/mis-compras")
