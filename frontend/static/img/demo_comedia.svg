@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 750">
+
+<rect width="600" height="750" fill="#385d51"/>
+<circle cx="390" cy="205" r="65" fill="#f2ca63"/>
+<path d="M100 500 V330 H175 V500 Z M205 500 V270 H280 V500 Z M310 500 V220 H385 V500 Z M415 500 V300 H490 V500 Z" fill="#f7ead5"/>
+<path d="M80 520 H520" stroke="#f7ead5" stroke-width="8"/>
+
+<text x="300" y="65" text-anchor="middle" fill="#fff4df" font-family="Georgia,serif" font-size="17" letter-spacing="4">CINE PARADISO PRESENTA</text>
+<text x="300" y="590" text-anchor="middle" fill="#fff4df" font-family="Georgia,serif" font-size="43">LA CIUDAD</text><text x="300" y="640" text-anchor="middle" fill="#fff4df" font-family="Georgia,serif" font-size="43">INVISIBLE</text>
+<text x="300" y="700" text-anchor="middle" fill="#fff4df" font-family="Georgia,serif" font-size="14" letter-spacing="5">UNA HISTORIA EN LA GRAN PANTALLA</text>
+</svg>

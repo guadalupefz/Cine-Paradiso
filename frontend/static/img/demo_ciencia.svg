@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 750">
+
+<rect width="600" height="750" fill="#594356"/>
+<circle cx="300" cy="230" r="70" fill="#f0ce72"/>
+<path d="M100 480 L300 260 L500 480 M150 480 L300 320 L450 480 M200 480 L300 380 L400 480" fill="none" stroke="#f5e8d3" stroke-width="9"/>
+<path d="M80 510 H520" stroke="#f5e8d3" stroke-width="5"/>
+
+<text x="300" y="65" text-anchor="middle" fill="#fff4df" font-family="Georgia,serif" font-size="17" letter-spacing="4">CINE PARADISO PRESENTA</text>
+<text x="300" y="590" text-anchor="middle" fill="#fff4df" font-family="Georgia,serif" font-size="43">UN TREN A CASA</text>
+<text x="300" y="700" text-anchor="middle" fill="#fff4df" font-family="Georgia,serif" font-size="14" letter-spacing="5">UNA HISTORIA EN LA GRAN PANTALLA</text>
+</svg>

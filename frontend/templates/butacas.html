@@ -5,12 +5,27 @@
 {% block content %}
 <section class="seleccion-butacas">
 
-    <!-- Barra de progreso -->
     <nav class="progreso-compra" aria-label="Progreso de compra">
-        <span class="paso completado">1. Función</span>
-        <span class="paso activo">2. Butacas</span>
-        <span class="paso">3. Servicios</span>
-        <span class="paso">4. Comprar</span>
+
+        <span class="paso completado">
+            <span class="numero-paso">1</span>
+            <span>Función</span>
+        </span>
+
+        <span class="separador-pasos"></span>
+
+        <span class="paso activo">
+            <span class="numero-paso">2</span>
+            <span>Butacas</span>
+        </span>
+
+        <span class="separador-pasos"></span>
+
+        <span class="paso">
+            <span class="numero-paso">3</span>
+            <span>Servicios</span>
+        </span>
+
     </nav>
 
     <h2>Seleccioná tus butacas</h2>
@@ -120,6 +135,10 @@
                                         'no disponible'
                                     ] %}
 
+                                    {% if butaca.numero == 6 %}
+                                         <span class="pasillo-butacas" aria-hidden="true"></span>
+                                    {% endif %}
+                                    
                                     <button
                                         type="button"
                                         class="butaca {% if ocupada %}ocupada{% else %}disponible{% endif %}"

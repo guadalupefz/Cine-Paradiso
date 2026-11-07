@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 750">
+
+<rect width="600" height="750" fill="#29445b"/>
+<circle cx="300" cy="250" r="105" fill="#f3ca60"/>
+<path d="M80 220 Q180 80 300 170 T520 110" fill="none" stroke="#f4e6c9" stroke-width="7"/>
+<circle cx="445" cy="360" r="20" fill="#f4e6c9"/>
+<path d="M100 500 Q300 430 500 500" fill="none" stroke="#f4e6c9" stroke-width="5"/>
+
+<text x="300" y="65" text-anchor="middle" fill="#fff4df" font-family="Georgia,serif" font-size="17" letter-spacing="4">CINE PARADISO PRESENTA</text>
+<text x="300" y="590" text-anchor="middle" fill="#fff4df" font-family="Georgia,serif" font-size="43">ÓRBITA 9</text>
+<text x="300" y="700" text-anchor="middle" fill="#fff4df" font-family="Georgia,serif" font-size="14" letter-spacing="5">UNA HISTORIA EN LA GRAN PANTALLA</text>
+</svg>

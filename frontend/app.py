@@ -258,14 +258,37 @@ def logout():
 
 @app.get("/")
 def index():
-    datos, estado = llamar_backend("GET", "/cartelera")
+    datos, estado = llamar_backend("GET", "/peliculas")
     peliculas, vistos = [], set()
-    for peli in lista(datos, "cartelera"):
+    for peli in lista(datos, "peliculas"):
         if peli["id_pelicula"] not in vistos:
             peli["duracion"] = peli.get("duracion_minutos")
+
+            # DATOS DE PRESENTACION FIGMA: conserva el ID de cada película
+            catalogo_demo = [
+                {"titulo": "La última función", "genero": "Drama", "duracion": 112, "clasificacion": "+13", "sinopsis": "Un viejo proyeccionista enciende una última vez las luces del cine de su barrio.", "poster": "static/img/demo_aventura.svg"},
+                {"titulo": "Órbita 9", "genero": "Ciencia ficción", "duracion": 104, "clasificacion": "+13", "sinopsis": "Una señal inesperada cambia el rumbo de un astronauta que viaja solo.", "poster": "static/img/demo_drama.svg"},
+                {"titulo": "Verano en la costa", "genero": "Comedia", "duracion": 98, "clasificacion": "ATP", "sinopsis": "Tres amigos, un verano y una promesa pendiente junto al mar.", "poster": "static/img/demo_romance.svg"},
+                {"titulo": "La ciudad invisible", "genero": "Suspenso", "duracion": 118, "clasificacion": "+16", "sinopsis": "Una fotógrafa descubre una ciudad que solo aparece después de medianoche.", "poster": "static/img/demo_comedia.svg"},
+                {"titulo": "Un tren a casa", "genero": "Aventura", "duracion": 106, "clasificacion": "ATP", "sinopsis": "Un viaje inesperado reúne a dos hermanos con las historias de su infancia.", "poster": "static/img/demo_ciencia.svg"}
+            ]
+            indice_demo = len(peliculas)
+            if indice_demo < len(catalogo_demo):
+                peli.update(catalogo_demo[indice_demo])
+
             poster = peli.get("poster", "")
             if poster and not poster.startswith(("http://", "https://")):
-                peli["poster"] = urljoin(BACKEND_ORIGEN + "/", poster.lstrip("/"))
+                ruta_poster = poster.lstrip("/")
+                if ruta_poster.startswith("static/img/demo_"):
+                    peli["poster"] = url_for(
+                        "static",
+                        filename=ruta_poster.removeprefix("static/")
+                    )
+                elif poster:
+                    peli["poster"] = urljoin(
+                        BACKEND_ORIGEN + "/",
+                        ruta_poster
+                    )
             peliculas.append(peli)
             vistos.add(peli["id_pelicula"])
     if estado != 200:
@@ -286,6 +309,17 @@ def ver_funciones():
     ]
 
     pelicula = funciones[0].copy() if funciones else {}
+
+    if pelicula and not pelicula.get("poster"):
+        datos_peliculas, estado_peliculas = llamar_backend("GET", "/peliculas")
+        catalogo = lista(datos_peliculas, "peliculas")
+        ficha = next(
+            (p for p in catalogo
+             if p.get("id_pelicula") == id_pelicula),
+            {}
+        )
+        if ficha.get("poster"):
+            pelicula["poster"] = ficha["poster"]
 
     if pelicula:
         poster = pelicula.get("poster", "")
@@ -318,6 +352,14 @@ def ver_funciones():
                 "may.", "jun.", "jul.", "ago.",
                 "sep.", "oct.", "nov.", "dic."
             ]
+
+            meses_largos = [
+                "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre",
+                "Diciembre"
+            ]
+            funcion["mes_nombre"] = meses_largos[fecha.month - 1]
+            funcion["anio"] = fecha.year
 
             funcion["fecha"] = (
                 f"{fecha.day} {meses_cortos[fecha.month - 1]}"
@@ -453,11 +495,43 @@ def ver_compra():
         )
 
     
-    poster = funcion.get("poster", "")
-    if poster and not poster.startswith(("http://", "https://")):
-        funcion["poster"] = urljoin(
-            BACKEND_ORIGEN + "/",
-            poster.lstrip("/")
+    # Recuperar el póster desde la función o desde el catálogo de películas.
+    poster = funcion.get("poster") or ""
+    if not poster:
+        peliculas, estado_peliculas = llamar_backend("GET", "/peliculas")
+        if estado_peliculas == 200:
+            pelicula = next(
+                (
+                    p for p in lista(peliculas, "peliculas")
+                    if p.get("id_pelicula") == funcion.get("id_pelicula")
+                ),
+                {}
+            )
+            poster = pelicula.get("poster") or ""
+
+    if poster.startswith(("http://", "https://")):
+        funcion["poster"] = poster
+    elif poster:
+        ruta_poster = poster.lstrip("/")
+        archivo_local = (
+            Path(__file__).resolve().parent
+            / "static"
+            / ruta_poster.removeprefix("static/")
+        )
+        if ruta_poster.startswith("static/") and archivo_local.is_file():
+            funcion["poster"] = url_for(
+                "static",
+                filename=ruta_poster.removeprefix("static/")
+            )
+        else:
+            funcion["poster"] = urljoin(
+                BACKEND_ORIGEN + "/",
+                ruta_poster
+            )
+    else:
+        funcion["poster"] = url_for(
+            "static",
+            filename="img/poster_sin_imagen.svg"
         )
 
     
@@ -509,6 +583,11 @@ def ver_compra():
     precio_unitario = float(funcion.get("precio_base") or 0)
     total = precio_unitario * len(ids_butacas)
 
+    # Datos de la persona autenticada.
+    usuario = usuario_actual() or {}
+    if isinstance(usuario, dict):
+        usuario = usuario.get("usuario", usuario)
+
     return render_template(
         "compra.html",
         id_funcion=id_funcion,
@@ -517,6 +596,7 @@ def ver_compra():
         funcion=funcion,
         precio_unitario=precio_unitario,
         total=total,
+        usuario=usuario,
         error=estado_butacas != 200
     )
 
