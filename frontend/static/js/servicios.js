@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const montoTotalVisita = document.getElementById("monto-total-visita");
 
     const cantidadButacas = parseInt(envolturaServicios.dataset.cantidadButacas) || 0;
-    const precioBaseEntrada = 8500; 
+    const precioBaseEntrada = parseFloat(envolturaServicios.dataset.precioEntrada) || 8500; 
     let subtotalEntradas = cantidadButacas * precioBaseEntrada;
 
     let carritoServicios = {};
