@@ -4,7 +4,7 @@
 {% block estilos_adicionales %}<link rel="stylesheet" href="{{ url_for('static', filename='css/servicios.css') }}">{% endblock %}
 
 {% block content %}
-    <div class="envoltura-servicios" data-cantidad-butacas="{{ butacas.split(',')|length if butacas else 0 }}">
+    <div class="envoltura-servicios" data-cantidad-butacas="{{ ids_butacas|length if ids_butacas else 0 }}" data-precio-entrada="{{ funcion.precio_base if funcion and funcion.precio_base else 8500 }}">
         
         <!-- Indicador de pasos -->
         <div class="pasos-compra">
@@ -20,7 +20,11 @@
             <span class="icono-ticket">🎟️</span>
             <div>
                 <strong>{{ funcion.titulo if funcion else "Función seleccionada" }}</strong>
-                <p>{{ funcion.fecha if funcion else "" }} · Sala {{ funcion.sala_nombre if funcion else "" }} · Butacas: {{ butacas }}</p>
+                <p>
+                    {{ funcion.fecha_corta if funcion else "" }} 
+                    {% if funcion and funcion.sala_nombre %}· {{ funcion.sala_nombre }}{% endif %} 
+                    · Butacas: {{ detalle_butacas|join(', ') }}
+                </p>
             </div>
         </div>
         
@@ -72,15 +76,15 @@
         <form action="{{ url_for('procesar_compra') }}" method="POST" id="form-servicios-compra">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <input type="hidden" name="id_funcion" value="{{ id_funcion }}">
-            <input type="hidden" name="butacas" value="{{ butacas }}">
+            <input type="hidden" name="butacas" value="{{ ids_butacas|join(',') }}">
             <input type="hidden" name="servicios_seleccionados" id="input-servicios-ocultos" value="">
 
             <div class="barra-resumen-compra">
                 <!-- Bloque izquierdo  -->
                 <div class="resumen-izquierda">
                     <div class="item-resumen">
-                        <span>{{ butacas.split(',')|length if butacas else 0 }} entradas · ARS 8.500 c/u</span>
-                        <strong>ARS {{ (butacas.split(',')|length if butacas else 0) * 8500 }}</strong>
+                        <span>{{ ids_butacas|length if ids_butacas else 0 }} entradas · ARS {{ funcion.precio_base if funcion and funcion.precio_base else 8500 }} c/u</span>
+                        <strong>ARS {{ (ids_butacas|length if ids_butacas else 0) * (funcion.precio_base|float if funcion and funcion.precio_base else 8500) }}</strong>
                     </div>
                     <div class="divisor-resumen"></div>
                     <div class="item-resumen" id="texto-servicios-agregados">
