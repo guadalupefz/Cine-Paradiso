@@ -16,6 +16,8 @@
             <a href="{{ url_for('admin_resumen') }}" {% if request.endpoint == 'admin_resumen' %}aria-current="page"{% endif %}>Resumen</a>
             <a href="{{ url_for('admin_peliculas') }}" {% if request.endpoint == 'admin_peliculas' %}aria-current="page"{% endif %}>Películas</a>
             <a href="{{ url_for('admin_funciones') }}" {% if request.endpoint == 'admin_funciones' %}aria-current="page"{% endif %}>Funciones</a>
+            <a href="{{ url_for('admin_locales') }}" {% if request.endpoint == 'admin_locales' %}aria-current="page"{% endif %}>Locales</a>
+            <a href="{{ url_for('admin_salas') }}" {% if request.endpoint in ('admin_salas', 'admin_butacas') %}aria-current="page"{% endif %}>Salas y butacas</a>
             <a href="{{ url_for('admin_servicios') }}" {% if request.endpoint == 'admin_servicios' %}aria-current="page"{% endif %}>Servicios</a>
             <a href="{{ url_for('validar_qr') }}" {% if request.endpoint == 'validar_qr' %}aria-current="page"{% endif %}>Validar QR</a>
             <a href="{{ url_for('index') }}">Ver cartelera</a>
