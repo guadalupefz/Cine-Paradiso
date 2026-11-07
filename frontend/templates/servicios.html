@@ -82,7 +82,10 @@
                     <small>Total de tu visita</small>
                     <span class="monto-total"> prueba </span> <!-- ARS PRECIO FINAL -->
                 </div>
-                <a href="#" class="btn-continuar-extras">Continuar</a>
+                <a href="{{ url_for('ver_compra', id_funcion=id_funcion, butacas=butacas) }}"
+                    class="btn-continuar-extras">
+                    Continuar
+                </a>
             </div>
         </div>
 

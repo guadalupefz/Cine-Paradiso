@@ -793,8 +793,18 @@ def procesar_compra():
 
 @app.get("/servicios")
 def ver_servicios():
+    id_funcion = request.args.get("id_funcion", type=int)
+    butacas = request.args.get("butacas", "")
+
     datos, estado = llamar_backend("GET", "/servicios")
-    return render_template("servicios.html", servicios=lista(datos,"servicios"), error=estado != 200)
+
+    return render_template(
+        "servicios.html",
+        servicios=lista(datos, "servicios"),
+        error=estado != 200,
+        id_funcion=id_funcion,
+        butacas=butacas
+    )
 
 @app.get("/mis-compras")
 @requiere_usuario

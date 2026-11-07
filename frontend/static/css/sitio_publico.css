@@ -4174,3 +4174,20 @@ body.sitio-publico .compra {
         padding: 18px;
     }
 }
+
+.sitio-publico .compra .informacion-funcion {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.sitio-publico .compra .poster-funcion {
+    width: 108px;
+    flex-shrink: 0;
+}
+
+.sitio-publico .compra .datos-funcion {
+    flex: 1;
+    min-width: 0;
+}
