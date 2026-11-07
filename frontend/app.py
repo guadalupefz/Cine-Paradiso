@@ -1073,6 +1073,175 @@ def admin_funciones():
     ), estado_pagina
 
 
+
+
+@app.route("/admin/locales", methods=["GET", "POST"])
+@requiere_admin
+def admin_locales():
+    datos_formulario = {"nombre": "", "direccion": ""}
+    error_formulario = None
+
+    if request.method == "POST":
+        datos_formulario = {
+            "nombre": request.form.get("nombre", "").strip(),
+            "direccion": request.form.get("direccion", "").strip(),
+        }
+        resultado, estado = llamar_backend("POST", "/locales", json=datos_formulario)
+        if estado in (200, 201):
+            flash(mensaje_error(resultado), "ok")
+            return redirect(url_for("admin_locales"))
+        error_formulario = mensaje_error(resultado)
+
+    datos, estado = llamar_backend("GET", "/locales")
+    locales = lista(datos, "locales") if estado == 200 else []
+
+    return render_template(
+        "admin/locales_admin.html",
+        locales=locales,
+        datos_formulario=datos_formulario,
+        error_formulario=error_formulario,
+        error_listado=estado != 200,
+    )
+
+
+@app.route("/admin/salas", methods=["GET", "POST"])
+@requiere_admin
+def admin_salas():
+    datos_formulario = {"id_local": "", "nombre": "", "capacidad": ""}
+    error_formulario = None
+
+    if request.method == "POST":
+        datos_formulario = {
+            "id_local": request.form.get("id_local", ""),
+            "nombre": request.form.get("nombre", "").strip(),
+            "capacidad": request.form.get("capacidad", "").strip(),
+        }
+        id_local = request.form.get("id_local", type=int)
+        capacidad = request.form.get("capacidad", type=int)
+
+        if not id_local or id_local <= 0 or not capacidad or capacidad <= 0:
+            error_formulario = "Seleccioná un local e ingresá una capacidad válida."
+        else:
+            resultado, estado = llamar_backend(
+                "POST",
+                f"/locales/{id_local}/salas",
+                json={"nombre": datos_formulario["nombre"], "capacidad": capacidad},
+            )
+            if estado in (200, 201):
+                flash(mensaje_error(resultado), "ok")
+                return redirect(url_for("admin_salas", local=id_local))
+            error_formulario = mensaje_error(resultado)
+
+    datos, estado = llamar_backend("GET", "/locales")
+    locales = lista(datos, "locales") if estado == 200 else []
+    salas = []
+    errores_carga = []
+
+    for local in locales:
+        respuesta, codigo = llamar_backend("GET", f"/locales/{local['id_local']}/salas")
+        if codigo == 200:
+            for sala in lista(respuesta, "salas"):
+                salas.append({**sala, "local_nombre": local["nombre"]})
+        else:
+            errores_carga.append(f"No se pudieron cargar las salas de {local['nombre']}.")
+
+    return render_template(
+        "admin/salas_admin.html",
+        locales=locales,
+        salas=salas,
+        datos_formulario=datos_formulario,
+        error_formulario=error_formulario,
+        errores_carga=errores_carga,
+        error_locales=estado != 200,
+    )
+
+
+@app.route("/admin/salas/<int:id_sala>/butacas", methods=["GET", "POST"])
+@requiere_admin
+def admin_butacas(id_sala):
+    if id_sala <= 0:
+        abort(400)
+
+    sala_seleccionada = None
+    locales_datos, estado_locales = llamar_backend("GET", "/locales")
+    locales = lista(locales_datos, "locales") if estado_locales == 200 else []
+
+    for local in locales:
+        datos, estado = llamar_backend("GET", f"/locales/{local['id_local']}/salas")
+        if estado == 200:
+            for sala in lista(datos, "salas"):
+                if sala["id_sala"] == id_sala:
+                    sala_seleccionada = {**sala, "local_nombre": local["nombre"]}
+                    break
+        if sala_seleccionada:
+            break
+
+    if sala_seleccionada is None:
+        flash("La sala seleccionada no existe o no está disponible.", "error")
+        return redirect(url_for("admin_salas"))
+
+    error_formulario = None
+    distribucion = ""
+
+    if request.method == "POST":
+        distribucion = request.form.get("distribucion", "").strip()
+        butacas = []
+        filas_utilizadas = set()
+
+        try:
+            if not distribucion:
+                raise ValueError
+
+            for segmento in distribucion.split(","):
+                partes = segmento.strip().split(":")
+
+                if len(partes) != 2:
+                    raise ValueError
+
+                fila = partes[0].strip().upper()
+                cantidad = int(partes[1].strip())
+
+                if (
+                    not fila
+                    or not fila.isalpha()
+                    or len(fila) > 5
+                    or cantidad <= 0
+                    or fila in filas_utilizadas
+                ):
+                    raise ValueError
+
+                filas_utilizadas.add(fila)
+
+                for numero in range(1, cantidad + 1):
+                    butacas.append({"fila": fila, "numero": numero})
+
+            if len(butacas) != int(sala_seleccionada["capacidad"]):
+                raise ValueError
+
+        except (ValueError, TypeError):
+            error_formulario = (
+                "Ingresá una distribución válida, por ejemplo A:10,B:10. "
+                "No repitas filas y verificá que la suma coincida "
+                "con la capacidad de la sala."
+            )
+        else:
+            resultado, estado = llamar_backend(
+                "POST",
+                f"/salas/{id_sala}/butacas",
+                json={"butacas": butacas},
+            )
+            if estado in (200, 201):
+                flash(mensaje_error(resultado), "ok")
+                return redirect(url_for("admin_salas"))
+            error_formulario = mensaje_error(resultado)
+
+    return render_template(
+        "admin/butacas_admin.html",
+        sala=sala_seleccionada,
+        distribucion=distribucion,
+        error_formulario=error_formulario,
+    )
+
 @app.route("/admin/validar-qr", methods=["GET", "POST"])
 @requiere_admin
 def validar_qr():
