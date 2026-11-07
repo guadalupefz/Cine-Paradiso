@@ -169,41 +169,39 @@
 
             <!-- Columna derecha: resumen -->
             <aside class="resumen-butacas">
+                 
+                <p class="encabezado-resumen">TU VISITA AL PARADISO</p>
 
-                <h3>Resumen de selección</h3>
-
-                <p>
-                    Butacas seleccionadas:
-                    <strong id="cantidad-seleccionadas">0</strong>
+                <h3>BUTACAS SELECCIONADAS</h3>
+            
+                <ul id="detalle-butacas"></ul>
+                    
+                <p class="datos-entradas">
+                    <strong id="cantidad-seleccionadas">0</strong> entradas
+                    · {{ funcion.fecha }}
+                    · {{ funcion.horario }}
                 </p>
 
-                <ul id="detalle-butacas">
-                    <li>Ninguna butaca seleccionada</li>
-                </ul>
+                <div class="separador-resumen"></div>
 
                 <div class="detalle-precio">
-                    <p>
-                        Precio por butaca:
-                        <strong id="precio-unitario">
-                            ${{ "%.2f"|format(funcion.precio_base|float) }}
-                        </strong>
-                    </p>
-
-                    <p class="total-butacas">
-                        Total:
-                        <strong id="total-butacas">$0.00</strong>
-                    </p>
+                    <span>Subtotal</span>
+                    <strong id="total-butacas">$0.00</strong>
                 </div>
+
+                <p class="mensaje-servicios">
+                    Precio final de las entradas.¿Se te antoja algo rico? Podés sumar algo en el siguiente paso.
+                </p>
+
 
                 <button id="continuar-compra" type="button" disabled>
                     Continuar
                 </button>
 
-                <p id="mensaje-seleccion" aria-live="polite">
-                    Seleccioná al menos una butaca.
-                </p>
-
+                <p id="mensaje-seleccion" aria-live="polite" hidden></p>
+     
             </aside>
+                
 
         </div>
 
@@ -244,7 +242,8 @@ document.addEventListener("DOMContentLoaded", function () {
             document.querySelectorAll(".butaca.seleccionada")
         );
     }
-
+    
+    
     function actualizarSeleccion() {
 
         const seleccionadas = obtenerSeleccionadas();
@@ -256,28 +255,36 @@ document.addEventListener("DOMContentLoaded", function () {
 
         detalle.innerHTML = "";
 
-        if (cantidad === 0) {
+        if (cantidad > 0) {
 
-            const elemento = document.createElement("li");
-            elemento.textContent = "Ninguna butaca seleccionada";
-            detalle.appendChild(elemento);
-
-            mensaje.textContent = "Seleccioná al menos una butaca.";
-
-        } else {
-
+            
             seleccionadas.forEach(function (butaca) {
                 const elemento = document.createElement("li");
-                elemento.textContent = butaca.dataset.etiqueta;
+                elemento.classList.add("item-butaca-resumen");
+
+                const nombre = document.createElement("span");
+                nombre.textContent = "FILA " + butaca.dataset.etiqueta.charAt(0) +
+                    " - Asiento " + butaca.dataset.etiqueta.slice(1);
+
+                const precio = document.createElement("strong");
+                precio.textContent = "ARS " + precioUnitario.toLocaleString("es-AR");
+
+                elemento.appendChild(nombre);
+                elemento.appendChild(precio);
+
                 detalle.appendChild(elemento);
             });
 
             mensaje.textContent =
                 "Seleccionaste " + cantidad + " butaca(s).";
+
+        } else {
+            mensaje.textContent = "";
         }
 
         total.textContent = "$" + importe.toFixed(2);
     }
+
 
     butacas.forEach(function (butaca) {
 
