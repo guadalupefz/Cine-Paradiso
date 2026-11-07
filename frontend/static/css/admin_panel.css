@@ -130,3 +130,17 @@
     background-color: #fce8e8;
     color: #a12626;
 }
+
+/* Correccion de contraste del dashboard */
+.dashboard-seccion {
+    color: #1f2937;
+}
+
+.dashboard-seccion h3,
+.dashboard-indicador,
+.dashboard-indicador h4,
+.dashboard-indicador p,
+.dashboard-indicador strong,
+.dashboard-estado {
+    color: #1f2937;
+}
