@@ -69,3 +69,64 @@
 .admin-panel #reader { max-width: 100%; }
 .admin-panel #reader :is(video, img) { max-width: 100%; }
 .admin-panel :is(select, textarea):focus-visible { outline: 3px solid var(--dorado); outline-offset: 4px; }
+
+.dashboard-encabezado {
+    margin-bottom: 25px;
+}
+
+.dashboard-encabezado p {
+    color: #777;
+}
+
+.dashboard-seccion {
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+}
+
+.dashboard-seccion h3 {
+    margin-bottom: 18px;
+}
+
+.dashboard-grilla {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.dashboard-indicador {
+    flex: 1 1 200px;
+    padding: 18px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+}
+
+.dashboard-indicador h4 {
+    margin-top: 0;
+}
+
+.dashboard-indicador p {
+    margin-bottom: 5px;
+}
+
+.dashboard-indicador strong {
+    display: block;
+    margin-bottom: 12px;
+    font-size: 20px;
+}
+
+.dashboard-cancelaciones {
+    max-width: 250px;
+}
+
+.dashboard-estado {
+    padding: 12px;
+    background-color: #f5f5f5;
+    border-radius: 6px;
+}
+
+.dashboard-estado.error {
+    background-color: #fce8e8;
+    color: #a12626;
+}

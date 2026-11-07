@@ -1,37 +1,119 @@
 {% extends "admin/base_admin.html" %}
 
+{% block title %}Resumen · Cine Paradiso{% endblock %}
+
 {% block content %}
 
-<h2>Resumen del cine</h2>
-<p>Consultá el catálogo y gestioná la programación desde el menú.</p>
-
-<section class="tarjeta-admin">
-    <h3>Ventas por género</h3>
-
-    {% for fila in ventas.get('ventas_por_genero', []) %}
-    <div class="tarjeta-admin">
-        <strong>{{ fila.genero }}</strong><br>
-        Entradas vendidas: {{ fila.entradas_vendidas }}<br>
-        Recaudación: ${{ fila.importe_estimado_entradas }}
-    </div>
-    {% else %}
-    <p>Sin ventas para mostrar.</p>
-    {% endfor %}
+<section class="dashboard-encabezado">
+    <h2>Resumen del cine</h2>
+    <p>Indicadores de ventas y ocupación de las funciones.</p>
 </section>
 
-<section class="tarjeta-admin">
+<section class="dashboard-seccion">
+    <h3>Ventas por género</h3>
+
+    {% if not ventas_ok %}
+        <p class="dashboard-estado error">No se pudieron cargar las estadísticas de ventas.</p>
+    {% elif ventas.get('ventas_por_genero', []) %}
+        <div class="dashboard-grilla">
+            {% for fila in ventas.get('ventas_por_genero', []) %}
+                <article class="dashboard-indicador">
+                    <h4>{{ fila.genero or 'Sin género' }}</h4>
+                    <p>Entradas vendidas</p>
+                    <strong>{{ fila.entradas_vendidas }}</strong>
+                    <p>Recaudación estimada</p>
+                    <strong>${{ fila.importe_estimado_entradas }}</strong>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="dashboard-estado">Todavía no hay ventas para mostrar.</p>
+    {% endif %}
+</section>
+
+<section class="dashboard-seccion">
+    <h3>Ventas por franja horaria</h3>
+
+    {% if not ventas_ok %}
+        <p class="dashboard-estado error">No se pudieron cargar las estadísticas de ventas.</p>
+    {% elif ventas.get('ventas_por_franja_horaria', []) %}
+        <div class="dashboard-grilla">
+            {% for fila in ventas.get('ventas_por_franja_horaria', []) %}
+                <article class="dashboard-indicador">
+                    <h4>{{ fila.franja_horaria }}</h4>
+                    <p>Entradas vendidas</p>
+                    <strong>{{ fila.entradas_vendidas }}</strong>
+                    <p>Recaudación estimada</p>
+                    <strong>${{ fila.importe_estimado_entradas }}</strong>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="dashboard-estado">Todavía no hay ventas por franja horaria.</p>
+    {% endif %}
+</section>
+
+<section class="dashboard-seccion">
+    <h3>Cancelaciones</h3>
+
+    {% if not ventas_ok %}
+        <p class="dashboard-estado error">No se pudo consultar la cantidad de cancelaciones.</p>
+    {% elif ventas.get('cantidad_cancelaciones') is not none %}
+        <article class="dashboard-indicador dashboard-cancelaciones">
+            <p>Compras canceladas</p>
+            <strong>{{ ventas.get('cantidad_cancelaciones') }}</strong>
+        </article>
+    {% else %}
+        <p class="dashboard-estado">No hay información de cancelaciones para mostrar.</p>
+    {% endif %}
+</section>
+
+<section class="dashboard-seccion">
     <h3>Ocupación por función</h3>
 
-    {% for fila in ocupacion.get('ocupacion_por_funcion', []) %}
-    <div class="tarjeta-admin">
-        <strong>{{ fila.pelicula }}</strong><br>
-        Sala: {{ fila.sala }}<br>
-        Ocupación: {{ fila.butacas_ocupadas }}/{{ fila.capacidad }} butacas<br>
-        Porcentaje: {{ fila.porcentaje_ocupacion or 0 }}%
-    </div>
+    {% if not ocupacion_ok %}
+        <p class="dashboard-estado error">No se pudieron cargar las estadísticas de ocupación.</p>
+    {% elif ocupacion.get('ocupacion_por_funcion', []) %}
+        <div class="dashboard-grilla">
+            {% for fila in ocupacion.get('ocupacion_por_funcion', []) %}
+                <article class="dashboard-indicador">
+                    <h4>{{ fila.pelicula }}</h4>
+                    <p>Función: {{ fila.fecha_hora_inicio }}</p>
+                    <p>Sala: {{ fila.sala }}</p>
+                    <p>Butacas ocupadas / capacidad</p>
+                    <strong>{{ fila.butacas_ocupadas }}/{{ fila.capacidad }}</strong>
+                    <p>Porcentaje de ocupación</p>
+                    <strong>{{ fila.porcentaje_ocupacion or 0 }}%</strong>
+                </article>
+            {% endfor %}
+        </div>
     {% else %}
-    <p>Sin ocupación para mostrar.</p>
-    {% endfor %}
+        <p class="dashboard-estado">No hay funciones para mostrar.</p>
+    {% endif %}
+</section>
+
+<section class="dashboard-seccion">
+    <h3>Ocupación por película</h3>
+
+    {% if not ocupacion_ok %}
+        <p class="dashboard-estado error">No se pudieron cargar las estadísticas de ocupación.</p>
+    {% elif ocupacion.get('ocupacion_por_pelicula', []) %}
+        <div class="dashboard-grilla">
+            {% for fila in ocupacion.get('ocupacion_por_pelicula', []) %}
+                <article class="dashboard-indicador">
+                    <h4>{{ fila.pelicula }}</h4>
+                    <p>Butacas ocupadas</p>
+                    <strong>{{ fila.butacas_ocupadas }}</strong>
+                    <p>Capacidad total</p>
+                    <strong>{{ fila.capacidad_total }}</strong>
+                    <p>Porcentaje de ocupación</p>
+                    <strong>{{ fila.porcentaje_ocupacion or 0 }}%</strong>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="dashboard-estado">No hay películas con funciones para mostrar.</p>
+    {% endif %}
 </section>
 
 {% endblock %}

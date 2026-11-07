@@ -803,9 +803,14 @@ def mis_compras():
 def admin_resumen():
     ventas, ev = llamar_backend("GET", "/estadisticas/ventas")
     ocupacion, eo = llamar_backend("GET", "/estadisticas/ocupacion")
-    if ev != 200 or eo != 200:
-        flash("No se pudieron cargar todas las estadísticas.", "error")
-    return render_template("admin/resumen_admin.html", ventas=ventas, ocupacion=ocupacion)
+
+    return render_template(
+        "admin/resumen_admin.html",
+        ventas=ventas if ev == 200 else {},
+        ocupacion=ocupacion if eo == 200 else {},
+        ventas_ok=ev == 200,
+        ocupacion_ok=eo == 200
+    )
 
 @app.route("/admin/servicios", methods=["GET", "POST"])
 @requiere_admin
