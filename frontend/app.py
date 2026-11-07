@@ -520,6 +520,9 @@ def ver_compra():
         error=estado_butacas != 200
     )
 
+def pago_aprobado():
+    return os.environ.get("SIMULAR_PAGO_RECHAZADO") != "1"
+
 @app.post("/procesar-compra")
 @requiere_usuario
 def procesar_compra():
@@ -557,15 +560,22 @@ def procesar_compra():
             butacas=butacas_texto
         ))
 
+    if not pago_aprobado():
+        flash("El pago fue rechazado, Intenta nuevamente", "error")
+        return redirect(url_for(
+            "ver_compra",
+            id_funcion=id_funcion,
+            butacas=butacas_texto
+        ))
+
+
     reserva_pendiente = session.get("reserva_pendiente")
 
-
     if reserva_pendiente:
-
         compras, estado_compras = llamar_backend("GET", "/compras")
 
         if estado_compras != 200:
-            flash("No se pudo verificar tu reserva anterior. Revisa mis compras", "error")
+            flash("No se pudo verificar tu reserva anterior. Revisa Mis compras", "error")
             return redirect(url_for("mis_compras"))
 
         compra_guardada = next(
@@ -591,15 +601,14 @@ def procesar_compra():
             flash("No se pudo determinar el estado de tu reserva", "error")
             return redirect(url_for("mis_compras"))
 
-
     if reserva_pendiente:
         if (
             reserva_pendiente["id_funcion"] != id_funcion
             or reserva_pendiente["butacas"] != ids_butacas
         ):
             flash(
-                "No se pudo recuperar el identificador de la reserva"
-                "Consulta tus compras antes de volver a intentar",
+                "Ya tenés otra reserva pendiente"
+                "Terminala antes de realizar una nueva",
                 "error"
             )
             return redirect(url_for("index"))
@@ -623,13 +632,13 @@ def procesar_compra():
                 id_funcion=id_funcion
             ))
 
-        reserva = resultado.get("reserva", {})
+        reserva = resultado.get("reserva", {}) if isinstance(resultado, dict) else {}
         id_compra = reserva.get("id_compra")
 
         if not id_compra:
             flash(
-                "No se pudo recuperar el identificador de la reserva"
-                "Consulta tus compras antes de volver a intentar",
+                "No se pudo recuperar el identificador de la reserva. "
+                "Consultá tus compras antes de volver a intentar.",
                 "error"
             )
             return redirect(url_for("mis_compras"))
@@ -644,6 +653,7 @@ def procesar_compra():
         "POST",
         f"/compras/{id_compra}/confirmar"
     )
+
 
 
     if estado == 200:
