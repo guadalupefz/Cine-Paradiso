@@ -1,0 +1,34 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Locales · Cine Paradiso{% endblock %}
+{% block content %}
+<h2>Administración de locales</h2>
+<p>Registrá y consultá los locales del cine.</p>
+
+<section class="panel-funciones">
+    <h3>Nuevo local</h3>
+    {% if error_formulario %}<p role="alert" class="aviso error">{{ error_formulario }}</p>{% endif %}
+    <form method="post">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <label for="nombre">Nombre del local</label>
+        <input id="nombre" name="nombre" maxlength="100" required value="{{ datos_formulario.nombre }}">
+        <label for="direccion">Dirección</label>
+        <input id="direccion" name="direccion" maxlength="200" required value="{{ datos_formulario.direccion }}">
+        <button type="submit" class="accion-principal">Crear local</button>
+    </form>
+</section>
+
+<section class="panel-funciones">
+    <h3>Locales registrados</h3>
+    {% if error_listado %}
+        <p role="alert" class="aviso error">No se pudieron cargar los locales.</p>
+    {% elif locales %}
+        <ul>
+            {% for local in locales %}
+                <li><strong>{{ local.nombre }}</strong> — {{ local.direccion }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Todavía no hay locales registrados.</p>
+    {% endif %}
+</section>
+{% endblock %}
