@@ -1,91 +1,105 @@
 {% extends "base.html" %}
 
 {% block title %}Servicios - Cine Paradiso{% endblock %}
-{% block estilos_adicionales %}<link rel="stylesheet" href="{{ url_for('static', filename='css/servicios.css') }}">{% endblock %}
+
+{% block estilos_adicionales %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/servicios.css') }}">
+{% endblock %}
 
 {% block content %}
-    <div class="envoltura-servicios">
-        <!-- Indicador de pasos -->
-        <div class="pasos-compra">
-            <span class="paso">1 · Función</span>
-            <span class="separador-paso"></span>
-            <span class="paso">2 · Butacas</span>
-            <span class="separador-paso"></span>
-            <span class="paso activo">3 · Servicios</span>
-        </div>
+<div class="envoltura-servicios">
+    <h2>Servicios adicionales</h2>
+    <p>Elegí los productos que quieras agregar a tu compra. Son opcionales.</p>
 
-        <!-- Función seleccionada -->
-        <div class="info-funcion-seleccionada">
-            <span class="icono-ticket">🎟️</span>
-            <div>
-                <strong> prueba </strong> <!-- Nombre de pelicula seleccionada -->
-                <p> prueba </p> <!-- Fecha · Hora · Sala · Butacas elegidas -->
+    {% if error %}
+        <p class="mensaje-error">No se pudieron cargar los servicios.</p>
+    {% elif servicios %}
+        <form id="form-servicios" method="GET" action="{{ url_for('ver_compra') }}">
+            <input type="hidden" name="id_funcion" value="{{ id_funcion }}">
+            <input type="hidden" name="butacas" value="{{ ids_butacas | join(',') }}">
+
+            <div class="lista-servicios">
+                {% for servicio in servicios %}
+                    <article class="tarjeta-servicio">
+                        <h3>{{ servicio.nombre }}</h3>
+                        <p>{{ servicio.descripcion }}</p>
+                        <p>Precio: ${{ servicio.precio }}</p>
+
+                        <label>
+                            Cantidad:
+                            <input
+                                class="cantidad-servicio"
+                                type="number"
+                                min="0"
+                                max="20"
+                                value="0"
+                                data-id="{{ servicio.id_servicio }}"
+                            >
+                        </label>
+                    </article>
+                {% endfor %}
             </div>
-        </div>
 
-        <section class="seccion-servicios">
-            <div class="encabezado-seccion-servicios">
-                <h2>Comprar</h2>
-                <h3 class="subtitulo">Servicios</h3>
-                <p class="descripcion-servicios">El mejor acompañamiento para una gran historia. Elegí tus favoritos.</p>
-            </div>
+            <p id="resumen-extras">No agregaste servicios.</p>
+            <button type="submit">Continuar al checkout</button>
+        </form>
+    {% else %}
+        <p>No hay servicios disponibles. Podés continuar sin extras.</p>
+        <a href="{{ url_for('ver_compra', id_funcion=id_funcion, butacas=ids_butacas|join(',')) }}">
+            Continuar al checkout
+        </a>
+    {% endif %}
+</div>
 
-            {% if error %}
-                <p class="mensaje-error">
-                    No se pudieron cargar los servicios.
-                </p>
-            {% elif servicios %}
-                <div class="lista-servicios">
-                    {% for servicio in servicios %}
-                        <div class="tarjeta-servicio">
-                            <!-- Contenedor de la ilustración de muestra (despues ver si lo agrego) -->
-                            <div class="ilustracion-servicio">
-                                <div class="circulo-icono">
-                                    <!-- Acá iría el icono o ilustración vectorial en el futuro -->
-                                </div>
-                            </div>
-                            <!-- Información del servicio -->
-                            <div class="cuerpo-servicio">
-                                <h4>{{ servicio.nombre }}</h4>
-                                <p>{{ servicio.descripcion }}</p>
-                            </div>
-                            <!-- Precio y botón -->
-                            <div class="pie-tarjeta-servicio">
-                                <span class="precio-servicio">ARS {{ servicio.precio }}</span>
-                                <button class="btn-agregar" data-id="{{ servicio.id_servicio }}">Agregar</button>
-                            </div>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p class="mensaje-vacio">
-                    No hay servicios disponibles en este momento.
-                </p>
-            {% endif %}
-        </section>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const formulario = document.getElementById("form-servicios");
+    if (!formulario) return;
 
-        <!-- Resumen -->
-        <div class="barra-resumen-compra">
-            <div class="resumen-izquierda">
-                <div class="item-resumen">
-                    <span> prueba </span> <!-- nro de entradas · precio de c/u -->
-                    <strong> prueba </strong> <!-- ARS precio total de entradas -->
-                </div>
-                <div class="divisor-resumen"></div>
-                <div class="item-resumen">
-                    <span> prueba </span> <!-- Servicios agregados: cantidad de servicios agregados -->
-                    <strong> prueba </strong> <!-- ARS precio final servicios -->
-                </div>
-            </div>
-            <div class="resumen-derecha">
-                <div class="total-visita">
-                    <small>Total de tu visita</small>
-                    <span class="monto-total"> prueba </span> <!-- ARS PRECIO FINAL -->
-                </div>
-                <a href="#" class="btn-continuar-extras">Continuar</a>
-            </div>
-        </div>
+    const resumen = document.getElementById("resumen-extras");
+    const cantidades = formulario.querySelectorAll(".cantidad-servicio");
+    const serviciosSeleccionados = {{ servicios_seleccionados | tojson }};
 
-        <p class="nota-pie-servicios">Retirá tus pochoclos y bebidas en el mostrador antes de la función. <span class="opcional">Los servicios son opcionales.</span></p>
-    </div>
+    serviciosSeleccionados.forEach(function (item) {
+        const partes = item.split(":");
+        if (partes.length !== 2) return;
+
+        const campo = Array.from(cantidades).find(
+            c => c.dataset.id === partes[0]
+        );
+
+        if (campo) campo.value = partes[1];
+    });
+
+    function actualizarResumen() {
+        const unidades = Array.from(cantidades)
+            .reduce((total, campo) => total + Math.max(0, Number(campo.value) || 0), 0);
+
+        resumen.textContent = unidades
+            ? "Agregaste " + unidades + " unidad(es) de servicios."
+            : "No agregaste servicios.";
+    }
+
+    actualizarResumen();
+
+    formulario.addEventListener("submit", function () {
+        cantidades.forEach(function (campo) {
+            const cantidad = Number(campo.value);
+            if (cantidad > 0) {
+                const oculto = document.createElement("input");
+                oculto.type = "hidden";
+                oculto.name = "servicios";
+                oculto.value = campo.dataset.id + ":" + cantidad;
+                formulario.appendChild(oculto);
+            }
+        });
+    });
+
+    cantidades.forEach(function (campo) {
+        campo.addEventListener("input", function () {
+            actualizarResumen();
+        });
+    });
+});
+</script>
 {% endblock %}

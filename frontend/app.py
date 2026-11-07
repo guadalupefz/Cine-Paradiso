@@ -570,9 +570,48 @@ def ver_compra():
         for id_butaca in ids_butacas
     ]
 
-    # Calcular el importe del resumen.
     precio_unitario = float(funcion.get("precio_base") or 0)
-    total = precio_unitario * len(ids_butacas)
+    total_entradas = precio_unitario * len(ids_butacas)
+
+    servicios_seleccionados = request.args.getlist("servicios")
+    datos_servicios, estado_servicios = llamar_backend("GET", "/servicios")
+    servicios_disponibles = lista(datos_servicios, "servicios")
+
+    detalle_servicios = []
+    total_servicios = 0
+
+    for item in servicios_seleccionados:
+        try:
+            id_servicio, cantidad = item.split(":")
+            id_servicio = int(id_servicio)
+            cantidad = int(cantidad)
+        except (ValueError, TypeError):
+            continue
+
+        if id_servicio <= 0 or cantidad <= 0:
+            continue
+
+        servicio = next(
+            (
+                s for s in servicios_disponibles
+                if int(s.get("id_servicio", 0)) == id_servicio
+            ),
+            None
+        )
+
+        if servicio:
+            precio = float(servicio.get("precio") or 0)
+            subtotal = precio * cantidad
+            detalle_servicios.append({
+                "id_servicio": id_servicio,
+                "nombre": servicio.get("nombre", "Servicio"),
+                "cantidad": cantidad,
+                "precio": precio,
+                "subtotal": subtotal
+            })
+            total_servicios += subtotal
+
+    total = total_entradas + total_servicios
 
     # Datos de la persona autenticada.
     usuario = usuario_actual() or {}
@@ -587,6 +626,10 @@ def ver_compra():
         funcion=funcion,
         precio_unitario=precio_unitario,
         total=total,
+        total_entradas=total_entradas,
+        detalle_servicios=detalle_servicios,
+        total_servicios=total_servicios,
+        servicios_seleccionados=servicios_seleccionados,
         usuario=usuario,
         error=estado_butacas != 200
     )
@@ -594,9 +637,10 @@ def ver_compra():
 @app.post("/procesar-compra")
 @requiere_usuario
 def procesar_compra():
-
     id_funcion = request.form.get("id_funcion", type=int)
     butacas_texto = request.form.get("butacas", "")
+    resultado_pago = request.form.get("resultado_pago")
+    servicios_formulario = request.form.getlist("servicios")
 
     if not id_funcion or id_funcion <= 0:
         flash("La función seleccionada no es válida.", "error")
@@ -620,30 +664,116 @@ def procesar_compra():
         flash("La selección de butacas no es válida.", "error")
         return redirect(url_for("ver_butacas", id_funcion=id_funcion))
 
+    if resultado_pago == "rechazado":
+        flash("El pago fue rechazado. No se confirmó la compra.", "error")
+        return redirect(url_for(
+            "ver_compra",
+            id_funcion=id_funcion,
+            butacas=butacas_texto,
+            servicios=servicios_formulario
+        ))
+
+    if resultado_pago != "aprobado":
+        flash("Seleccioná un resultado de pago válido.", "error")
+        return redirect(url_for(
+            "ver_compra",
+            id_funcion=id_funcion,
+            butacas=butacas_texto,
+            servicios=servicios_formulario
+        ))
+
+    servicios = []
+
+    for item in servicios_formulario:
+        try:
+            id_servicio, cantidad = item.split(":")
+            id_servicio = int(id_servicio)
+            cantidad = int(cantidad)
+        except (ValueError, TypeError):
+            flash("La selección de servicios no es válida.", "error")
+            return redirect(url_for(
+                "ver_compra",
+                id_funcion=id_funcion,
+                butacas=butacas_texto
+            ))
+
+        if id_servicio <= 0 or cantidad <= 0:
+            flash("La selección de servicios no es válida.", "error")
+            return redirect(url_for(
+                "ver_compra",
+                id_funcion=id_funcion,
+                butacas=butacas_texto
+            ))
+
+        servicios.append({
+            "id_servicio": id_servicio,
+            "cantidad": cantidad
+        })
+
     resultado, estado = llamar_backend(
         "POST",
-        "/compras",
+        f"/funciones/{id_funcion}/reservas",
         json={
-            "id_funcion": id_funcion,
-            "ids_butacas": ids_butacas
+            "butacas": ids_butacas,
+            "servicios": servicios
         }
     )
 
-    if estado == 201 and isinstance(resultado, dict) and resultado.get("id_compra"):
-        return redirect(
-            url_for(
-                "ver_comprobante",
-                id_compra=resultado["id_compra"]
-            )
-        )
+    if estado != 201:
+        flash(mensaje_error(resultado), "error")
+        return redirect(url_for(
+            "ver_compra",
+            id_funcion=id_funcion,
+            butacas=butacas_texto,
+            servicios=servicios_formulario
+        ))
 
-    flash(mensaje_error(resultado), "error")
-    return redirect(url_for("ver_butacas", id_funcion=id_funcion))
+    reserva = resultado.get("reserva", resultado) if isinstance(resultado, dict) else {}
+    id_compra = reserva.get("id_compra")
+
+    if not id_compra:
+        flash("El backend no devolvió el identificador de la reserva.", "error")
+        return redirect(url_for("mis_compras"))
+
+    confirmacion, estado_confirmacion = llamar_backend(
+        "POST",
+        f"/compras/{id_compra}/confirmar"
+    )
+
+    if estado_confirmacion != 200:
+        flash(mensaje_error(confirmacion), "error")
+        return redirect(url_for("mis_compras"))
+
+    return redirect(url_for(
+        "ver_comprobante",
+        id_compra=id_compra
+    ))
 
 @app.get("/servicios")
+@requiere_usuario
 def ver_servicios():
+    id_funcion = request.args.get("id_funcion", type=int)
+    ids_butacas = [
+        b.strip()
+        for b in request.args.get("butacas", "").split(",")
+        if b.strip().isdigit()
+    ]
+
+    if not id_funcion or not ids_butacas:
+        return redirect(url_for("ver_funciones"))
+
+    servicios_seleccionados = request.args.getlist("servicios")
     datos, estado = llamar_backend("GET", "/servicios")
-    return render_template("servicios.html", servicios=lista(datos,"servicios"), error=estado != 200)
+    servicios = lista(datos, "servicios")
+
+    return render_template(
+        "servicios.html",
+        servicios=servicios,
+        id_funcion=id_funcion,
+        ids_butacas=ids_butacas,
+        servicios_seleccionados=servicios_seleccionados,
+        error=estado != 200
+    )
 
 @app.get("/mis-compras")
 @requiere_usuario

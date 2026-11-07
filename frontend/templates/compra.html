@@ -8,7 +8,7 @@ $ {{ ("{:,.2f}".format(valor|float)).replace(",", "X").replace(".", ",").replace
 
 {% block content %}
 <section class="checkout">
-    <a class="checkout-volver" href="{{ url_for('ver_servicios') }}">← Volver a Servicios</a>
+    <a class="checkout-volver" href="{{ url_for('ver_servicios', id_funcion=id_funcion, butacas=butacas|join(','), servicios=servicios_seleccionados) }}">← Volver a Servicios</a>
 
     <nav class="checkout-pasos" aria-label="Pasos de compra">
         <span class="paso-completo">✓ Tu cuenta</span>
@@ -26,8 +26,13 @@ $ {{ ("{:,.2f}".format(valor|float)).replace(",", "X").replace(".", ",").replace
     </header>
 
     {% if error %}
-        <p class="checkout-error">No se pudo recuperar la información de la función o de las butacas.</p>
-        <a href="{{ url_for('index') }}">Volver a la cartelera</a>
+        <article class="checkout-panel">
+            <h3>Resumen preliminar</h3>
+            <p>La compra todavía no está confirmada. Revisá los datos de la función antes de continuar.</p>
+            <p><strong>Butacas seleccionadas:</strong> {{ butacas|join(' · ') }}</p>
+            <p class="checkout-error">No se pudo recuperar la información completa de la función o de las butacas. No es posible confirmar el pago todavía.</p>
+            <a href="{{ url_for('index') }}">Volver a la cartelera</a>
+        </article>
     {% else %}
     <div class="checkout-columnas">
         <div class="checkout-principal">
@@ -138,6 +143,20 @@ $ {{ ("{:,.2f}".format(valor|float)).replace(",", "X").replace(".", ",").replace
                     <strong>{{ dinero(total) }}</strong>
                 </div>
 
+                {% for servicio in detalle_servicios %}
+                <div class="checkout-linea">
+                    <span>{{ servicio.nombre }} x {{ servicio.cantidad }}</span>
+                    <span>{{ dinero(servicio.subtotal) }}</span>
+                </div>
+                {% endfor %}
+
+                {% if detalle_servicios %}
+                <div class="checkout-subtotal">
+                    <span>Servicios adicionales</span>
+                    <strong>{{ dinero(total_servicios) }}</strong>
+                </div>
+                {% endif %}
+
                 <div class="checkout-total-final">
                     <span>Total</span>
                     <strong>{{ dinero(total) }}</strong>
@@ -147,18 +166,24 @@ $ {{ ("{:,.2f}".format(valor|float)).replace(",", "X").replace(".", ",").replace
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                     <input type="hidden" name="id_funcion" value="{{ id_funcion }}">
                     <input type="hidden" name="butacas" value="{{ butacas|join(',') }}">
+                    {% for servicio in servicios_seleccionados %}
+                    <input type="hidden" name="servicios" value="{{ servicio }}">
+                    {% endfor %}
 
                     <label class="checkout-confirmacion">
                         <input type="checkbox" required>
                         Revisé la función, las butacas y mis datos de contacto.
                     </label>
 
-                    <button type="submit" class="checkout-boton">
-                        Confirmar compra · {{ dinero(total) }} →
+                    <button type="submit" name="resultado_pago" value="aprobado" class="checkout-boton">
+                        Simular pago aprobado · {{ dinero(total) }} →
+                    </button>
+                    <button type="submit" name="resultado_pago" value="rechazado" class="checkout-boton">
+                        Simular pago rechazado
                     </button>
                 </form>
 
-                <a class="checkout-volver-servicios" href="{{ url_for('ver_servicios') }}">Volver a Servicios</a>
+                <a class="checkout-volver-servicios" href="{{ url_for('ver_servicios', id_funcion=id_funcion, butacas=butacas|join(','), servicios=servicios_seleccionados) }}">Volver a Servicios</a>
             </article>
 
             <div class="checkout-ayuda">
