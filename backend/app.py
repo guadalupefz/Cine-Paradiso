@@ -21,6 +21,7 @@ from backend.src.routes.peliculas_routes import peliculas_bp
 from backend.src.routes.funciones_routes import funciones_bp
 from backend.src.routes.locales_routes import locales_bp
 from backend.src.routes.salas_routes import salas_bp
+from backend.src.routes.configuracion_butacas import configuracion_butacas_bp
 from backend.src.routes.compras_routes import compras_bp
 from backend.src.routes.servicios_routes import servicios_bp
 from backend.src.routes.estadisticas_routes import estadisticas_bp
@@ -59,7 +60,7 @@ def error_base_datos(error):
     return jsonify({"error": "No se pudo acceder a la base de datos"}), 500
 
 
-for blueprint in (auth_bp, mis_rutas, peliculas_externas_bp, peliculas_bp, funciones_bp, locales_bp, salas_bp, compras_bp, servicios_bp, estadisticas_bp, qr_bp, reservas_bp):
+for blueprint in (auth_bp, mis_rutas, peliculas_externas_bp, peliculas_bp, funciones_bp, locales_bp, salas_bp, configuracion_butacas_bp, compras_bp, servicios_bp, estadisticas_bp, qr_bp, reservas_bp):
     app.register_blueprint(blueprint, url_prefix="/api")
 
 @app.get("/")
