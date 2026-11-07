@@ -528,27 +528,67 @@
 
 .sitio-publico .progreso-compra {
     display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    margin: 10px 0 40px;
-    padding-bottom: 18px;
-    border-bottom: 1px solid var(--borde-publico);
+    align-items: center;
+    justify-content: flex-end;
+    padding-left: 0;
+    width: 100%;
+    box-sizing: border-box;
+    gap: 16px;
+    margin: 10px 0 40px auto;
+    padding: 15px 0;
+    background: transparent;
+    border: none;
+    border-radius: 0;
 }
 
 .sitio-publico .progreso-compra .paso {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     color: var(--texto-suave);
-    font-size: 13px;
+    font-size: 12px;
     font-weight: bold;
+    white-space: nowrap;
+}
+
+.sitio-publico .numero-paso {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border: 1px solid #c9c1b4;
+    border-radius: 50%;
+    color: var(--texto-suave);
+    font-size: 12px;
 }
 
 .sitio-publico .progreso-compra .completado {
     color: #36764b;
 }
 
+.sitio-publico .progreso-compra .completado .numero-paso {
+    background: #36764b;
+    border-color: #36764b;
+    color: white;
+}
+
 .sitio-publico .progreso-compra .activo {
     color: var(--vino);
-    border-bottom: 3px solid var(--dorado);
-    padding-bottom: 8px;
+}
+
+.sitio-publico .progreso-compra .activo .numero-paso {
+    background: var(--vino);
+    border-color: var(--vino);
+    color: white;
+}
+
+.sitio-publico .separador-pasos {
+    flex: 0 0 35px;
+    height: 2px;
+    min-width: 35px;
+    margin: 0;
+    background: #b8ad9c;
 }
 
 .sitio-publico .seleccion-butacas > h2 {
