@@ -885,45 +885,91 @@ def procesar_compra():
         servicios=servicios_texto
     ))
 
-
 @app.route("/servicios", methods=["GET", "POST"])
-@requiere_usuario
 def ver_servicios():
     id_funcion = request.values.get("id_funcion", type=int)
     bruto_butacas = request.values.get("butacas", "")
 
     if isinstance(bruto_butacas, str):
-        ids_butacas = [b.strip() for b in bruto_butacas.split(",") if b.strip()]
+        ids_butacas = [
+            b.strip() for b in bruto_butacas.split(",") if b.strip()
+        ]
     else:
         ids_butacas = bruto_butacas
 
+
+    datos, estado = llamar_backend("GET", "/servicios")
+    servicios = lista(datos, "servicios")
+
+
+    if not id_funcion and not ids_butacas:
+        return render_template(
+            "servicios.html",
+            servicios=servicios,
+            funcion=None,
+            id_funcion=None,
+            ids_butacas=[],
+            detalle_butacas=[],
+            servicios_seleccionados=[],
+            modo_catalogo=True,
+            error=estado != 200
+        )
+
+
+    if usuario_actual() is None:
+        flash("Iniciá sesión para continuar con tu compra.", "error")
+        destino = destino_interno(request.full_path)
+        if destino:
+            session["destino_acceso"] = destino
+        return redirect(url_for("login", next=destino))
+
+    
     if not id_funcion or not ids_butacas:
         return redirect(url_for("ver_funciones"))
 
     datos_cartelera, estado_cartelera = llamar_backend("GET", "/cartelera")
     funciones = lista(datos_cartelera, "cartelera")
-    funcion = next((f for f in funciones if f.get("id_funcion") == id_funcion), None)
+    funcion = next(
+        (f for f in funciones if f.get("id_funcion") == id_funcion),
+        None
+    )
 
-    if funcion:
-        try:
-            fecha = datetime.strptime(funcion["fecha_hora_inicio"], "%a, %d %b %Y %H:%M:%S GMT")
-            dias_cortos = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
-            meses_cortos = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
-            funcion["fecha_corta"] = f"{dias_cortos[fecha.weekday()]} {fecha.day} {meses_cortos[fecha.month - 1].capitalize()} · {fecha.strftime('%H:%M')}"
-        except (ValueError, TypeError):
-            funcion["fecha_corta"] = funcion.get("fecha_hora_inicio", "")
+    if not funcion:
+        flash("No encontramos la función solicitada.", "error")
+        return redirect(url_for("ver_funciones"))
 
-    datos_butacas, estado_butacas = llamar_backend("GET", f"/funciones/{id_funcion}/butacas")
+    try:
+        fecha = datetime.strptime(
+            funcion["fecha_hora_inicio"],
+            "%a, %d %b %Y %H:%M:%S GMT"
+        )
+        dias_cortos = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+        meses_cortos = [
+            "ene", "feb", "mar", "abr", "may", "jun",
+            "jul", "ago", "sep", "oct", "nov", "dic"
+        ]
+        funcion["fecha_corta"] = (
+            f"{dias_cortos[fecha.weekday()]} {fecha.day} "
+            f"{meses_cortos[fecha.month - 1].capitalize()} · "
+            f"{fecha.strftime('%H:%M')}"
+        )
+    except (ValueError, TypeError, KeyError):
+        funcion["fecha_corta"] = funcion.get("fecha_hora_inicio", "")
+
+    datos_butacas, estado_butacas = llamar_backend(
+        "GET", f"/funciones/{id_funcion}/butacas"
+    )
     butacas_disponibles = lista(datos_butacas, "butacas")
+
     mapa_butacas = {
         str(b.get("id_butaca")): f"{b.get('fila')}{b.get('numero')}"
         for b in butacas_disponibles
     }
-    detalle_butacas = [mapa_butacas.get(id_b, id_b) for id_b in ids_butacas]
+    detalle_butacas = [
+        mapa_butacas.get(id_b, id_b) for id_b in ids_butacas
+    ]
 
     servicios_seleccionados = request.values.getlist("servicios")
-    datos, estado = llamar_backend("GET", "/servicios")
-    servicios = lista(datos, "servicios")
 
     return render_template(
         "servicios.html",
@@ -933,7 +979,12 @@ def ver_servicios():
         ids_butacas=ids_butacas,
         detalle_butacas=detalle_butacas,
         servicios_seleccionados=servicios_seleccionados,
-        error=estado != 200 or estado_cartelera != 200
+        modo_catalogo=False,
+        error=(
+            estado != 200
+            or estado_cartelera != 200
+            or estado_butacas != 200
+        )
     )
 
 @app.get("/mis-compras")
