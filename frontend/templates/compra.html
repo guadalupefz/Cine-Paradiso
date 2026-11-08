@@ -41,7 +41,7 @@ $ {{ ("{:,.2f}".format(valor|float)).replace(",", "X").replace(".", ",").replace
                 <img
                     src="{{ funcion.poster or url_for('static', filename='img/poster_sin_imagen.svg') }}"
                     alt="Póster de {{ funcion.titulo }}"
-                    onerror="this.onerror=null;this.src='{{ url_for('static', filename='img/poster_sin_imagen.svg') }}';"
+                   #onerror="this.onerror=null;this.src='{{ url_for('static', filename='img/poster_sin_imagen.svg') }}';"
                 >
 
                 <div class="checkout-funcion-datos">
@@ -72,7 +72,7 @@ $ {{ ("{:,.2f}".format(valor|float)).replace(",", "X").replace(".", ",").replace
                         <h3>Tus datos de contacto</h3>
                         <p>La información de tu cuenta se utilizará para identificar tu compra.</p>
                     </div>
-                    <a class="checkout-modificar" href="{{ url_for('mi_perfil') if 'mi_perfil' in current_app.view_functions else url_for('compras') }}">Mi cuenta</a>
+                        <a class="checkout-modificar" href="{{ url_for('mis_compras') }}">Mi cuenta</a>
                 </div>
 
                 <div class="checkout-datos-usuario">
