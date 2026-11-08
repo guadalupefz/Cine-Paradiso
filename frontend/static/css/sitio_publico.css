@@ -633,6 +633,41 @@
     font-size: 25px;
 }
 
+.sitio-publico .datos-funcion .detalle-pelicula {
+    width: 100%;
+    margin-left: -20px;
+    padding: 0;
+    text-align: left;
+    color: var(--texto-suave);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.sitio-publico .datos-funcion .separador-funcion {
+    width: 100%;
+    margin: 7px 0;
+    border: 0;
+    border-top: 1px solid var(--borde-publico);
+}
+
+.sitio-publico .datos-funcion .detalle-horario p {
+    margin: 5px 0;
+    color: var(--tinta);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.sitio-publico .datos-funcion .detalle-horario p:first-child {
+    color: #302017;
+    font-weight: 600;
+}
+
+
+.sitio-publico .datos-funcion .detalle-horario p:nth-child(2) {
+    color: var(--vino);
+    font-weight: 700;
+}
+
 .sitio-publico .datos-funcion p {
     margin: 9px 0;
     font-size: 12px;
@@ -938,6 +973,7 @@
     flex: 1;
     width: 100%;
 }
+
 
 .sitio-publico .leyenda-butacas {
     display: flex;
