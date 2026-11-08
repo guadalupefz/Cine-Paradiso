@@ -9,6 +9,8 @@ from backend.src.services.compra_service import realizar_compra, confirmar_compr
 
 from backend.src.services.comprobante_service import obtener_comprobante
 
+from backend.src.services.cancelacion_service import cancelar_compra
+
 compras_bp = Blueprint("compras", __name__)
 
 
@@ -164,4 +166,16 @@ def confirmar_compra_route(id_usuario, id_compra):
         return jsonify({
             "error": "ERROR_SERVIDOR",
             "mensaje": "No se pudo confirmar la compra."
+        }), 500
+
+@compras_bp.post("/compras/<int:id_compra>/cancelar")
+@cliente_required
+def cancelar_compra_route(id_usuario, id_compra):
+    try:
+        resultado, codigo = cancelar_compra(id_usuario, id_compra)
+        return jsonify(resultado), codigo
+
+    except mysql.connector.Error:
+        return jsonify({
+            "error": "No se pudo cancelar la compra"
         }), 500
