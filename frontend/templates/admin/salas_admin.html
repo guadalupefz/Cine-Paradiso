@@ -1,0 +1,58 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Salas · Cine Paradiso{% endblock %}
+{% block content %}
+<h2>Administración de salas</h2>
+<p>Creá salas asociadas a un local existente y configurá sus butacas.</p>
+
+<section class="panel-funciones">
+    <h3>Nueva sala</h3>
+    {% if error_formulario %}<p role="alert" class="aviso error">{{ error_formulario }}</p>{% endif %}
+    {% if error_locales %}
+        <p role="alert" class="aviso error">No se pudieron cargar los locales.</p>
+    {% elif not locales %}
+        <p>Primero tenés que registrar un local.</p>
+        <a class="accion-principal" href="{{ url_for('admin_locales') }}">Ir a locales</a>
+    {% else %}
+        <form method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <label for="id_local">Local</label>
+            <select id="id_local" name="id_local" required>
+                <option value="">Seleccioná un local</option>
+                {% for local in locales %}
+                    <option value="{{ local.id_local }}" {% if datos_formulario.id_local|string == local.id_local|string %}selected{% endif %}>{{ local.nombre }}</option>
+                {% endfor %}
+            </select>
+            <label for="nombre">Nombre de la sala</label>
+            <input id="nombre" name="nombre" maxlength="50" required value="{{ datos_formulario.nombre }}">
+            <label for="capacidad">Capacidad</label>
+            <input id="capacidad" name="capacidad" type="number" min="1" required value="{{ datos_formulario.capacidad }}">
+            <button type="submit" class="accion-principal">Crear sala</button>
+        </form>
+    {% endif %}
+</section>
+
+{% for error in errores_carga %}<p role="alert" class="aviso error">{{ error }}</p>{% endfor %}
+
+<section class="panel-funciones">
+    <h3>Salas registradas</h3>
+    {% if salas %}
+        <div class="tabla-scroll">
+            <table>
+                <thead><tr><th>Local</th><th>Sala</th><th>Capacidad</th><th>Configuración</th></tr></thead>
+                <tbody>
+                    {% for sala in salas %}
+                        <tr>
+                            <td>{{ sala.local_nombre }}</td>
+                            <td>{{ sala.nombre }}</td>
+                            <td>{{ sala.capacidad }}</td>
+                            <td><a href="{{ url_for('admin_butacas', id_sala=sala.id_sala) }}">Configurar butacas</a></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p>No hay salas registradas.</p>
+    {% endif %}
+</section>
+{% endblock %}

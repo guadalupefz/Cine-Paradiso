@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ pelicula.titulo }} - Cine Paradiso{% endblock %}
+{% block title %}{{ pelicula.titulo or 'Funciones' }} - Cine Paradiso{% endblock %}
 {% block clase_pagina %}pagina-funciones{% endblock %}
 
 {% block content %}
@@ -19,22 +19,21 @@
 
     {% if error %}
         <p class="mensaje-error">No se pudieron cargar las funciones. Intentá nuevamente más tarde.</p>
+    {% elif not pelicula %}
+        <p class="mensaje-vacio">No encontramos la película solicitada. Volvé a la cartelera para elegir otra.</p>
     {% else %}
 
     <div class="u8-contenido">
 
         <aside class="u8-poster">
-        <img
-            src="{{ pelicula.poster or url_for('static', filename='img/poster_sin_imagen.svg') }}"
-            alt="Póster de {{ pelicula.titulo }}"
-        >
-       <div class="u8-poster-datos">
-            <span>Argentina · 2026</span>
-            <span>2D · En español</span>
-        </div>
+            <img
+                src="{{ pelicula.poster or url_for('static', filename='img/poster_sin_imagen.svg') }}"
+                alt="Póster de {{ pelicula.titulo }}"
+                onerror="this.onerror=null;this.src='{{ url_for('static', filename='img/poster_sin_imagen.svg') }}';"
+            >
+        </aside>
 
         <div class="u8-detalle">
-
             <div class="u8-info-pelicula">
                 <p class="u8-etiqueta">
                     {{ pelicula.genero or 'CINE' }} ·
@@ -45,7 +44,7 @@
                 <h1>{{ pelicula.titulo }}</h1>
 
                 <p class="u8-sinopsis">
-                    {{ pelicula.sinopsis or 'Una historia que merece ser vista en la gran pantalla.' }}
+                    {{ pelicula.sinopsis or 'Sinopsis no disponible.' }}
                 </p>
             </div>
 
@@ -59,50 +58,52 @@
                 </div>
 
                 {% if funciones %}
-                <div class="u8-horarios">
-                    {% for funcion in funciones %}
-                    <label class="u8-opcion">
-                        <input
-                            type="radio"
-                            name="funcion_seleccionada"
-                            value="{{ funcion.id_funcion }}"
-                            data-url="{{ url_for('ver_butacas', id_funcion=funcion.id_funcion, id_pelicula=id_pelicula) }}"
-                            data-fecha="{{ funcion.fecha }}"
-                            data-dia="{{ funcion.fecha_completa.split(' ')[0] }}"
-                            data-fecha-completa="{{ funcion.fecha_completa }}"
-                            data-horario="{{ funcion.horario }}"
-                            data-sala="{{ funcion.sala_nombre or 'Sala 1' }}"
-                            data-precio="{{ funcion.precio_base or 0 }}"
-                        >
-                        <span class="u8-circulo">
-                            <small>{{ funcion.fecha }}</small>
-                            <strong>{{ funcion.horario }}</strong>
-                            <em>SELECCIONAR</em>
-                        </span>
-                        <span class="u8-dia">
-                            {{ funcion.fecha_completa.split(' ')[0] }}
-                        </span>
-                    </label>
-                    {% endfor %}
-                </div>
+                    <div class="u8-horarios">
+                        {% for funcion in funciones %}
+                            <label class="u8-opcion">
+                                <input
+                                    type="radio"
+                                    name="funcion_seleccionada"
+                                    value="{{ funcion.id_funcion }}"
+                                    data-url="{{ url_for('ver_butacas', id_funcion=funcion.id_funcion, id_pelicula=id_pelicula) }}"
+                                    data-fecha-completa="{{ funcion.fecha_completa }}"
+                                    data-horario="{{ funcion.horario }}"
+                                    data-local="{{ funcion.local_nombre or 'Local no disponible' }}"
+                                    data-sala="{{ funcion.sala_nombre or 'Sala no disponible' }}"
+                                    data-precio="{{ funcion.precio_base or 0 }}"
+                                >
 
-                <div class="u8-resumen" id="detalle-funcion" hidden>
-                    <div>
-                        <strong id="precio-funcion"></strong>
-                        <span id="datos-funcion-seleccionada"></span>
+                                <span class="u8-circulo">
+                                    <small>{{ funcion.fecha }}</small>
+                                    <strong>{{ funcion.horario }}</strong>
+                                    <em>SELECCIONAR</em>
+                                </span>
+
+                                <span class="u8-dia">
+                                    {{ funcion.fecha_completa.split(' ')[0] }}
+                                    <small>{{ funcion.local_nombre or 'Local no disponible' }}</small>
+                                    <small>{{ funcion.sala_nombre or 'Sala no disponible' }}</small>
+                                </span>
+                            </label>
+                        {% endfor %}
                     </div>
-                    <button type="button" id="btn-elegir-butacas">
-                        Elegir butacas <span>→</span>
-                    </button>
-                </div>
 
-                <p class="u8-frase">
-                    <span>▤</span>
-                    Tu próxima gran historia empieza con una entrada.
-                </p>
+                    <div class="u8-resumen" id="detalle-funcion" hidden>
+                        <div>
+                            <strong id="precio-funcion"></strong>
+                            <span id="datos-funcion-seleccionada"></span>
+                        </div>
+                        <button type="button" id="btn-elegir-butacas">
+                            Elegir butacas <span>→</span>
+                        </button>
+                    </div>
 
+                    <p class="u8-frase">
+                        <span>▤</span>
+                        Tu próxima gran historia empieza con una entrada.
+                    </p>
                 {% else %}
-                    <p class="mensaje-vacio">No hay funciones disponibles para esta película.</p>
+                    <p class="mensaje-vacio">No hay funciones disponibles para esta película en este momento.</p>
                 {% endif %}
             </section>
         </div>
@@ -131,10 +132,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const valor = Number(opcion.dataset.precio || 0);
         precio.textContent = "ARS " + valor.toLocaleString("es-AR") + " por entrada";
+
         datos.textContent =
             opcion.dataset.fechaCompleta + " · " +
             opcion.dataset.horario + " · " +
-            opcion.dataset.sala + " · 2D";
+            opcion.dataset.local + " · " +
+            opcion.dataset.sala;
 
         resumen.hidden = false;
         boton.dataset.url = opcion.dataset.url;

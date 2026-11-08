@@ -264,18 +264,6 @@ def index():
         if peli["id_pelicula"] not in vistos:
             peli["duracion"] = peli.get("duracion_minutos")
 
-            # DATOS DE PRESENTACION FIGMA: conserva el ID de cada película
-            catalogo_demo = [
-                {"titulo": "La última función", "genero": "Drama", "duracion": 112, "clasificacion": "+13", "sinopsis": "Un viejo proyeccionista enciende una última vez las luces del cine de su barrio.", "poster": "static/img/demo_aventura.svg"},
-                {"titulo": "Órbita 9", "genero": "Ciencia ficción", "duracion": 104, "clasificacion": "+13", "sinopsis": "Una señal inesperada cambia el rumbo de un astronauta que viaja solo.", "poster": "static/img/demo_drama.svg"},
-                {"titulo": "Verano en la costa", "genero": "Comedia", "duracion": 98, "clasificacion": "ATP", "sinopsis": "Tres amigos, un verano y una promesa pendiente junto al mar.", "poster": "static/img/demo_romance.svg"},
-                {"titulo": "La ciudad invisible", "genero": "Suspenso", "duracion": 118, "clasificacion": "+16", "sinopsis": "Una fotógrafa descubre una ciudad que solo aparece después de medianoche.", "poster": "static/img/demo_comedia.svg"},
-                {"titulo": "Un tren a casa", "genero": "Aventura", "duracion": 106, "clasificacion": "ATP", "sinopsis": "Un viaje inesperado reúne a dos hermanos con las historias de su infancia.", "poster": "static/img/demo_ciencia.svg"}
-            ]
-            indice_demo = len(peliculas)
-            if indice_demo < len(catalogo_demo):
-                peli.update(catalogo_demo[indice_demo])
-
             poster = peli.get("poster", "")
             if poster and not poster.startswith(("http://", "https://")):
                 ruta_poster = poster.lstrip("/")
@@ -310,7 +298,7 @@ def ver_funciones():
 
     pelicula = funciones[0].copy() if funciones else {}
 
-    if pelicula and not pelicula.get("poster"):
+    if id_pelicula and (not pelicula or not pelicula.get("poster")):
         datos_peliculas, estado_peliculas = llamar_backend("GET", "/peliculas")
         catalogo = lista(datos_peliculas, "peliculas")
         ficha = next(
@@ -318,7 +306,10 @@ def ver_funciones():
              if p.get("id_pelicula") == id_pelicula),
             {}
         )
-        if ficha.get("poster"):
+
+        if not pelicula:
+            pelicula = ficha.copy()
+        elif ficha.get("poster"):
             pelicula["poster"] = ficha["poster"]
 
     if pelicula:
@@ -424,17 +415,17 @@ def ver_butacas(id_funcion):
                 "lunes", "martes", "miércoles", "jueves",
                 "viernes", "sábado", "domingo"
             ]
-            meses = [
-                "enero", "febrero", "marzo", "abril",
-                "mayo", "junio", "julio", "agosto",
-                "septiembre", "octubre", "noviembre", "diciembre"
+            meses_cortos = [
+                "ene", "feb", "mar", "abr", "may", "jun",
+                "jul", "ago", "sep", "oct", "nov", "dic"
             ]
-            dia_semana = dias[fecha.weekday()]
-            mes = meses[fecha.month - 1]
+            dia_semana = dias[fecha.weekday()].capitalize()
+            mes = meses_cortos[fecha.month - 1]
 
             funcion["fecha"] = (
-                f"{dia_semana} {fecha.day} de {mes} de {fecha.year}"
-            )    
+                f"{dia_semana} {fecha.day} {mes}, {fecha.year}"
+            )
+
             funcion["horario"] = fecha.strftime("%H:%M")
         except (ValueError, TypeError):
             funcion["fecha"] = funcion.get("fecha_hora_inicio", "")
@@ -579,9 +570,48 @@ def ver_compra():
         for id_butaca in ids_butacas
     ]
 
-    # Calcular el importe del resumen.
     precio_unitario = float(funcion.get("precio_base") or 0)
-    total = precio_unitario * len(ids_butacas)
+    total_entradas = precio_unitario * len(ids_butacas)
+
+    servicios_seleccionados = request.args.getlist("servicios")
+    datos_servicios, estado_servicios = llamar_backend("GET", "/servicios")
+    servicios_disponibles = lista(datos_servicios, "servicios")
+
+    detalle_servicios = []
+    total_servicios = 0
+
+    for item in servicios_seleccionados:
+        try:
+            id_servicio, cantidad = item.split(":")
+            id_servicio = int(id_servicio)
+            cantidad = int(cantidad)
+        except (ValueError, TypeError):
+            continue
+
+        if id_servicio <= 0 or cantidad <= 0:
+            continue
+
+        servicio = next(
+            (
+                s for s in servicios_disponibles
+                if int(s.get("id_servicio", 0)) == id_servicio
+            ),
+            None
+        )
+
+        if servicio:
+            precio = float(servicio.get("precio") or 0)
+            subtotal = precio * cantidad
+            detalle_servicios.append({
+                "id_servicio": id_servicio,
+                "nombre": servicio.get("nombre", "Servicio"),
+                "cantidad": cantidad,
+                "precio": precio,
+                "subtotal": subtotal
+            })
+            total_servicios += subtotal
+
+    total = total_entradas + total_servicios
 
     # Datos de la persona autenticada.
     usuario = usuario_actual() or {}
@@ -596,6 +626,10 @@ def ver_compra():
         funcion=funcion,
         precio_unitario=precio_unitario,
         total=total,
+        total_entradas=total_entradas,
+        detalle_servicios=detalle_servicios,
+        total_servicios=total_servicios,
+        servicios_seleccionados=servicios_seleccionados,
         usuario=usuario,
         error=estado_butacas != 200
     )
@@ -631,6 +665,18 @@ def procesar_compra():
     ):
         flash("La selección de butacas no es válida.", "error")
         return redirect(url_for("ver_butacas", id_funcion=id_funcion))
+
+    servicios_texto = request.form.get("servicios", "")
+
+    try:
+        servicios_seleccionados = obtener_servicios_seleccionados(servicios_texto)
+    except ValueError:
+        flash("La selección de servicios no es válida", "error")
+        return redirect(url_for(
+            "ver_servicios",
+            id_funcion=id_funcion,
+            butacas=butacas_texto
+        ))
 
     if request.form.get("metodo_pago") != "tarjeta":
         flash("Selecciona un método de pago valido", "error")
@@ -685,6 +731,7 @@ def procesar_compra():
         if (
             reserva_pendiente["id_funcion"] != id_funcion
             or reserva_pendiente["butacas"] != ids_butacas
+            or reserva_pendiente.get("servicios", []) != servicios_seleccionados
         ):
             flash(
                 "Ya tenés otra reserva pendiente"
@@ -701,7 +748,7 @@ def procesar_compra():
             f"/funciones/{id_funcion}/reservas",
             json={
                 "butacas": ids_butacas,
-                "servicios": []
+                "servicios": servicios_seleccionados
             }
         )
 
@@ -726,8 +773,9 @@ def procesar_compra():
         session["reserva_pendiente"] = {
             "id_compra": id_compra,
             "id_funcion": id_funcion,
-            "butacas": ids_butacas
-        }
+            "butacas": ids_butacas,
+            "servicios": servicios_seleccionados
+    }
 
     resultado, estado = llamar_backend(
         "POST",
@@ -787,23 +835,59 @@ def procesar_compra():
     return redirect(url_for(
         "ver_compra",
         id_funcion=id_funcion,
-        butacas=butacas_texto
+        butacas=butacas_texto,
+        servicios=servicios_texto
     ))
 
 
-@app.get("/servicios")
+@app.route("/servicios", methods=["GET", "POST"])
+@requiere_usuario
 def ver_servicios():
-    id_funcion = request.args.get("id_funcion", type=int)
-    butacas = request.args.get("butacas", "")
+    id_funcion = request.values.get("id_funcion", type=int)
+    bruto_butacas = request.values.get("butacas", "")
 
+    if isinstance(bruto_butacas, str):
+        ids_butacas = [b.strip() for b in bruto_butacas.split(",") if b.strip()]
+    else:
+        ids_butacas = bruto_butacas
+
+    if not id_funcion or not ids_butacas:
+        return redirect(url_for("ver_funciones"))
+
+    datos_cartelera, estado_cartelera = llamar_backend("GET", "/cartelera")
+    funciones = lista(datos_cartelera, "cartelera")
+    funcion = next((f for f in funciones if f.get("id_funcion") == id_funcion), None)
+
+    if funcion:
+        try:
+            fecha = datetime.strptime(funcion["fecha_hora_inicio"], "%a, %d %b %Y %H:%M:%S GMT")
+            dias_cortos = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"]
+            meses_cortos = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
+            funcion["fecha_corta"] = f"{dias_cortos[fecha.weekday()]} {fecha.day} {meses_cortos[fecha.month - 1].capitalize()} · {fecha.strftime('%H:%M')}"
+        except (ValueError, TypeError):
+            funcion["fecha_corta"] = funcion.get("fecha_hora_inicio", "")
+
+    datos_butacas, estado_butacas = llamar_backend("GET", f"/funciones/{id_funcion}/butacas")
+    butacas_disponibles = lista(datos_butacas, "butacas")
+    mapa_butacas = {
+        str(b.get("id_butaca")): f"{b.get('fila')}{b.get('numero')}"
+        for b in butacas_disponibles
+    }
+    detalle_butacas = [mapa_butacas.get(id_b, id_b) for id_b in ids_butacas]
+
+    servicios_seleccionados = request.values.getlist("servicios")
     datos, estado = llamar_backend("GET", "/servicios")
+    servicios = lista(datos, "servicios")
 
     return render_template(
         "servicios.html",
-        servicios=lista(datos, "servicios"),
-        error=estado != 200,
+        servicios=servicios,
+        funcion=funcion,
         id_funcion=id_funcion,
-        butacas=butacas
+        ids_butacas=ids_butacas,
+        detalle_butacas=detalle_butacas,
+        servicios_seleccionados=servicios_seleccionados,
+        error=estado != 200 or estado_cartelera != 200
     )
 
 @app.get("/mis-compras")
@@ -834,9 +918,14 @@ def mis_compras():
 def admin_resumen():
     ventas, ev = llamar_backend("GET", "/estadisticas/ventas")
     ocupacion, eo = llamar_backend("GET", "/estadisticas/ocupacion")
-    if ev != 200 or eo != 200:
-        flash("No se pudieron cargar todas las estadísticas.", "error")
-    return render_template("admin/resumen_admin.html", ventas=ventas, ocupacion=ocupacion)
+
+    return render_template(
+        "admin/resumen_admin.html",
+        ventas=ventas if ev == 200 else {},
+        ocupacion=ocupacion if eo == 200 else {},
+        ventas_ok=ev == 200,
+        ocupacion_ok=eo == 200
+    )
 
 @app.route("/admin/servicios", methods=["GET", "POST"])
 @requiere_admin
@@ -1103,6 +1192,175 @@ def admin_funciones():
         habilitar_guardado=not errores_carga and bool(peliculas) and bool(salas),
     ), estado_pagina
 
+
+
+
+@app.route("/admin/locales", methods=["GET", "POST"])
+@requiere_admin
+def admin_locales():
+    datos_formulario = {"nombre": "", "direccion": ""}
+    error_formulario = None
+
+    if request.method == "POST":
+        datos_formulario = {
+            "nombre": request.form.get("nombre", "").strip(),
+            "direccion": request.form.get("direccion", "").strip(),
+        }
+        resultado, estado = llamar_backend("POST", "/locales", json=datos_formulario)
+        if estado in (200, 201):
+            flash(mensaje_error(resultado), "ok")
+            return redirect(url_for("admin_locales"))
+        error_formulario = mensaje_error(resultado)
+
+    datos, estado = llamar_backend("GET", "/locales")
+    locales = lista(datos, "locales") if estado == 200 else []
+
+    return render_template(
+        "admin/locales_admin.html",
+        locales=locales,
+        datos_formulario=datos_formulario,
+        error_formulario=error_formulario,
+        error_listado=estado != 200,
+    )
+
+
+@app.route("/admin/salas", methods=["GET", "POST"])
+@requiere_admin
+def admin_salas():
+    datos_formulario = {"id_local": "", "nombre": "", "capacidad": ""}
+    error_formulario = None
+
+    if request.method == "POST":
+        datos_formulario = {
+            "id_local": request.form.get("id_local", ""),
+            "nombre": request.form.get("nombre", "").strip(),
+            "capacidad": request.form.get("capacidad", "").strip(),
+        }
+        id_local = request.form.get("id_local", type=int)
+        capacidad = request.form.get("capacidad", type=int)
+
+        if not id_local or id_local <= 0 or not capacidad or capacidad <= 0:
+            error_formulario = "Seleccioná un local e ingresá una capacidad válida."
+        else:
+            resultado, estado = llamar_backend(
+                "POST",
+                f"/locales/{id_local}/salas",
+                json={"nombre": datos_formulario["nombre"], "capacidad": capacidad},
+            )
+            if estado in (200, 201):
+                flash(mensaje_error(resultado), "ok")
+                return redirect(url_for("admin_salas", local=id_local))
+            error_formulario = mensaje_error(resultado)
+
+    datos, estado = llamar_backend("GET", "/locales")
+    locales = lista(datos, "locales") if estado == 200 else []
+    salas = []
+    errores_carga = []
+
+    for local in locales:
+        respuesta, codigo = llamar_backend("GET", f"/locales/{local['id_local']}/salas")
+        if codigo == 200:
+            for sala in lista(respuesta, "salas"):
+                salas.append({**sala, "local_nombre": local["nombre"]})
+        else:
+            errores_carga.append(f"No se pudieron cargar las salas de {local['nombre']}.")
+
+    return render_template(
+        "admin/salas_admin.html",
+        locales=locales,
+        salas=salas,
+        datos_formulario=datos_formulario,
+        error_formulario=error_formulario,
+        errores_carga=errores_carga,
+        error_locales=estado != 200,
+    )
+
+
+@app.route("/admin/salas/<int:id_sala>/butacas", methods=["GET", "POST"])
+@requiere_admin
+def admin_butacas(id_sala):
+    if id_sala <= 0:
+        abort(400)
+
+    sala_seleccionada = None
+    locales_datos, estado_locales = llamar_backend("GET", "/locales")
+    locales = lista(locales_datos, "locales") if estado_locales == 200 else []
+
+    for local in locales:
+        datos, estado = llamar_backend("GET", f"/locales/{local['id_local']}/salas")
+        if estado == 200:
+            for sala in lista(datos, "salas"):
+                if sala["id_sala"] == id_sala:
+                    sala_seleccionada = {**sala, "local_nombre": local["nombre"]}
+                    break
+        if sala_seleccionada:
+            break
+
+    if sala_seleccionada is None:
+        flash("La sala seleccionada no existe o no está disponible.", "error")
+        return redirect(url_for("admin_salas"))
+
+    error_formulario = None
+    distribucion = ""
+
+    if request.method == "POST":
+        distribucion = request.form.get("distribucion", "").strip()
+        butacas = []
+        filas_utilizadas = set()
+
+        try:
+            if not distribucion:
+                raise ValueError
+
+            for segmento in distribucion.split(","):
+                partes = segmento.strip().split(":")
+
+                if len(partes) != 2:
+                    raise ValueError
+
+                fila = partes[0].strip().upper()
+                cantidad = int(partes[1].strip())
+
+                if (
+                    not fila
+                    or not fila.isalpha()
+                    or len(fila) > 5
+                    or cantidad <= 0
+                    or fila in filas_utilizadas
+                ):
+                    raise ValueError
+
+                filas_utilizadas.add(fila)
+
+                for numero in range(1, cantidad + 1):
+                    butacas.append({"fila": fila, "numero": numero})
+
+            if len(butacas) != int(sala_seleccionada["capacidad"]):
+                raise ValueError
+
+        except (ValueError, TypeError):
+            error_formulario = (
+                "Ingresá una distribución válida, por ejemplo A:10,B:10. "
+                "No repitas filas y verificá que la suma coincida "
+                "con la capacidad de la sala."
+            )
+        else:
+            resultado, estado = llamar_backend(
+                "POST",
+                f"/salas/{id_sala}/butacas",
+                json={"butacas": butacas},
+            )
+            if estado in (200, 201):
+                flash(mensaje_error(resultado), "ok")
+                return redirect(url_for("admin_salas"))
+            error_formulario = mensaje_error(resultado)
+
+    return render_template(
+        "admin/butacas_admin.html",
+        sala=sala_seleccionada,
+        distribucion=distribucion,
+        error_formulario=error_formulario,
+    )
 
 @app.route("/admin/validar-qr", methods=["GET", "POST"])
 @requiere_admin

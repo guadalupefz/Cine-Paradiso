@@ -534,7 +534,7 @@
     width: 100%;
     box-sizing: border-box;
     gap: 16px;
-    margin: 10px 0 40px auto;
+    margin: -20px 0 40px;
     padding: 15px 0;
     background: transparent;
     border: none;
@@ -555,8 +555,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 26px;
-    height: 26px;
+    width: 20px;
+    height: 20px;
     border: 1px solid #c9c1b4;
     border-radius: 50%;
     color: var(--texto-suave);
@@ -631,6 +631,41 @@
     color: var(--tinta);
     font-family: Georgia, serif;
     font-size: 25px;
+}
+
+.sitio-publico .datos-funcion .detalle-pelicula {
+    width: 100%;
+    margin-left: -20px;
+    padding: 0;
+    text-align: left;
+    color: var(--texto-suave);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.sitio-publico .datos-funcion .separador-funcion {
+    width: 100%;
+    margin: 7px 0;
+    border: 0;
+    border-top: 1px solid var(--borde-publico);
+}
+
+.sitio-publico .datos-funcion .detalle-horario p {
+    margin: 5px 0;
+    color: var(--tinta);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.sitio-publico .datos-funcion .detalle-horario p:first-child {
+    color: #302017;
+    font-weight: 600;
+}
+
+
+.sitio-publico .datos-funcion .detalle-horario p:nth-child(2) {
+    color: var(--vino);
+    font-weight: 700;
 }
 
 .sitio-publico .datos-funcion p {
@@ -779,41 +814,89 @@
     box-shadow: 0 3px 12px rgba(0, 0, 0, .06);
 }
 
-.sitio-publico .resumen-butacas h3 {
-    margin-top: 0;
+.sitio-publico .encabezado-resumen {
+    margin: 0 0 12px;
     color: var(--vino);
-    font-size: 23px;
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 1px;
 }
 
-.sitio-publico .resumen-butacas > p {
-    font-size: 13px;
+.sitio-publico .resumen-butacas h3 {
+    margin: 0 0 18px;
+    color: #222;
+    font-size: 20px;
 }
 
 .sitio-publico #detalle-butacas {
-    min-height: 60px;
-    padding-left: 20px;
+    min-height: 0;
+    margin: 0 0 12px;
+    padding: 0;
+    list-style: none;
     color: var(--texto-suave);
     font-size: 13px;
 }
 
-.sitio-publico .detalle-precio {
-    margin: 25px 0;
-    padding-top: 15px;
-    border-top: 1px solid var(--borde-publico);
-}
-
-.sitio-publico .detalle-precio p {
+.sitio-publico .item-butaca-resumen {
     display: flex;
+    align-items: center;
     justify-content: space-between;
     gap: 10px;
+    margin-bottom: 10px;
+    padding: 12px;
+    background: #fff;
+    border: 1px solid var(--borde-publico);
+    border-radius: 5px;
+    color: var(--tinta);
+    font-size: 12px;
+}
+
+.sitio-publico .item-butaca-resumen strong {
+    white-space: nowrap;
+    font-size: 12px;
+    color: var(--vino);
+}
+
+.sitio-publico .datos-entradas {
+    margin: 0;
+    color: var(--texto-suave);
+    font-size: 12px;
+}
+
+.sitio-publico .separador-resumen {
+    height: 1px;
+    margin: 20px 0;
+    background: var(--borde-publico);
+}
+
+.sitio-publico .detalle-precio {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0;
+}
+
+.sitio-publico .detalle-precio span {
     font-size: 13px;
 }
 
-.sitio-publico .detalle-precio .total-butacas {
-    padding-top: 12px;
-    border-top: 1px solid var(--borde-publico);
-    font-size: 17px;
-    font-weight: bold;
+.sitio-publico .detalle-precio strong {
+    font-size: 22px;
+    color: var(--tinta);
+}
+
+.sitio-publico .precio-final {
+    margin: 5px 0 18px;
+    color: var(--texto-suave);
+    font-size: 11px;
+}
+
+.sitio-publico .mensaje-servicios {
+    margin: 0 0 15px;
+    color: var(--texto-suave);
+    font-size: 12px;
+    line-height: 1.5;
 }
 
 .sitio-publico #continuar-compra {
@@ -890,6 +973,7 @@
     flex: 1;
     width: 100%;
 }
+
 
 .sitio-publico .leyenda-butacas {
     display: flex;

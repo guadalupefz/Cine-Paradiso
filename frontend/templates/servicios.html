@@ -4,7 +4,8 @@
 {% block estilos_adicionales %}<link rel="stylesheet" href="{{ url_for('static', filename='css/servicios.css') }}">{% endblock %}
 
 {% block content %}
-    <div class="envoltura-servicios">
+    <div class="envoltura-servicios" data-cantidad-butacas="{{ ids_butacas|length if ids_butacas else 0 }}" data-precio-entrada="{{ funcion.precio_base if funcion and funcion.precio_base else 8500 }}">
+
         <!-- Indicador de pasos -->
         <div class="pasos-compra">
             <span class="paso">1 · Función</span>
@@ -18,15 +19,20 @@
         <div class="info-funcion-seleccionada">
             <span class="icono-ticket">🎟️</span>
             <div>
-                <strong> prueba </strong> <!-- Nombre de pelicula seleccionada -->
-                <p> prueba </p> <!-- Fecha · Hora · Sala · Butacas elegidas -->
+                <strong>{{ funcion.titulo if funcion else "Función seleccionada" }}</strong>
+                <p>
+                    {{ funcion.fecha_corta if funcion else "" }}
+                    {% if funcion and funcion.sala_nombre %}· {{ funcion.sala_nombre }}{% endif %}
+                    · Butacas: {{ detalle_butacas|join(', ') }}
+                </p>
             </div>
         </div>
 
+        <!-- Sección servicios -->
         <section class="seccion-servicios">
             <div class="encabezado-seccion-servicios">
                 <h2>Comprar</h2>
-                <h3 class="subtitulo">Servicios</h3>
+                <h3 class="subtitulo-vino">Servicios</h3>
                 <p class="descripcion-servicios">El mejor acompañamiento para una gran historia. Elegí tus favoritos.</p>
             </div>
 
@@ -37,22 +43,24 @@
             {% elif servicios %}
                 <div class="lista-servicios">
                     {% for servicio in servicios %}
-                        <div class="tarjeta-servicio">
-                            <!-- Contenedor de la ilustración de muestra (despues ver si lo agrego) -->
+                        <div class="tarjeta-servicio" data-id="{{ servicio.id_servicio }}">
                             <div class="ilustracion-servicio">
                                 <div class="circulo-icono">
-                                    <!-- Acá iría el icono o ilustración vectorial en el futuro -->
+                                    <span>🍿</span>
                                 </div>
+                                <small>ILUSTRACIÓN DE MUESTRA</small>
                             </div>
-                            <!-- Información del servicio -->
                             <div class="cuerpo-servicio">
                                 <h4>{{ servicio.nombre }}</h4>
                                 <p>{{ servicio.descripcion }}</p>
                             </div>
-                            <!-- Precio y botón -->
                             <div class="pie-tarjeta-servicio">
-                                <span class="precio-servicio">ARS {{ servicio.precio }}</span>
-                                <button class="btn-agregar" data-id="{{ servicio.id_servicio }}">Agregar</button>
+                                <span class="precio-servicio" data-precio="{{ servicio.precio }}">ARS {{ servicio.precio }}</span>
+                                <div class="controles-cantidad">
+                                    <button type="button" class="btn-cantidad btn-restar" data-id="{{ servicio.id_servicio }}" disabled>-</button>
+                                    <span class="contador-cantidad" id="cant-{{ servicio.id_servicio }}">0</span>
+                                    <button type="button" class="btn-cantidad btn-sumar" data-id="{{ servicio.id_servicio }}">Agregar</button>
+                                </div>
                             </div>
                         </div>
                     {% endfor %}
@@ -64,31 +72,40 @@
             {% endif %}
         </section>
 
-        <!-- Resumen -->
-        <div class="barra-resumen-compra">
-            <div class="resumen-izquierda">
-                <div class="item-resumen">
-                    <span> prueba </span> <!-- nro de entradas · precio de c/u -->
-                    <strong> prueba </strong> <!-- ARS precio total de entradas -->
+        <!-- Formulario con barra inferior -->
+        <form action="{{ url_for('procesar_compra') }}" method="POST" id="form-servicios-compra">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="id_funcion" value="{{ id_funcion }}">
+            <input type="hidden" name="butacas" value="{{ ids_butacas|join(',') }}">
+            <input type="hidden" name="servicios_seleccionados" id="input-servicios-ocultos" value="">
+
+            <div class="barra-resumen-compra">
+                <!-- Bloque izquierdo  -->
+                <div class="resumen-izquierda">
+                    <div class="item-resumen">
+                        <span>{{ ids_butacas|length if ids_butacas else 0 }} entradas · ARS {{ funcion.precio_base if funcion and funcion.precio_base else 8500 }} c/u</span>
+                        <strong>ARS {{ (ids_butacas|length if ids_butacas else 0) * (funcion.precio_base|float if funcion and funcion.precio_base else 8500) }}</strong>
+                    </div>
+                    <div class="divisor-resumen"></div>
+                    <div class="item-resumen" id="texto-servicios-agregados">
+                        <span>Servicios agregados: 0</span>
+                        <strong>ARS 0</strong>
+                    </div>
                 </div>
-                <div class="divisor-resumen"></div>
-                <div class="item-resumen">
-                    <span> prueba </span> <!-- Servicios agregados: cantidad de servicios agregados -->
-                    <strong> prueba </strong> <!-- ARS precio final servicios -->
+
+                <!-- Bloque derecho -->
+                <div class="resumen-derecha">
+                    <div class="total-visita">
+                        <small>Total de tu visita</small>
+                        <span class="monto-total" id="monto-total-visita">ARS 0</span>
+                    </div>
+                    <button type="submit" class="btn-continuar-extras">Confirmar compra →</button>
                 </div>
             </div>
-            <div class="resumen-derecha">
-                <div class="total-visita">
-                    <small>Total de tu visita</small>
-                    <span class="monto-total"> prueba </span> <!-- ARS PRECIO FINAL -->
-                </div>
-                <a href="{{ url_for('ver_compra', id_funcion=id_funcion, butacas=butacas) }}"
-                    class="btn-continuar-extras">
-                    Continuar
-                </a>
-            </div>
-        </div>
+        </form>
 
         <p class="nota-pie-servicios">Retirá tus pochoclos y bebidas en el mostrador antes de la función. <span class="opcional">Los servicios son opcionales.</span></p>
     </div>
+
+    <script src="{{ url_for('static', filename='js/servicios.js') }}" defer></script>
 {% endblock %}
