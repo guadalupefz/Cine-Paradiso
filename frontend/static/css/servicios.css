@@ -286,6 +286,29 @@
     background-color: #f4c455;
 }
 
+.btn-continuar-extras:disabled {
+    background-color: #e0d5c1;
+    color: #888;
+    cursor: not-allowed;
+}
+
+/* Aviso si el precio no está disponible */
+.alerta-precio-no-disponible {
+    display: block;
+    width: fit-content;           /* Se ajusta exactamente al tamaño del texto */
+    margin: 0 auto 20px auto;     /* Centra el cuadro automáticamente y le da margen abajo */
+    background-color: #fde8e8;
+    border: 1px solid #f8b4b4;
+    color: #9b1c1c;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: bold;
+    text-align: center;
+    position: relative;
+    z-index: 10;                  /* Se ubica por encima sin superponerse mal */
+}
+
 /* Nota al pie */
 .nota-pie-servicios {
     text-align: center;

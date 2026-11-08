@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const montoTotalVisita = document.getElementById("monto-total-visita");
 
     const cantidadButacas = parseInt(envolturaServicios.dataset.cantidadButacas) || 0;
-    const precioBaseEntrada = parseFloat(envolturaServicios.dataset.precioEntrada) || 8500;
+    const precioBaseEntrada = parseFloat(envolturaServicios.dataset.precioEntrada) || 0;
     let subtotalEntradas = cantidadButacas * precioBaseEntrada;
 
     let carritoServicios = {};
@@ -34,7 +34,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let totalGeneral = subtotalEntradas + totalServicios;
         if (montoTotalVisita) {
-            montoTotalVisita.textContent = `ARS ${totalGeneral.toLocaleString()}`;
+            if (precioBaseEntrada > 0) {
+                montoTotalVisita.textContent = `ARS ${totalGeneral.toLocaleString()}`;
+            } else {
+                montoTotalVisita.textContent = "No disponible";
+            }
         }
 
         if (inputServiciosOcultos) {
@@ -52,6 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (btnSumar && btnRestar && spanContador) {
             btnSumar.addEventListener("click", () => {
+                if (precioBaseEntrada === 0) return;
                 carritoServicios[idServicio]++;
                 spanContador.textContent = carritoServicios[idServicio];
                 btnRestar.disabled = false;
@@ -59,6 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             btnRestar.addEventListener("click", () => {
+                if (precioBaseEntrada === 0) return;
                 if (carritoServicios[idServicio] > 0) {
                     carritoServicios[idServicio]--;
                     spanContador.textContent = carritoServicios[idServicio];

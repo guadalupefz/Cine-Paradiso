@@ -4,8 +4,7 @@
 {% block estilos_adicionales %}<link rel="stylesheet" href="{{ url_for('static', filename='css/servicios.css') }}">{% endblock %}
 
 {% block content %}
-    <div class="envoltura-servicios" data-cantidad-butacas="{{ ids_butacas|length if ids_butacas else 0 }}" data-precio-entrada="{{ funcion.precio_base if funcion and funcion.precio_base else 8500 }}">
-        
+    <div class="envoltura-servicios" data-cantidad-butacas="{{ ids_butacas|length if ids_butacas else 0 }}" data-precio-entrada="{{ funcion.precio_base if funcion and funcion.precio_base else 0 }}">
     {% if not modo_catalogo %}
 
         <!-- Indicador de pasos -->
@@ -30,6 +29,13 @@
             </div>
         </div>
     {% endif %}
+
+        <!-- Aviso si el precio no está disponible -->
+        {% if not (funcion and funcion.precio_base) %}
+            <div class="alerta-precio-no-disponible">
+                ⚠️ El precio de la entrada no está disponible. No es posible continuar con la compra.
+            </div>
+        {% endif %}
 
         <!-- Sección servicios -->
         <section class="seccion-servicios">
@@ -69,7 +75,7 @@
                                     <div class="controles-cantidad">
                                         <button type="button" class="btn-cantidad btn-restar" data-id="{{ servicio.id_servicio }}" disabled>-</button>
                                         <span class="contador-cantidad" id="cant-{{ servicio.id_servicio }}">0</span>
-                                        <button type="button" class="btn-cantidad btn-sumar" data-id="{{ servicio.id_servicio }}">Agregar</button>
+                                        <button type="button" class="btn-cantidad btn-sumar" data-id="{{ servicio.id_servicio }}" {% if not (funcion and funcion.precio_base) %}disabled{% endif %}>Agregar</button>
                                     </div>
                                 {% endif %}
 
@@ -89,13 +95,17 @@
             <input type="hidden" name="butacas" value="{{ ids_butacas|join(',') }}">
             <input type="hidden" name="servicios" id="input-servicios-ocultos" value="">
 
-
             <div class="barra-resumen-compra">
                 <!-- Bloque izquierdo  -->
                 <div class="resumen-izquierda">
                     <div class="item-resumen">
-                        <span>{{ ids_butacas|length if ids_butacas else 0 }} entradas · ARS {{ funcion.precio_base if funcion and funcion.precio_base else 8500 }} c/u</span>
-                        <strong>ARS {{ (ids_butacas|length if ids_butacas else 0) * (funcion.precio_base|float if funcion and funcion.precio_base else 8500) }}</strong>
+                        {% if funcion and funcion.precio_base %}
+                            <span>{{ ids_butacas|length if ids_butacas else 0 }} entradas · ARS {{ funcion.precio_base }} c/u</span>
+                            <strong>ARS {{ (ids_butacas|length if ids_butacas else 0) * (funcion.precio_base|float) }}</strong>
+                        {% else %}
+                            <span>Entradas</span>
+                            <strong>Precio no disponible</strong>
+                        {% endif %}
                     </div>
                     <div class="divisor-resumen"></div>
                     <div class="item-resumen" id="texto-servicios-agregados">
@@ -108,9 +118,9 @@
                 <div class="resumen-derecha">
                     <div class="total-visita">
                         <small>Total de tu visita</small>
-                        <span class="monto-total" id="monto-total-visita">ARS 0</span>
+                        <span class="monto-total" id="monto-total-visita">{% if funcion and funcion.precio_base %}ARS 0{% else %}No disponible{% endif %}</span>
                     </div>
-                    <button type="submit" class="btn-continuar-extras">Continuar a resumen →</button>
+                    <button type="submit" class="btn-continuar-extras" {% if not (funcion and funcion.precio_base) %}disabled{% endif %}>Continuar a resumen →</button>
                 </div>
             </div>
         </form>
