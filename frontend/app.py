@@ -8,9 +8,19 @@ from werkzeug.exceptions import HTTPException
 
 import requests
 from dotenv import load_dotenv
-from flask import Flask, render_template, request, session, redirect, url_for, flash, g, abort
+from flask import Flask, render_template, request, session, redirect, url_for, flash, g, abort, send_file
 
 from flask import Response
+from io import BytesIO
+from xml.sax.saxutils import escape
+
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import mm
+from reportlab.platypus import (SimpleDocTemplate, Paragraph, Spacer, Table, 
+    TableStyle, Image)
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 BACKEND_URL = os.environ.get("BACKEND_URL", "http://127.0.0.1:5001/api").rstrip("/")
@@ -1516,6 +1526,170 @@ def ver_comprobante(id_compra):
         comprobante=comprobante
     )
 
+@app.get("/compras/<int:id_compra>/comprobante/pdf")
+@requiere_usuario
+def descargar_comprobante_pdf(id_compra):
+
+    comprobante, estado = llamar_backend(
+        "GET",
+        f"/compras/{id_compra}/comprobante"
+    )
+
+    if estado != 200:
+        abort(estado)
+
+    compra = comprobante["compra"]
+    entradas = comprobante["entradas"]
+    servicios = comprobante.get("servicios", [])
+
+    buffer = BytesIO()
+
+    documento = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=20 * mm,
+        leftMargin=20 * mm,
+        topMargin=20 * mm,
+        bottomMargin=20 * mm
+    )
+
+    estilos = getSampleStyleSheet()
+    elementos = []
+
+    titulo = ParagraphStyle(
+        "TituloCine",
+        parent=estilos["Title"],
+        alignment=TA_CENTER,
+        textColor=colors.HexColor("#702f24"),
+        fontSize=20,
+        spaceAfter=15
+    )
+
+    elementos.append(Paragraph("CINE PARADISO", titulo))
+    elementos.append(Paragraph(
+        f"Comprobante de compra N° {compra['id_compra']}",
+        estilos["Heading2"]
+    ))
+
+    elementos.append(Spacer(1, 10))
+
+    datos_compra = [
+        ["Cliente", f"{escape(str(compra['nombre']))} {escape(str(compra['apellido']))}"],
+        ["Email", escape(str(compra["email"]))],
+        ["Fecha", escape(str(compra["fecha_hora"]))],
+        ["Estado", escape(str(compra["estado"]))],
+        ["Total", f"$ {compra['total']}"]
+    ]
+
+    tabla_compra = Table(datos_compra, colWidths=[35 * mm, 120 * mm])
+
+    tabla_compra.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#eee4d5")),
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+        ("PADDING", (0, 0), (-1, -1), 8),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE")
+    ]))
+
+    elementos.append(tabla_compra)
+    elementos.append(Spacer(1, 18))
+    elementos.append(Paragraph("ENTRADAS", estilos["Heading2"]))
+
+    if compra["estado"] in ("aprobada", "confirmada"):
+
+        for entrada in entradas:
+
+            elementos.append(Paragraph(
+                f"<b>{escape(str(entrada['pelicula']))}</b>",
+                estilos["Heading3"]
+            ))
+
+            datos_entrada = [
+                ["Función", escape(str(entrada["fecha_hora_inicio"]))],
+                ["Cine", escape(str(entrada["local"]))],
+                ["Dirección", escape(str(entrada.get("direccion", "No disponible")))],
+                ["Sala", escape(str(entrada["sala"]))],
+                ["Butaca", f"{escape(str(entrada['fila']))}{escape(str(entrada['numero']))}"]
+            ]
+
+            tabla_entrada = Table(
+                datos_entrada,
+                colWidths=[35 * mm, 120 * mm]
+            )
+
+            tabla_entrada.setStyle(TableStyle([
+                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+                ("PADDING", (0, 0), (-1, -1), 7)
+            ]))
+
+            elementos.append(tabla_entrada)
+            elementos.append(Spacer(1, 8))
+
+            respuesta_qr = requests.get(
+                f"{BACKEND_URL}/qr/{entrada['id_entrada']}",
+                headers={
+                    "Authorization": "Bearer " + session.get("backend_token", "")
+                },
+                timeout=15
+            )
+
+            if respuesta_qr.status_code != 200:
+                abort(respuesta_qr.status_code)
+
+            imagen_qr = Image(
+                BytesIO(respuesta_qr.content),
+                width=35 * mm,
+                height=35 * mm
+            )
+
+            elementos.append(imagen_qr)
+            elementos.append(Spacer(1, 15))
+
+    elementos.append(Paragraph(
+        "SERVICIOS ADICIONALES",
+        estilos["Heading2"]
+    ))
+
+    if servicios:
+        datos_servicios = [["Servicio", "Cantidad", "Subtotal"]]
+
+        for servicio in servicios:
+            datos_servicios.append([
+                escape(str(servicio["nombre"])),
+                str(servicio["cantidad"]),
+                f"$ {servicio['subtotal']}"
+            ])
+
+        tabla_servicios = Table(
+            datos_servicios,
+            colWidths=[80 * mm, 30 * mm, 45 * mm]
+        )
+
+        tabla_servicios.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eee4d5")),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+            ("PADDING", (0, 0), (-1, -1), 8)
+        ]))
+
+        elementos.append(tabla_servicios)
+
+    else:
+        elementos.append(Paragraph(
+            "No se compraron servicios adicionales.",
+            estilos["Normal"]
+        ))
+
+    elementos.append(Spacer(1, 15))
+
+    documento.build(elementos)
+
+    buffer.seek(0)
+
+    return send_file(
+        buffer,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=f"comprobante_{id_compra}.pdf"
+    )
 
 if __name__ == "__main__":
     app.run("127.0.0.1",port=8080,debug=os.environ.get("FLASK_DEBUG") == "1")
