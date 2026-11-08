@@ -23,9 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const precio = parseFloat(tarjeta.querySelector(".precio-servicio").getAttribute("data-precio")) || 0;
                 totalServicios += precio * cantidad;
 
-                for (let i = 0; i < cantidad; i++) {
-                    arrayParaBackend.push(idServicio);
-                }
+                arrayParaBackend.push(`${idServicio}:${cantidad}`);
             }
         }
 

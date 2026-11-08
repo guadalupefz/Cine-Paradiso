@@ -72,12 +72,11 @@
             {% endif %}
         </section>
 
-        <!-- Formulario con barra inferior -->
-        <form action="{{ url_for('procesar_compra') }}" method="POST" id="form-servicios-compra">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+        <form action="{{ url_for('ver_compra') }}" method="GET" id="form-servicios-compra">
             <input type="hidden" name="id_funcion" value="{{ id_funcion }}">
             <input type="hidden" name="butacas" value="{{ ids_butacas|join(',') }}">
-            <input type="hidden" name="servicios_seleccionados" id="input-servicios-ocultos" value="">
+            <input type="hidden" name="servicios" id="input-servicios-ocultos" value="">
+
 
             <div class="barra-resumen-compra">
                 <!-- Bloque izquierdo  -->
@@ -99,7 +98,7 @@
                         <small>Total de tu visita</small>
                         <span class="monto-total" id="monto-total-visita">ARS 0</span>
                     </div>
-                    <button type="submit" class="btn-continuar-extras">Confirmar compra →</button>
+                    <button type="submit" class="btn-continuar-extras">Continuar a resumen →</button>
                 </div>
             </div>
         </form>

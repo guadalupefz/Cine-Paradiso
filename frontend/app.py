@@ -445,6 +445,36 @@ def ver_butacas(id_funcion):
         )
     )
 
+
+def obtener_servicios_seleccionados(texto):
+    if not texto:
+        return []
+
+    servicios = []
+    ids = set()
+
+    for elemento in texto.split(","):
+        partes = elemento.split(":")
+
+        if len(partes) != 2:
+            raise ValueError("Formato de servicios inválido")
+
+        id_servicio = int(partes[0])
+        cantidad = int(partes[1])
+
+        if id_servicio <= 0 or cantidad <= 0 or id_servicio in ids:
+            raise ValueError("Selección de servicios inválida")
+
+        servicios.append({
+            "id_servicio": id_servicio,
+            "cantidad": cantidad
+        })
+
+        ids.add(id_servicio)
+
+    return servicios
+
+
 @app.get("/compra")
 @requiere_usuario
 def ver_compra():
@@ -463,6 +493,19 @@ def ver_compra():
             id_funcion=id_funcion,
             butacas=ids_butacas
         )
+
+    servicios_texto = request.args.get("servicios", "")
+
+    try:
+        servicios_seleccionados = obtener_servicios_seleccionados(servicios_texto)
+    except ValueError:
+        flash("La selección de servicios no es válida", "error")
+        return redirect(url_for(
+            "ver_servicios",
+            id_funcion=id_funcion,
+            butacas=",".join(ids_butacas)
+        ))
+
 
     datos_cartelera, estado_cartelera = llamar_backend(
         "GET", "/cartelera"
@@ -571,47 +614,51 @@ def ver_compra():
     ]
 
     precio_unitario = float(funcion.get("precio_base") or 0)
-    total_entradas = precio_unitario * len(ids_butacas)
-
-    servicios_seleccionados = request.args.getlist("servicios")
-    datos_servicios, estado_servicios = llamar_backend("GET", "/servicios")
-    servicios_disponibles = lista(datos_servicios, "servicios")
+    total = precio_unitario * len(ids_butacas)
 
     detalle_servicios = []
-    total_servicios = 0
 
-    for item in servicios_seleccionados:
-        try:
-            id_servicio, cantidad = item.split(":")
-            id_servicio = int(id_servicio)
-            cantidad = int(cantidad)
-        except (ValueError, TypeError):
-            continue
+    if servicios_seleccionados:
+        datos_servicios, estado_servicios = llamar_backend("GET", "/servicios")
 
-        if id_servicio <= 0 or cantidad <= 0:
-            continue
+        if estado_servicios != 200:
+            flash("No se pudieron cargar los servicios seleccionados", "error")
+            return redirect(url_for(
+                "ver_servicios",
+                id_funcion=id_funcion,
+                butacas=",".join(ids_butacas)
+            ))
 
-        servicio = next(
-            (
-                s for s in servicios_disponibles
-                if int(s.get("id_servicio", 0)) == id_servicio
-            ),
-            None
-        )
+        servicios_disponibles = lista(datos_servicios, "servicios")
 
-        if servicio:
-            precio = float(servicio.get("precio") or 0)
+        for seleccionado in servicios_seleccionados:
+            servicio = next(
+                (
+                    s for s in servicios_disponibles
+                    if s["id_servicio"] == seleccionado["id_servicio"]
+                ),
+                None
+            )
+
+            if servicio is None:
+                flash("Uno de los servicios ya no está disponible", "error")
+                return redirect(url_for(
+                    "ver_servicios",
+                    id_funcion=id_funcion,
+                    butacas=",".join(ids_butacas)
+                ))
+
+            cantidad = seleccionado["cantidad"]
+            precio = float(servicio["precio"])
             subtotal = precio * cantidad
+
             detalle_servicios.append({
-                "id_servicio": id_servicio,
-                "nombre": servicio.get("nombre", "Servicio"),
+                "nombre": servicio["nombre"],
                 "cantidad": cantidad,
-                "precio": precio,
                 "subtotal": subtotal
             })
-            total_servicios += subtotal
 
-    total = total_entradas + total_servicios
+            total += subtotal
 
     # Datos de la persona autenticada.
     usuario = usuario_actual() or {}
@@ -626,12 +673,11 @@ def ver_compra():
         funcion=funcion,
         precio_unitario=precio_unitario,
         total=total,
-        total_entradas=total_entradas,
-        detalle_servicios=detalle_servicios,
-        total_servicios=total_servicios,
-        servicios_seleccionados=servicios_seleccionados,
         usuario=usuario,
-        error=estado_butacas != 200
+        error=estado_butacas != 200,
+        servicios_seleccionados=servicios_seleccionados,
+        detalle_servicios=detalle_servicios,
+        servicios_texto=servicios_texto
     )
 
 def pago_aprobado():

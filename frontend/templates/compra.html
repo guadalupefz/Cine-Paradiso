@@ -38,6 +38,12 @@
                 value="{{ butacas|join(',') }}"
             >
 
+            <input
+                type="hidden"
+                name="servicios"
+                value="{{ servicios_texto }}"
+            >
+
             <div class="contenido-compra">
 
                 <div class="datos-compra">
@@ -133,6 +139,17 @@
                         {% endfor %}
 
                     </div>
+
+                {% if detalle_servicios %}
+                    <h3>Servicios adicionales</h3>
+
+                    {% for servicio in detalle_servicios %}
+                        <p>
+                            {{ servicio.nombre }} ({{ servicio.cantidad }}):
+                            ${{ servicio.subtotal }}
+                        </p>
+                    {% endfor %}
+                {% endif %}
 
                     <div class="detalle-precio">
 
