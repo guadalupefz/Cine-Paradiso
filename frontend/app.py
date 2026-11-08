@@ -415,17 +415,17 @@ def ver_butacas(id_funcion):
                 "lunes", "martes", "miércoles", "jueves",
                 "viernes", "sábado", "domingo"
             ]
-            meses = [
-                "enero", "febrero", "marzo", "abril",
-                "mayo", "junio", "julio", "agosto",
-                "septiembre", "octubre", "noviembre", "diciembre"
+            meses_cortos = [
+                "ene", "feb", "mar", "abr", "may", "jun",
+                "jul", "ago", "sep", "oct", "nov", "dic"
             ]
-            dia_semana = dias[fecha.weekday()]
-            mes = meses[fecha.month - 1]
+            dia_semana = dias[fecha.weekday()].capitalize()
+            mes = meses_cortos[fecha.month - 1]
 
             funcion["fecha"] = (
-                f"{dia_semana} {fecha.day} de {mes} de {fecha.year}"
-            )    
+                f"{dia_semana} {fecha.day} {mes}, {fecha.year}"
+            )
+            
             funcion["horario"] = fecha.strftime("%H:%M")
         except (ValueError, TypeError):
             funcion["fecha"] = funcion.get("fecha_hora_inicio", "")
