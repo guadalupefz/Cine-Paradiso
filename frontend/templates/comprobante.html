@@ -40,13 +40,27 @@
 {% endfor %}
 
 <h3>servicios adicionales</h3>
-
 {% for servicio in comprobante.servicios %}
 <p>{{ servicio.nombre }} - Cantidad: {{ servicio.cantidad }} - ${{ servicio.subtotal }}</p>
 {% else %}
 <p>no se compraron servicios adicionales</p>
 {% endfor %}
 
-<a href="{{ url_for('mis_compras') }}">volver a mis compras</a>
+{% if comprobante.compra.estado in ["aprobada", "confirmada"] %}
+<div class="acciones-comprobante">
+    <a href="{{ url_for('descargar_comprobante_pdf', id_compra=comprobante.compra.id_compra) }}"
+       class="boton-principal">
+        Descargar comprobante PDF
+    </a>
+
+    <a href="{{ url_for('mis_compras') }}" class="boton-secundario">
+        Volver a mis compras
+    </a>
+</div>
+{% else %}
+<a href="{{ url_for('mis_compras') }}" class="boton-secundario">
+    Volver a mis compras
+</a>
+{% endif %}
 
 {% endblock %}
