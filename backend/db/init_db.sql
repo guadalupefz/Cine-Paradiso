@@ -67,7 +67,7 @@ CREATE TABLE compra (
     id_usuario INT NOT NULL,
     fecha_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
     total DECIMAL(10,2) NOT NULL,
-    estado VARCHAR(20) NOT NULL,
+    estado VARCHAR(20) NOT NULLCHECK (estado IN ('pendiente', 'confirmada', 'expirada', 'cancelada'))
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
 );
 

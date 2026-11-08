@@ -11,7 +11,7 @@ def obtener_butacas_ocupadas_con_bloqueo(cursor, id_funcion: int, lista_id_butac
         WHERE e.id_funcion = %s
             AND e.id_butaca IN ({format_strings})
             AND (
-                c.estado IN ('aprobada', 'confirmada')
+                c.estado = 'confirmada'
                 OR (c.estado = 'pendiente' AND c.fecha_hora > NOW() - INTERVAL 15 MINUTE)
             )
         FOR UPDATE;
@@ -21,21 +21,19 @@ def obtener_butacas_ocupadas_con_bloqueo(cursor, id_funcion: int, lista_id_butac
     filas = cursor.fetchall()
     return [fila['id_butaca'] for fila in filas]
 
-def limpiar_reservas_expiradas(cursor, id_funcion: int, lista_id_butacas: list):
+def limpiar_reservas_expiradas(cursor, id_funcion: int):
 
-    format_strings = ','.join(['%s'] * len(lista_id_butacas))
-
-    query_upd = f"""
+    query_upd = """
         UPDATE compra c
         INNER JOIN entrada e ON e.id_compra = c.id_compra
         SET c.estado = 'expirada'
         WHERE e.id_funcion = %s
             AND c.estado = 'pendiente'
-            AND c.fecha_hora <= NOW() - INTERVAL 15 MINUTE;
+            AND c.fecha_hora &lt;= NOW() - INTERVAL 15 MINUTE;
     """
     cursor.execute(query_upd, (id_funcion,))
 
-    query_del = f"""
+    query_del = """
         DELETE e FROM entrada e
         INNER JOIN compra c ON c.id_compra = e.id_compra
         WHERE e.id_funcion = %s

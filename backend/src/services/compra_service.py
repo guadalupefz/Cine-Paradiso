@@ -71,7 +71,7 @@ def realizar_compra(id_usuario, id_funcion, ids_butacas):
             cursor,
             id_usuario,
             total,
-            "aprobada"
+            "confirmada"
         )
 
         entradas = []
@@ -98,7 +98,7 @@ def realizar_compra(id_usuario, id_funcion, ids_butacas):
         resultado = {
             "id_compra": id_compra,
             "total": str(total),
-            "estado": "aprobada",
+            "estado": "confirmada",
             "entradas": entradas
         }
 
@@ -177,7 +177,7 @@ def confirmar_compra(id_usuario, id_compra):
         cursor.execute(
             """
             UPDATE compra
-            SET estado = 'aprobada'
+            SET estado = 'confirmada'
             WHERE id_compra = %s AND estado = 'pendiente'
             """,
             (id_compra,)
@@ -211,7 +211,7 @@ def confirmar_compra(id_usuario, id_compra):
         resultado = {
             "id_compra": id_compra,
             "total": str(compra["total"]),
-            "estado": "aprobada",
+            "estado": "confirmada",
             "entradas": entradas_confirmadas
         }
 

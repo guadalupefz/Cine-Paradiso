@@ -12,7 +12,7 @@ def entrada_utilizada(entrada):
 
 
 def compra_confirmada(entrada):
-    if entrada["estado_compra"].lower() in ("confirmada", "aprobada"):
+    if entrada["estado_compra"].lower() == "confirmada":
         return True
 
     return False

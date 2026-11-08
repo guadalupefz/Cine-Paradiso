@@ -1,5 +1,5 @@
 def obtener_ventas_por_genero(cursor, desde=None, hasta=None):
-    filtros = ["LOWER(c.estado) = 'aprobada'"]
+    filtros = ["LOWER(c.estado) = 'confirmada'"]
     parametros = []
 
     if desde:
@@ -31,7 +31,7 @@ def obtener_ventas_por_genero(cursor, desde=None, hasta=None):
 
 
 def obtener_ventas_por_franja(cursor, desde=None, hasta=None):
-    filtros = ["LOWER(c.estado) = 'aprobada'"]
+    filtros = ["LOWER(c.estado) = 'confirmada'"]
     parametros = []
 
     if desde:
@@ -89,12 +89,12 @@ def obtener_ocupacion_por_funcion(cursor, desde=None, hasta=None):
             s.nombre AS sala,
             s.capacidad,
             COUNT(DISTINCT CASE
-                WHEN LOWER(c.estado) = 'aprobada'
+                WHEN LOWER(c.estado) = 'confirmada'
                 THEN e.id_butaca
             END) AS butacas_ocupadas,
             ROUND(
                 100.0 * COUNT(DISTINCT CASE
-                    WHEN LOWER(c.estado) = 'aprobada'
+                    WHEN LOWER(c.estado) = 'confirmada'
                     THEN e.id_butaca
                 END) / NULLIF(s.capacidad, 0),
                 2
@@ -152,7 +152,7 @@ def obtener_ocupacion_por_pelicula(cursor, desde=None, hasta=None):
                 p.titulo AS pelicula,
                 s.capacidad,
                 COUNT(DISTINCT CASE
-                    WHEN LOWER(c.estado) = 'aprobada'
+                    WHEN LOWER(c.estado) = 'confirmada'
                     THEN e.id_butaca
                 END) AS butacas_ocupadas
             FROM funcion f
