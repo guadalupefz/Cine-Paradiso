@@ -33,6 +33,7 @@ def enviar_mail_compra(comprobante, entradas_qr):
         f"hola {compra['nombre']}!\n\n"
         f"tu compra {compra['id_compra']} fue confirmada\n"
         f"Total: ${compra['total']}\n"
+        f"\nServicios adicionales:{detalle_servicios}\n\n"
         f"\ntus entradas:\n{detalle_entradas}\n"
         "Estos son los codigos qr de tus entradas\n\n"
     )
@@ -48,5 +49,16 @@ def enviar_mail_compra(comprobante, entradas_qr):
             content_type="image/png",
             data=archivo.getvalue()
         )
+
+        detalle_servicios = ""
+
+    for servicio in comprobante.get("servicios", []):
+        detalle_servicios += (
+            f"\n- {servicio['nombre']} x{servicio['cantidad']}: "
+            f"${servicio['subtotal']}"
+        )
+
+    if not detalle_servicios:
+        detalle_servicios = "\nSin servicios adicionales"
 
     mail.send(mensaje)
