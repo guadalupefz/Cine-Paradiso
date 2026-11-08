@@ -10,7 +10,7 @@ def enviar_mail_compra(comprobante, entradas_qr):
     compra = comprobante["compra"]
     entradas = comprobante["entradas"]
 
-    if compra["estado"] not in ("aprobada", "confirmada"):
+    if compra["estado"] not in ("confirmada"):
         raise ValueError("La compra no está confirmada")
 
     mensaje = Message(
