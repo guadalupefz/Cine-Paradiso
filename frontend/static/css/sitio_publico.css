@@ -1488,6 +1488,9 @@ body.sitio-publico {
     background: #f5f0e7;
     color: #34251f;
 }
+body.sitio-publico:has(.seleccion-butacas) {
+    background: #fff8e8;
+}
 
 body.sitio-publico .cabecera-sitio {
     background: #f5f0e7;
