@@ -57,35 +57,19 @@
                     <div class="datos-funcion">
                         <h3>{{ funcion.titulo }}</h3>
 
-                        <p>
-                            <strong>Fecha:</strong>
-                            {{ funcion.fecha }}
-                        </p>
-
-                        <p>
-                            <strong>Horario:</strong>
-                            {{ funcion.horario }}
-                        </p>
-
-                        <p>
-                            <strong>Cine:</strong>
-                            {{ funcion.local_nombre }}
-                        </p>
-
-                        <p>
-                            <strong>Sala:</strong>
-                            {{ funcion.sala_nombre }}
-                        </p>
-
-                        <p>
-                            <strong>Duración:</strong>
-                            {{ funcion.duracion_minutos }} minutos
-                        </p>
-
-                        <p>
-                            <strong>Clasificación:</strong>
+                        <p class="detalle-pelicula">
+                            {{ funcion.genero }} ·
+                            {{ funcion.duracion_minutos }} min ·
                             {{ funcion.clasificacion }}
                         </p>
+
+                        <hr class="separador-funcion">
+                        
+                        <div class="detalle-horario">
+                            <p>{{ funcion.fecha }}</p>
+                            <p>{{ funcion.horario }} · {{ funcion.sala_nombre }}</p>
+                            <p>2D · En español</p>
+                        </div>
                     </div>
 
                 </div>
