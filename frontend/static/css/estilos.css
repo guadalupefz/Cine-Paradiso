@@ -628,3 +628,16 @@ a { color: #8d1515; }
 .imagen_qr {
     width: 200px;
 }
+
+.acciones-comprobante {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin: 30px auto;
+}
+
+.acciones-comprobante a {
+    min-width: 220px;
+    text-align: center;
+}
