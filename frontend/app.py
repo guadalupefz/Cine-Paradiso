@@ -958,6 +958,21 @@ def mis_compras():
 
     return render_template("compras.html", compras=compras, error=estado != 200)
 
+@app.post("/mis-compras/<int:id_compra>/cancelar")
+@requiere_usuario
+def cancelar_compra_frontend(id_compra):
+    datos, estado = llamar_backend(
+        "POST",
+        f"/compras/{id_compra}/cancelar"
+    )
+
+    if estado == 200:
+        flash(mensaje_error(datos), "ok")
+    else:
+        flash(mensaje_error(datos), "error")
+
+    return redirect(url_for("mis_compras"))
+
 
 @app.get("/admin")
 @requiere_admin
