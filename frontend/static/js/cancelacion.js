@@ -1,59 +1,115 @@
 document.addEventListener("DOMContentLoaded", () => {
-    cargarMisEntradas();
+    // 1. Activar la interactividad de las pestañas (Tabs)
+    configurarTabs();
+
+    // 2. Activar la lógica del modal de cancelación
+    configurarModalCancelacion();
 });
 
-async function cargarMisEntradas() {
-    const contenedorEntradas = document.getElementById("contenedor-entradas"); // Asegúrate que este sea el ID en tu HTML
-    
-    // Recuperar el token JWT guardado al iniciar sesión
-    const token = localStorage.getItem("access_token"); 
+// --- LÓGICA DE LAS PESTAÑAS ---
+function configurarTabs() {
+    const tabs = document.querySelectorAll(".tab");
+    const contenidos = document.querySelectorAll(".contenido-tab");
 
-    if (!token) {
-        window.location.href = "/login"; // Redirigir si no está autenticado
-        return;
-    }
+    tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+            const targetId = tab.getAttribute("data-tab");
 
-    try {
-        const response = await fetch("/api/mis-entradas", {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
+            // Remover la clase active de todas las pestañas y contenidos
+            tabs.forEach(t => t.classList.remove("active"));
+            contenidos.forEach(c => c.classList.remove("active"));
+
+            // Activar la pestaña clickeada y su sección correspondiente
+            tab.classList.add("active");
+            const seccionActiva = document.getElementById(targetId);
+            if (seccionActiva) {
+                seccionActiva.classList.add("active");
             }
         });
-
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-            renderizarEntradas(data.entradas);
-        } else {
-            console.error("Error al obtener entradas:", data.message);
-            contenedorEntradas.innerHTML = `<p class="text-danger">No se pudieron cargar tus entradas.</p>`;
-        }
-    } catch (error) {
-        console.error("Error de conexión:", error);
-    }
+    });
 }
 
-function renderizarEntradas(entradas) {
-    const contenedor = document.getElementById("contenedor-entradas");
-    contenedor.innerHTML = "";
+// --- LÓGICA DEL MODAL Y CANCELACIÓN DE COMPRAS ---
+function configurarModalCancelacion() {
+    const modal = document.getElementById("modalCancelacion");
+    const botonesAbrir = document.querySelectorAll(".btn-cancelar"); // Los botones en cada tarjeta
+    const cerrarModal = document.getElementById("cerrarModal");
+    const conservarEntradas = document.getElementById("conservarEntradas");
+    const aceptarCheckbox = document.getElementById("aceptarCancelacion");
+    const confirmarBtn = document.getElementById("confirmarCancelacion");
 
-    if (entradas.length === 0) {
-        contenedor.innerHTML = `<p>No tenés entradas compradas actualmente.</p>`;
-        return;
-    }
+    let compraIdSeleccionada = null;
 
-    entradas.forEach(entrada => {
-        const tarjeta = document.createElement("div");
-        tarjeta.className = "entrada-card";
-        tarjeta.innerHTML = `
-            <h3>${entrada.pelicula_titulo}</h3>
-            <p><strong>Función:</strong> ${entrada.fecha_funcion} - ${entrada.hora_funcion}</p>
-            <p><strong>Sala:</strong> ${entrada.sala_nombre}</p>
-            <p><strong>Butacas:</strong> ${entrada.butacas.join(", ")}</p>
-            <p><strong>Código QR:</strong> <img src="${entrada.qr_url}" alt="QR Entradas" width="100"></p>
-        `;
-        contenedor.appendChild(tarjeta);
+    // Abrir modal al hacer clic en "Cancelar compra"
+    botonesAbrir.forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            // Si el botón está dentro de un form, evitamos que recargue la página por defecto
+            e.preventDefault();
+            
+            // Obtenemos el id_compra del atributo data (o podemos extraerlo del HTML)
+            compraIdSeleccionada = btn.getAttribute("data-id-compra");
+            
+            if (modal) {
+                modal.style.display = "flex";
+            }
+        });
     });
+
+    // Cerrar modal
+    const cerrarAccion = () => {
+        if (modal) modal.style.display = "none";
+        if (aceptarCheckbox) aceptarCheckbox.checked = false;
+        if (confirmarBtn) confirmarBtn.disabled = true;
+    };
+
+    if (cerrarModal) cerrarModal.addEventListener("click", cerrarAccion);
+    if (conservarEntradas) conservarEntradas.addEventListener("click", cerrarAccion);
+
+    // Habilitar botón de confirmación solo si tilda el checkbox
+    if (aceptarCheckbox && confirmarBtn) {
+        aceptarCheckbox.addEventListener("change", (e) => {
+            confirmarBtn.disabled = !e.target.checked;
+        });
+
+        // Manejar la petición POST al backend cuando confirma
+        confirmarBtn.addEventListener("click", async () => {
+            if (!compraIdSeleccionada) return;
+
+            const token = localStorage.getItem("access_token");
+            if (!token) {
+                window.location.href = "/login";
+                return;
+            }
+
+            try {
+                const response = await fetch(`/compras/${compraIdSeleccionada}/cancelar`, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Ocultar modal de cancelación y mostrar el de éxito (o recargar)
+                    modal.style.display = "none";
+                    const modalExito = document.getElementById("modalExito");
+                    if (modalExito) {
+                        modalExito.style.display = "flex";
+                        document.getElementById("finalizar").onclick = () => location.reload();
+                    } else {
+                        alert(data.mensaje || "Compra cancelada correctamente.");
+                        location.reload();
+                    }
+                } else {
+                    alert(data.error || "No se pudo cancelar la compra.");
+                }
+            } catch (error) {
+                console.error("Error de red:", error);
+                alert("Ocurrió un error al procesar la cancelación.");
+            }
+        });
+    }
 }
