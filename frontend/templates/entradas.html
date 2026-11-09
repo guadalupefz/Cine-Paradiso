@@ -48,89 +48,65 @@
         </section>
 
         <div class="tabs">
-
             <button class="tab active" data-tab="todas">
-                Todas · 3
+                Todas · {{ compras | length }}
             </button>
-
             <button class="tab" data-tab="proximas">
-                Próximas · 1
+                Próximas · {{ compras | selectattr('estado', 'equalto', 'confirmada') | list | length }}
             </button>
-
             <button class="tab" data-tab="historial">
-                Historial · 2
-            </button>
-
+                Historial · {{ compras | rejectattr('estado', 'equalto', 'confirmada') | list | length }}
+            </button>>
         </div>
 
         <section id="todas" class="contenido-tab active">
 
             <h3 class="seccion-label">PRÓXIMA FUNCIÓN</h3>
 
-            <article class="entrada-card entrada-proxima">
-
-
-                <div class="poster poster-actual">
-                    <span class="poster-top">CINE PARADISO PRESENTA</span>
-
-                    <div class="poster-figura">
-                        <span class="sol"></span>
-                        <span class="montana"></span>
-                        <span class="linea"></span>
+            {% set confirmadas = compras | selectattr('estado', 'equalto', 'confirmada') | list %}
+            {% if confirmadas %}
+                {% for compra in confirmadas %}
+                <article class="entrada-card entrada-proxima">
+                    <div class="poster poster-actual">
+                        <span class="poster-top">CINE PARADISO PRESENTA</span>
+                        <div class="poster-figura">
+                            <span class="sol"></span>
+                            <span class="montana"></span>
+                            <span class="linea"></span>
+                        </div>
+                        <strong>COMPRA #{{ compra.id_compra }}</strong>
                     </div>
 
-                    <strong>LA ÚLTIMA<br>FUNCIÓN</strong>
-                    <small>UNA HISTORIA POR CONTAR</small>
-                </div>
+                    <div class="entrada-info">
+                        <h2>Compra #{{ compra.id_compra }}</h2>
+                        <strong>{{ compra.fecha_hora.strftime('%A %d de %B de %Y') if compra.fecha_hora else '' }}</strong>
+                        <p class="destacado">{{ compra.fecha_hora.strftime('%H:%M') if compra.fecha_hora else '' }} · Sala Principal</p>
+                        <p>Fila {{ compra.fila }} · Asiento {{ compra.numero }}</p>
+                        
+                        <div class="codigo-compra">
+                            CP-{{ compra.id_compra }} · Registrada en sistema
+                        </div>
 
-                <div class="entrada-info">
-
-                    <h2>La última función</h2>
-
-                    <p class="genero">Drama · 112 min · +13</p>
-
-                    <strong>Jueves 12 de noviembre de 2026</strong>
-
-                    <p class="destacado">18:30 · Sala 1</p>
-
-                    <p>2D en español</p>
-
-                    <p>Fila E · Asientos 7 y 8</p>
-
-                    <div class="codigo-compra">
-                        CP-261112-0482 · Comprada el 30/10/2026
+                        <div class="resumen-compra">
+                            Total: ARS {{ compra.total }}
+                        </div>
                     </div>
 
-                    <div class="resumen-compra">
-                        2 × ARS 8.500 · Servicios: ARS 0 · Total: ARS 17.000
+                    <div class="entrada-acciones">
+                        <span class="estado confirmada">● {{ compra.estado | capitalize }}</span>
+                        <h2 class="precio">ARS {{ compra.total }}</h2>
+                        <button class="btn-dorado">Ver entrada / QR →</button>
+                        
+                        <!-- Formulario o enlace para cancelar conectando con tu ruta POST /compras/<id>/cancelar -->
+                        <form action="/compras/{{ compra.id_compra }}/cancelar" method="POST" style="display:inline;">
+                            <button type="submit" class="btn-cancelar">Cancelar compra</button>
+                        </form>
                     </div>
-
-                </div>
-
-                <div class="entrada-acciones">
-
-                    <span class="estado confirmada">
-                        ● Confirmada
-                    </span>
-
-                    <h2 class="precio">ARS 17.000</h2>
-
-                    <button class="btn-dorado">
-                        Ver entrada / QR →
-                    </button>
-
-                    <button class="btn-cancelar" id="abrirModal">
-                        Cancelar compra
-                    </button>
-
-                    <small>
-                        Cancelación sin cargo disponible hasta el 11/11/2026 a las 18:30.
-                        Reintegro del 100%.
-                    </small>
-
-                </div>
-
-            </article>
+                </article>
+                {% endfor %}
+            {% else %}
+                <p class="sin-resultados">No tenés funciones próximas programadas.</p>
+            {% endif %}
 
         </section>
 
