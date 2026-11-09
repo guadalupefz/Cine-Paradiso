@@ -114,10 +114,22 @@ def realizar_compra(id_usuario, id_funcion, ids_butacas):
     try:
         comprobante = obtener_comprobante(id_compra, id_usuario)
 
+        if comprobante is None:
+            raise ValueError("No se pudo obtener el comprobante.")
+
         enviar_mail_compra(comprobante, entradas)
+
+        resultado["correo_enviado"] = True
+        resultado["mensaje_correo"] = "El comprobante fue enviado por correo."
 
     except Exception as error:
         print(f"No se pudo enviar el correo: {error}")
+
+        resultado["correo_enviado"] = False
+        resultado["mensaje_correo"] = (
+            "La compra fue confirmada, pero no se pudo enviar el correo. "
+            "Podés consultar tus entradas desde tu cuenta."
+        )
 
     return resultado
 
@@ -227,9 +239,21 @@ def confirmar_compra(id_usuario, id_compra):
     try:
         comprobante = obtener_comprobante(id_compra, id_usuario)
 
+        if comprobante is None:
+            raise ValueError("No se pudo obtener el comprobante.")
+
         enviar_mail_compra(comprobante, entradas_confirmadas)
 
+        resultado["correo_enviado"] = True
+        resultado["mensaje_correo"] = "El comprobante fue enviado por correo."
+
     except Exception as error:
-        print(f"no se pudo enviar el correo: {error}")
+        print(f"No se pudo enviar el correo: {error}")
+
+        resultado["correo_enviado"] = False
+        resultado["mensaje_correo"] = (
+            "La reserva fue confirmada, pero no se pudo enviar el correo. "
+            "Podés consultar tus entradas desde tu cuenta."
+        )
 
     return resultado
