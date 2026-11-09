@@ -2,7 +2,7 @@ def validar_datos_reserva(id_funcion: int, data: dict):
 
     errores = []
 
-    if isinstance(id_funcion, bool) or not isinstance(id_funcion, int) or id_funcion <= 0:
+    if id_funcion is not None and (isinstance(id_funcion, bool) or not isinstance(id_funcion, int) or id_funcion <= 0):
         errores.append({
             "code": "ID_FUNCION_INVALIDO",
             "message": "El ID de la función debe ser un número entero positivo.",

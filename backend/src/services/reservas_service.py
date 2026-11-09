@@ -352,3 +352,250 @@ def abandonar_reserva_pendiente(id_compra: int, id_usuario: int):
     finally:
         if conn is not None:
             conn.close()
+
+
+def editar_reserva_pendiente(id_compra: int, id_usuario: int, lista_id_butacas: list, servicios: list = None):
+    if servicios is None:
+        servicios = []
+
+    conn = None
+
+    try:
+        conn = get_connection()
+        conn.start_transaction()
+
+        with conn.cursor(dictionary=True) as cursor:
+            cursor.execute(
+                """
+                SELECT id_compra, estado
+                FROM compra
+                WHERE id_compra = %s AND id_usuario = %s
+                FOR UPDATE
+                """,
+                (id_compra, id_usuario)
+            )
+            compra = cursor.fetchone()
+
+            if compra is None:
+                conn.rollback()
+                return None, {
+                    "error": "RESERVA_NO_ENCONTRADA",
+                    "mensaje": "No se encontró la reserva.",
+                    "status_code": 404
+                }
+
+            if compra["estado"] != "pendiente":
+                conn.rollback()
+                return None, {
+                    "error": "RESERVA_NO_PENDIENTE",
+                    "mensaje": "Solo se pueden editar reservas pendientes.",
+                    "status_code": 409
+                }
+
+            cursor.execute(
+                """
+                SELECT fecha_hora <= NOW() - INTERVAL 15 MINUTE AS vencida
+                FROM compra
+                WHERE id_compra = %s
+                """,
+                (id_compra,)
+            )
+
+            if cursor.fetchone()["vencida"]:
+                cursor.execute(
+                    "UPDATE compra SET estado = 'expirada' WHERE id_compra = %s",
+                    (id_compra,)
+                )
+                cursor.execute(
+                    "UPDATE entrada SET ocupacion_activa = NULL WHERE id_compra = %s",
+                    (id_compra,)
+                )
+                conn.commit()
+                return None, {
+                    "error": "RESERVA_EXPIRADA",
+                    "mensaje": "La reserva ya venció.",
+                    "status_code": 409
+                }
+
+            cursor.execute(
+                """
+                SELECT id_funcion
+                FROM entrada
+                WHERE id_compra = %s
+                LIMIT 1
+                """,
+                (id_compra,)
+            )
+            entrada_actual = cursor.fetchone()
+
+            if entrada_actual is None:
+                conn.rollback()
+                return None, {
+                    "error": "RESERVA_SIN_ENTRADAS",
+                    "mensaje": "No se encontraron entradas asociadas a la reserva.",
+                    "status_code": 409
+                }
+
+            id_funcion = entrada_actual["id_funcion"]
+            funcion = obtener_funcion(cursor, id_funcion)
+
+            if funcion is None:
+                conn.rollback()
+                return None, {
+                    "error": "FUNCION_NO_ENCONTRADA",
+                    "mensaje": "La función asociada a la reserva no existe.",
+                    "status_code": 404
+                }
+
+            try:
+                validar_inicio_funcion(
+                    funcion["fecha_hora_inicio"],
+                    obtener_hora_actual(cursor)
+                )
+            except ValueError as error:
+                conn.rollback()
+                return None, {
+                    "error": "FUNCION_INICIADA",
+                    "mensaje": str(error),
+                    "status_code": 400
+                }
+
+            butacas_sala = obtener_butacas_de_funcion(cursor, id_funcion)
+            ids_validos = {butaca["id_butaca"] for butaca in butacas_sala}
+
+            if any(id_butaca not in ids_validos for id_butaca in lista_id_butacas):
+                conn.rollback()
+                return None, {
+                    "error": "BUTACAS_INVALIDAS",
+                    "mensaje": "Una o más butacas no pertenecen a la sala de esta función.",
+                    "status_code": 400
+                }
+
+            placeholders = ",".join(["%s"] * len(lista_id_butacas))
+            cursor.execute(
+                f"""
+                SELECT entrada.id_butaca
+                FROM entrada
+                JOIN compra ON compra.id_compra = entrada.id_compra
+                WHERE entrada.id_funcion = %s
+                  AND entrada.id_butaca IN ({placeholders})
+                  AND entrada.ocupacion_activa = 1
+                  AND entrada.id_compra <> %s
+                  AND (
+                      compra.estado IN ('aprobada', 'confirmada')
+                      OR (
+                          compra.estado = 'pendiente'
+                          AND compra.fecha_hora > NOW() - INTERVAL 15 MINUTE
+                      )
+                  )
+                FOR UPDATE
+                """,
+                [id_funcion] + lista_id_butacas + [id_compra]
+            )
+            ocupadas = [fila["id_butaca"] for fila in cursor.fetchall()]
+
+            if ocupadas:
+                conn.rollback()
+                return None, {
+                    "error": "BUTACAS_OCUPADAS",
+                    "mensaje": "Una o más butacas seleccionadas ya están reservadas o vendidas.",
+                    "butacas_conflictivas": ocupadas,
+                    "status_code": 409
+                }
+
+            total_entradas = Decimal(str(funcion["precio_base"])) * len(lista_id_butacas)
+            total_servicios = Decimal("0.00")
+            servicios_a_guardar = []
+
+            for servicio in servicios:
+                servicio_db = obtener_servicio(cursor, servicio["id_servicio"])
+
+                if servicio_db is None:
+                    conn.rollback()
+                    return None, {
+                        "error": "SERVICIO_NO_ENCONTRADO",
+                        "mensaje": f"El servicio {servicio['id_servicio']} no existe.",
+                        "status_code": 404
+                    }
+
+                precio_unitario = Decimal(str(servicio_db["precio"]))
+                cantidad = servicio["cantidad"]
+                total_servicios += precio_unitario * cantidad
+
+                servicios_a_guardar.append({
+                    "id_servicio": servicio["id_servicio"],
+                    "cantidad": cantidad,
+                    "precio_unitario": precio_unitario
+                })
+
+            cursor.execute(
+                "UPDATE entrada SET ocupacion_activa = NULL WHERE id_compra = %s",
+                (id_compra,)
+            )
+
+            crear_entradas_reserva(
+                cursor,
+                id_compra,
+                id_funcion,
+                lista_id_butacas
+            )
+
+            cursor.execute(
+                "DELETE FROM compra_servicio WHERE id_compra = %s",
+                (id_compra,)
+            )
+
+            for servicio in servicios_a_guardar:
+                agregar_servicio_a_compra(
+                    cursor,
+                    id_compra,
+                    servicio["id_servicio"],
+                    servicio["cantidad"],
+                    servicio["precio_unitario"]
+                )
+
+            total = total_entradas + total_servicios
+
+            cursor.execute(
+                "UPDATE compra SET total = %s WHERE id_compra = %s",
+                (total, id_compra)
+            )
+
+            conn.commit()
+
+            return {
+                "id_compra": id_compra,
+                "id_funcion": id_funcion,
+                "butacas": lista_id_butacas,
+                "servicios": servicios_a_guardar,
+                "total": float(total),
+                "estado": "pendiente"
+            }, None
+
+    except mysql.connector.Error as error:
+        if conn is not None:
+            conn.rollback()
+
+        if error.errno == 1062:
+            return None, {
+                "error": "BUTACAS_OCUPADAS",
+                "mensaje": "Una o más butacas seleccionadas ya están reservadas o vendidas.",
+                "status_code": 409
+            }
+
+        if error.errno in (1205, 1213):
+            return None, {
+                "error": "CONFLICTO_RESERVA",
+                "mensaje": "Otra operación está modificando la reserva. Volvé a intentar.",
+                "status_code": 409
+            }
+
+        return None, {
+            "error": "ERROR_BASE_DATOS",
+            "mensaje": "No se pudo editar la reserva.",
+            "status_code": 500
+        }
+
+    finally:
+        if conn is not None:
+            conn.close()
