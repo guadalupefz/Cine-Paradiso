@@ -17,7 +17,7 @@
             <a href="#" class="active">Mis entradas</a>
 
             <button class="cuenta">
-                ♙ Henry · Mi cuenta⌄
+                ♙ {{ usuario.nombre if usuario else 'Mi cuenta' }} · Mi cuenta         
             </button>
         </nav>
     </header>
@@ -41,8 +41,8 @@
             </div>
 
             <div class="usuario">
-                <strong>Henry Luis</strong>
-                <span>henryluis@example.com</span>
+                <strong>{{ usuario.nombre if usuario else '' }}</strong>
+                <span>{{ usuario.email if usuario else '' }}</span>
             </div>
 
         </section>
