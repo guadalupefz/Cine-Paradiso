@@ -11,8 +11,11 @@ def obtener_butacas_ocupadas_con_bloqueo(cursor, id_funcion: int, lista_id_butac
         WHERE e.id_funcion = %s
             AND e.id_butaca IN ({format_strings})
             AND (
-                c.estado = 'confirmada'
-                OR (c.estado = 'pendiente' AND c.fecha_hora > NOW() - INTERVAL 15 MINUTE)
+                c.estado IN ('aprobada', 'confirmada')
+                OR (
+                    c.estado = 'pendiente'
+                    AND c.fecha_hora > NOW() - INTERVAL 15 MINUTE
+                )
             )
         FOR UPDATE;
     """
