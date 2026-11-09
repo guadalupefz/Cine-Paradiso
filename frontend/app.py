@@ -1038,12 +1038,10 @@ def cancelar_compra_frontend(id_compra):
         f"/compras/{id_compra}/cancelar"
     )
 
+
     if estado == 200:
         flash(mensaje_error(datos), "ok")
-    else:
-        flash(mensaje_error(datos), "error")
 
-    return redirect(url_for("mis_compras"))
 
 
 @app.get("/admin")

@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 
 {% block content %}
@@ -10,6 +11,9 @@
         <a href="{{ url_for('mis_compras') }}">Volver a intentar</a>.
     </p>
 {% else %}
+
+    {% for compra in compras %}
+
 
     {% for compra in compras %}
         <article class="tarjeta-admin">
@@ -29,11 +33,15 @@
                     <p>Función: {{ entrada.id_funcion }}</p>
                     <p>Butaca: {{ entrada.fila }}{{ entrada.numero }}</p>
 
-                    <img
-                        src="{{ url_for('ver_qr_cliente', id_entrada=entrada.id_entrada) }}"
-                        alt="QR de la entrada {{ entrada.id_entrada }}"
-                        class="imagen_qr"
-                    >
+                    {% if compra.estado|lower in ['aprobada', 'confirmada'] %}
+                        <img
+                            src="{{ url_for('ver_qr_cliente', id_entrada=entrada.id_entrada) }}"
+                            alt="QR de la entrada {{ entrada.id_entrada }}"
+                            class="imagen_qr"
+                        >
+                    {% elif compra.estado|lower == 'cancelada' %}
+                        <p>Entrada cancelada. El código QR ya no es válido</p>
+                    {% endif %}
                 </div>
             {% endfor %}
 
