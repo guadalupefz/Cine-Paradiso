@@ -326,7 +326,7 @@ def abandonar_reserva_pendiente(id_compra: int, id_usuario: int):
                 }
 
             cursor.execute(
-                "UPDATE compra SET estado = 'abandonada' WHERE id_compra = %s",
+                "UPDATE compra SET estado = 'cancelada' WHERE id_compra = %s",
                 (id_compra,)
             )
             cursor.execute(
@@ -337,7 +337,7 @@ def abandonar_reserva_pendiente(id_compra: int, id_usuario: int):
             conn.commit()
             return {
                 "id_compra": id_compra,
-                "estado": "abandonada"
+                "estado": "cancelada"
             }, None
 
     except mysql.connector.Error:
