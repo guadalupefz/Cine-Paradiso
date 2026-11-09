@@ -76,7 +76,8 @@ CREATE TABLE compra (
             'confirmada',
             'expirada',
             'cancelada',
-            'rechazada'
+            'rechazada',
+            'abandonada'
         )
     ),
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
