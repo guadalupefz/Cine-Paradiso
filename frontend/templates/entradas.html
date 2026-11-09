@@ -1,1 +1,476 @@
 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis entradas | Cine Paradiso</title>
+    <link rel="stylesheet" href="../static/css/mis_entradas.css">
+</head>
+
+<body>
+
+    <header class="navbar">
+        <a href="#" class="logo">
+            <span class="logo-icon">✦</span>
+            Cine Paradiso
+        </a>
+
+        <nav>
+            <a href="#">Cartelera</a>
+            <a href="#">Comprar</a>
+            <a href="#" class="active">Mis entradas</a>
+
+            <button class="cuenta">
+                ♙ Henry · Mi cuenta⌄
+            </button>
+        </nav>
+    </header>
+
+    <main class="pagina">
+
+        <div class="breadcrumb">
+            <a href="#">← Volver a Cartelera</a>
+            <span>Tu cuenta / Mis entradas</span>
+        </div>
+
+        <section class="titulo-seccion">
+
+            <div>
+                <span class="overline">TU COLECCIÓN DE HISTORIAS</span>
+                <h1>Mis entradas</h1>
+
+                <p>
+                    Tu próxima visita y las funciones que ya son parte de tu historia.
+                </p>
+            </div>
+
+            <div class="usuario">
+                <strong>Henry Luis</strong>
+                <span>henryluis@example.com</span>
+            </div>
+
+        </section>
+
+        <div class="tabs">
+
+            <button class="tab active" data-tab="todas">
+                Todas · 3
+            </button>
+
+            <button class="tab" data-tab="proximas">
+                Próximas · 1
+            </button>
+
+            <button class="tab" data-tab="historial">
+                Historial · 2
+            </button>
+
+        </div>
+
+        <section id="todas" class="contenido-tab active">
+
+            <h3 class="seccion-label">PRÓXIMA FUNCIÓN</h3>
+
+            <article class="entrada-card entrada-proxima">
+
+
+                <div class="poster poster-actual">
+                    <span class="poster-top">CINE PARADISO PRESENTA</span>
+
+                    <div class="poster-figura">
+                        <span class="sol"></span>
+                        <span class="montana"></span>
+                        <span class="linea"></span>
+                    </div>
+
+                    <strong>LA ÚLTIMA<br>FUNCIÓN</strong>
+                    <small>UNA HISTORIA POR CONTAR</small>
+                </div>
+
+                <div class="entrada-info">
+
+                    <h2>La última función</h2>
+
+                    <p class="genero">Drama · 112 min · +13</p>
+
+                    <strong>Jueves 12 de noviembre de 2026</strong>
+
+                    <p class="destacado">18:30 · Sala 1</p>
+
+                    <p>2D en español</p>
+
+                    <p>Fila E · Asientos 7 y 8</p>
+
+                    <div class="codigo-compra">
+                        CP-261112-0482 · Comprada el 30/10/2026
+                    </div>
+
+                    <div class="resumen-compra">
+                        2 × ARS 8.500 · Servicios: ARS 0 · Total: ARS 17.000
+                    </div>
+
+                </div>
+
+                <div class="entrada-acciones">
+
+                    <span class="estado confirmada">
+                        ● Confirmada
+                    </span>
+
+                    <h2 class="precio">ARS 17.000</h2>
+
+                    <button class="btn-dorado">
+                        Ver entrada / QR →
+                    </button>
+
+                    <button class="btn-cancelar" id="abrirModal">
+                        Cancelar compra
+                    </button>
+
+                    <small>
+                        Cancelación sin cargo disponible hasta el 11/11/2026 a las 18:30.
+                        Reintegro del 100%.
+                    </small>
+
+                </div>
+
+            </article>
+
+        </section>
+
+        <section id="proximas" class="contenido-tab">
+
+            <h3 class="seccion-label">PRÓXIMAS FUNCIONES</h3>
+
+            <p class="sin-resultados">
+                No hay otras funciones próximas para mostrar.
+            </p>
+
+        </section>
+
+
+        <section id="historial" class="contenido-tab">
+
+            <h3 class="seccion-label">HISTORIAL</h3>
+
+            <article class="historial-card">
+
+                <div class="historial-icon usado">✓</div>
+
+                <div class="historial-info">
+                    <h2>El viaje de Clara</h2>
+                    <p>Sábado 17 de octubre de 2026 · 20:00 · Sala 2</p>
+                    <p>2D en español · Fila C, asientos 3 y 4</p>
+                </div>
+
+                <div class="historial-detalle">
+                    <strong>CP-261017-0218 · ARS 17.000</strong>
+                    <span>Función finalizada · Entradas utilizadas</span>
+                </div>
+
+                <span class="estado historial-estado">Usada</span>
+
+            </article>
+
+
+            <article class="historial-card">
+
+                <div class="historial-icon cancelado-icon">○</div>
+
+                <div class="historial-info">
+                    <h2>Noches de verano</h2>
+                    <p>Viernes 2 de octubre de 2026 · 21:30 · Sala 1</p>
+                    <p>2D en español · Fila D, asientos 5 y 6</p>
+                </div>
+
+                <div class="historial-detalle">
+                    <strong>CP-261002-0108 · ARS 17.000</strong>
+                    <span>Reintegro completado el 03/10/2026</span>
+                </div>
+
+                <span class="estado cancelada">Cancelada</span>
+
+            </article>
+
+        </section>
+
+
+        <div class="volver-cartelera">
+            <a href="#">Volver a Cartelera y elegir otra historia →</a>
+        </div>
+
+    </main>
+
+
+
+    <footer class="footer">
+
+        <p>El cine de siempre. Las historias de hoy.</p>
+
+        <div>
+            <span>Buenos Aires, Argentina</span>
+            <span>Todos los precios en ARS</span>
+            <span>© 2026 Cine Paradiso</span>
+        </div>
+
+    </footer>
+
+    <div class="modal-overlay" id="modalCancelacion">
+
+        <div class="modal-cancelacion">
+
+            <div class="modal-header">
+
+                <div>
+                    <span class="overline">ANTES DE CONFIRMAR</span>
+
+                    <h2>¿Cancelamos tu visita?</h2>
+
+                    <p>
+                        Revisá el detalle. La compra CP-261112-0482
+                        sigue confirmada hasta que confirmes.
+                    </p>
+                </div>
+
+                <button class="cerrar-modal" id="cerrarModal">
+                    ×
+                </button>
+
+            </div>
+
+
+            <!--ADVERTENCIA-->
+
+            <div class="alerta">
+
+                <strong>! Se invalidarán las dos entradas y sus QR</strong>
+
+                <p>
+                    La cancelación afecta a toda la compra: fila E,
+                    asientos 7 y 8. Ninguna de las dos entradas
+                    podrá usarse para ingresar.
+                </p>
+
+            </div>
+
+            <div class="modal-contenido">
+
+                <div class="columna-compra">
+
+                    <div class="compra-card">
+
+                        <span class="estado confirmada">
+                            ● Confirmada · aún no cancelada
+                        </span>
+
+                        <div class="pelicula-modal">
+
+                            <div class="poster poster-modal">
+                                <span class="poster-top">CINE PARADISO</span>
+
+                                <div class="poster-figura">
+                                    <span class="sol"></span>
+                                    <span class="montana"></span>
+                                    <span class="linea"></span>
+                                </div>
+
+                                <strong>LA ÚLTIMA<br>FUNCIÓN</strong>
+                            </div>
+
+                            <div class="pelicula-datos">
+
+                                <h3>La última función</h3>
+
+                                <p>Drama · 112 min · +13</p>
+
+                                <strong>
+                                    Jueves 12 de noviembre de 2026
+                                </strong>
+
+                                <p class="destacado">18:30 · Sala 1</p>
+
+                                <p>2D en español</p>
+
+                                <strong>Fila E · Asientos 7 y 8</strong>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="precio-linea">
+                            <span>2 entradas · ARS 8.500 c/u</span>
+                            <strong>ARS 17.000</strong>
+                        </div>
+
+                        <div class="precio-linea">
+                            <span>Servicios agregados: 0</span>
+                            <strong>ARS 0</strong>
+                        </div>
+
+                        <div class="total-linea">
+                            <strong>Total abonado</strong>
+                            <strong>ARS 17.000</strong>
+                        </div>
+
+                        <small>Compra CP-261112-0482</small>
+
+                    </div>
+
+
+                    <!-- REINTEGRO -->
+
+                    <div class="reintegro">
+
+                        <span>Importe a reintegrar · 100% de la compra</span>
+
+                        <h3>ARS 17.000</h3>
+
+                        <p>
+                            El reintegro se solicitará solo después
+                            de confirmar la cancelación.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="columna-formulario">
+
+                    <h3>Contanos el motivo</h3>
+
+                    <label for="motivo">
+                        Motivo de cancelación
+                    </label>
+
+                    <select id="motivo">
+
+                        <option value="No puedo asistir a la función">
+                            No puedo asistir a la función
+                        </option>
+
+                        <option value="Compré entradas por error">
+                            Compré entradas por error
+                        </option>
+
+                        <option value="Problemas con el horario">
+                            Problemas con el horario
+                        </option>
+
+                        <option value="Quiero cambiar la función">
+                            Quiero cambiar la función
+                        </option>
+
+                        <option value="Otro motivo">
+                            Otro motivo
+                        </option>
+
+                    </select>
+
+
+                    <label for="comentario">
+                        Comentario (opcional)
+                    </label>
+
+                    <textarea
+                        id="comentario"
+                        maxlength="300"
+                        placeholder="Contanos el motivo de tu cancelación..."
+                    ></textarea>
+
+                    <div class="contador">
+                        0 / 300 caracteres
+                    </div>
+
+
+                    <label class="checkbox-container">
+
+                        <input type="checkbox" id="aceptarCancelacion">
+
+                        <span>
+                            Entiendo que se invalidarán las dos
+                            entradas y sus QR.
+                        </span>
+
+                    </label>
+
+
+                    <button
+                        class="btn-confirmar"
+                        id="confirmarCancelacion"
+                        disabled
+                    >
+                        Confirmar cancelación
+                    </button>
+
+                    <button class="btn-conservar" id="conservarEntradas">
+                        Conservar mis entradas
+                    </button>
+
+                    <p class="nota">
+                        Si conservás tus entradas, volvés a Mis entradas
+                        con la compra confirmada.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- POLÍTICA -->
+
+            <div class="politica">
+
+                <strong>Política de ejemplo para este diseño</strong>
+
+                <p>
+                    Reintegro del 100% al cancelar hasta 24 horas antes
+                    de la función: 11/11/2026 a las 18:30.
+                    Se solicita al medio de pago original y puede
+                    demorar de 3 a 10 días hábiles.
+                    No representa una política real de Cine Paradiso.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ================= CONFIRMACIÓN FINAL ================= -->
+
+    <div class="modal-overlay" id="modalExito">
+
+        <div class="exito-card">
+
+            <div class="exito-icon">✓</div>
+
+            <h2>Cancelación confirmada</h2>
+
+            <p>
+                Tu compra fue cancelada correctamente.
+                Las entradas y sus códigos QR fueron invalidados.
+            </p>
+
+            <div class="exito-total">
+                <span>Importe a reintegrar</span>
+                <strong>ARS 17.000</strong>
+            </div>
+
+            <button class="btn-dorado" id="finalizar">
+                Volver a Mis entradas
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <script src="mis_entradas.js"></script>
+
+</body>
+</html>
+
