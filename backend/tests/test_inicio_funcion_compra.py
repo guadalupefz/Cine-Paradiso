@@ -81,7 +81,7 @@ class InicioFuncionCompra(unittest.TestCase):
 
     def test_confirmacion_futura_conserva_resultado(self):
         resultado=compras.confirmar_compra(8,17)
-        self.assertEqual(resultado['estado'],'aprobada')
+        self.assertEqual(resultado['estado'], 'confirmada')
         self.assertEqual(resultado['entradas'][0]['id_entrada'],19)
         self.conexion.commit.assert_called_once()
 
