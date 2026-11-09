@@ -57,7 +57,7 @@ def crear_reserva(id_usuario: int, id_funcion: int,
                     "mensaje": "Una o más butacas no pertenecen a la sala de esta función.",
                     "status_code": 400,
                 }
-        
+
             limpiar_reservas_expiradas(cursor, id_funcion)
 
             ocupadas = obtener_butacas_ocupadas_con_bloqueo(
@@ -174,4 +174,93 @@ def crear_reserva(id_usuario: int, id_funcion: int,
     finally:
         if conn is not None:
             conn.close()
-    
+
+
+def rechazar_reserva_pendiente(id_compra: int, id_usuario: int):
+    conn = None
+
+    try:
+        conn = get_connection()
+        conn.start_transaction()
+
+        with conn.cursor(dictionary=True) as cursor:
+            cursor.execute(
+                """
+                SELECT id_compra, estado, fecha_hora
+                FROM compra
+                WHERE id_compra = %s AND id_usuario = %s
+                FOR UPDATE
+                """,
+                (id_compra, id_usuario)
+            )
+            compra = cursor.fetchone()
+
+            if compra is None:
+                conn.rollback()
+                return None, {
+                    "error": "RESERVA_NO_ENCONTRADA",
+                    "mensaje": "No se encontró la reserva.",
+                    "status_code": 404
+                }
+
+            if compra["estado"] != "pendiente":
+                conn.rollback()
+                return None, {
+                    "error": "RESERVA_NO_PENDIENTE",
+                    "mensaje": "La reserva no se encuentra pendiente.",
+                    "status_code": 409
+                }
+
+            cursor.execute(
+                """
+                SELECT fecha_hora <= NOW() - INTERVAL 15 MINUTE AS vencida
+                FROM compra
+                WHERE id_compra = %s
+                """,
+                (id_compra,)
+            )
+            vencimiento = cursor.fetchone()
+
+            if vencimiento["vencida"]:
+                cursor.execute(
+                    "UPDATE compra SET estado = 'expirada' WHERE id_compra = %s",
+                    (id_compra,)
+                )
+                cursor.execute(
+                    "UPDATE entrada SET ocupacion_activa = NULL WHERE id_compra = %s",
+                    (id_compra,)
+                )
+                conn.commit()
+                return None, {
+                    "error": "RESERVA_EXPIRADA",
+                    "mensaje": "La reserva ya venció.",
+                    "status_code": 409
+                }
+
+            cursor.execute(
+                "UPDATE compra SET estado = 'rechazada' WHERE id_compra = %s",
+                (id_compra,)
+            )
+            cursor.execute(
+                "UPDATE entrada SET ocupacion_activa = NULL WHERE id_compra = %s",
+                (id_compra,)
+            )
+
+            conn.commit()
+            return {
+                "id_compra": id_compra,
+                "estado": "rechazada"
+            }, None
+
+    except mysql.connector.Error:
+        if conn is not None:
+            conn.rollback()
+        return None, {
+            "error": "ERROR_BASE_DATOS",
+            "mensaje": "No se pudo rechazar la reserva.",
+            "status_code": 500
+        }
+
+    finally:
+        if conn is not None:
+            conn.close()
