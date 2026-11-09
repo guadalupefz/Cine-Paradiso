@@ -69,6 +69,9 @@ class InicioFuncionCompra(unittest.TestCase):
         self.assertEqual(resultado['entradas'][0]['id_butaca'],11)
         self.conexion.commit.assert_called_once()
         self.conexion.rollback.assert_not_called()
+        self.assertTrue(resultado['correo_enviado'])
+        self.assertEqual(resultado['mensaje_correo'], 'El comprobante fue enviado por correo.')
+        self.correo.assert_called_once()
 
     def test_confirmar_reserva_de_funcion_iniciada_no_aprueba_ni_cambia_qr(self):
         self.inicio_compra.return_value=self.ahora-timedelta(seconds=1)
@@ -84,6 +87,33 @@ class InicioFuncionCompra(unittest.TestCase):
         self.assertEqual(resultado['estado'], 'confirmada')
         self.assertEqual(resultado['entradas'][0]['id_entrada'],19)
         self.conexion.commit.assert_called_once()
+        self.assertTrue(resultado['correo_enviado'])
+        self.assertEqual(resultado['mensaje_correo'], 'El comprobante fue enviado por correo.')
+        self.correo.assert_called_once()
+
+    def test_compra_se_confirma_aunque_falle_el_correo(self):
+        self.correo.side_effect = RuntimeError("Error SMTP")
+
+        resultado = compras.realizar_compra(8, 15, [11])
+
+        self.assertEqual(resultado['estado'], 'confirmada')
+        self.assertFalse(resultado['correo_enviado'])
+        self.assertIn('no se pudo enviar el correo', resultado['mensaje_correo'])
+        self.conexion.commit.assert_called_once()
+        self.conexion.rollback.assert_not_called()
+        self.correo.assert_called_once()
+
+    def test_reserva_se_confirma_aunque_falle_el_correo(self):
+        self.correo.side_effect = RuntimeError("Error SMTP")
+
+        resultado = compras.confirmar_compra(8, 17)
+
+        self.assertEqual(resultado['estado'], 'confirmada')
+        self.assertFalse(resultado['correo_enviado'])
+        self.assertIn('no se pudo enviar el correo', resultado['mensaje_correo'])
+        self.conexion.commit.assert_called_once()
+        self.conexion.rollback.assert_not_called()
+        self.correo.assert_called_once()
 
 
 if __name__=='__main__':unittest.main()
