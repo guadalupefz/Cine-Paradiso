@@ -843,6 +843,17 @@ def procesar_compra():
     if estado == 200:
         session.pop("reserva_pendiente", None)
 
+        datos_compra = resultado.get("compra", resultado)
+        mensaje_correo = datos_compra.get("mensaje_correo")
+
+        if mensaje_correo:
+            flash(mensaje_correo, "ok")
+        else:
+            flash(
+                "La compra fue confirmada. Podés consultar tus entradas desde el comprobante.",
+                "ok"
+            )
+
         return redirect(url_for(
             "ver_comprobante",
             id_compra=id_compra
