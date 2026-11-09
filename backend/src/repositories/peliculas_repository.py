@@ -12,10 +12,12 @@ def obtener_peliculas(cursor):
 # Sincronizar películas con una API externa
 def sincronizar_pelicula(cursor, pelicula):
     query = """
-        INSERT INTO pelicula (titulo, sinopsis, poster, duracion_minutos, clasificacion, genero)
-        VALUES (%s, %s, %s, %s, %s, %s)
+        INSERT INTO pelicula
+        (id_externo_api, titulo, sinopsis, poster, duracion_minutos, clasificacion, genero)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
     """
     cursor.execute(query, (
+        pelicula["id_externo_api"],
         pelicula["titulo"],
         pelicula["sinopsis"],
         pelicula["poster"],

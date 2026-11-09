@@ -13,7 +13,6 @@ app = Flask(__name__)
 app.json.sort_keys = False
 load_dotenv()
 
-from backend.src.repositories.peliculas import buscar_pelicula, ejecutar_guardar, guardar_pelicula
 
 
 
@@ -76,6 +75,7 @@ def pelicula_a_guardar (datos_omdb, url):
         datos_omdb ['Genre'] = traductor.translate(datos_omdb['Genre'])
 
     resultado = {
+                'id_externo_api': datos_omdb.get('imdbID'),
                 'titulo': datos_omdb.get('Title'),
                 'sinopsis': datos_omdb.get('Plot'),
                 'poster'  : url,
@@ -84,4 +84,3 @@ def pelicula_a_guardar (datos_omdb, url):
                 'genero': datos_omdb.get('Genre')
              }
     return resultado
-

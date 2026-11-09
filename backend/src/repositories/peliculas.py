@@ -1,38 +1,74 @@
-from backend.db import ejecutar_buscar, ejecutar_guardar
+import mysql.connector
+from backend.db.db import get_connection
 
 
-def buscar_pelicula (titulo):
+def buscar_pelicula_por_id_externo(cursor, id_externo_api):
+    cursor.execute(
+        "SELECT id_pelicula FROM pelicula WHERE id_externo_api = %s",
+        (id_externo_api,),
+    )
+    return cursor.fetchone()
 
 
+def guardar_pelicula(datos):
+    """Inserta o actualiza una película identificada por su imdbID."""
+    id_externo_api = datos.get("id_externo_api")
+    if not isinstance(id_externo_api, str) or not id_externo_api.strip():
+        return {"exito": False, "error": "OMDb no devolvió imdbID", "accion": None}
 
-    query = "SELECT titulo FROM pelicula WHERE titulo = %s"
+    id_externo_api = id_externo_api.strip()
+    conexion = None
+    try:
+        conexion = get_connection()
+        with conexion.cursor(dictionary=True, buffered=True) as cursor:
+            cursor.execute(
+                "SELECT id_pelicula FROM pelicula WHERE id_externo_api = %s FOR UPDATE",
+                (id_externo_api,),
+            )
+            existente = cursor.fetchone()
 
-    film_procurado = ejecutar_buscar(query, (titulo,))
-    if film_procurado["exito"] and film_procurado["datos"]:
-       return True
-    return False
-
-def guardar_pelicula (datos):
-
-    query = """
-                INSERT INTO pelicula (titulo, sinopsis, poster, duracion_minutos, clasificacion, genero)
-                VALUES (%s, %s, %s, %s, %s, %s)
-            """
-    valores = (
-                datos['titulo'],
-                datos['sinopsis'],
-                datos['poster'],
-                datos['duracion_minutos'],
-                datos['clasificacion'],
-                datos['genero']
+            valores = (
+                datos["titulo"],
+                datos["sinopsis"],
+                datos["poster"],
+                datos["duracion_minutos"],
+                datos["clasificacion"],
+                datos["genero"],
             )
 
-    film_guardado = ejecutar_guardar(query, valores)
+            if existente:
+                cursor.execute(
+                    """
+                    UPDATE pelicula
+                    SET titulo=%s, sinopsis=%s, poster=%s, duracion_minutos=%s,
+                        clasificacion=%s, genero=%s
+                    WHERE id_externo_api=%s
+                    """,
+                    valores + (id_externo_api,),
+                )
+                accion = "actualizada"
+                id_pelicula = existente["id_pelicula"]
+            else:
+                cursor.execute(
+                    """
+                    INSERT INTO pelicula
+                    (id_externo_api, titulo, sinopsis, poster, duracion_minutos, clasificacion, genero)
+                    VALUES (%s,%s,%s,%s,%s,%s,%s)
+                    """,
+                    (id_externo_api,) + valores,
+                )
+                accion = "insertada"
+                id_pelicula = cursor.lastrowid
 
-    if film_guardado ["exito"]:
-        return True
-    return False
-
+        conexion.commit()
+        return {"exito": True, "accion": accion, "id": id_pelicula}
+    except (mysql.connector.Error, KeyError):
+        if conexion is not None:
+            conexion.rollback()
+        return {"exito": False, "error": "No se pudo guardar la película", "accion": None}
+    finally:
+        if conexion is not None:
+            conexion.close()
 
 
 
