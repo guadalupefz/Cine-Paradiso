@@ -60,7 +60,14 @@ class AporteBackend(unittest.TestCase):
         return cn, cur
 
     def post_servicio(self, datos=None):
-        return self.client.post('/api/servicios', json=datos or {'nombre': ' Agua ', 'precio': '2000.00'})
+        return self.client.post(
+            '/api/servicios',
+            json=datos or {
+                'nombre': ' Agua ',
+                'descripcion': 'Agua mineral',
+                'precio': '2000.00'
+            }
+        )
 
     def assertCierre(self, cn, cur):
         cur.close.assert_called_once()
@@ -94,7 +101,7 @@ class AporteBackend(unittest.TestCase):
         r = self.post_servicio()
         self.assertEqual(r.status_code, 201)
         self.assertEqual(r.json['id_servicio'], 37)
-        self.assertEqual(cur.execute.call_args.args[1], ('Agua', Decimal('2000.00')))
+        self.assertEqual(cur.execute.call_args.args[1], ('Agua', 'Agua mineral', Decimal('2000.00')))
         cn.commit.assert_called_once()
         cn.rollback.assert_not_called()
         self.assertCierre(cn, cur)
