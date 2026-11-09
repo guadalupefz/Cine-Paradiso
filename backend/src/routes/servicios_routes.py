@@ -23,7 +23,7 @@ def validar_servicio(datos):
         raise ValueError("Precio inválido")
     if not precio.is_finite() or precio <= 0 or precio > Decimal("99999999.99") or precio.as_tuple().exponent < -2:
         raise ValueError("El precio debe ser positivo, tener como máximo dos decimales y no superar 99999999.99")
-    return nombre.strip(), precio
+    return nombre.strip(), descripcion.strip(), precio
 
 @servicios_bp.get("/servicios")
 def listar_servicios():
