@@ -37,14 +37,14 @@
                 </p>
             </div>
         </div>
-    {% endif %}
-
+      
         <!-- Aviso si el precio no está disponible -->
         {% if not (funcion and funcion.precio_base) %}
             <div class="alerta-precio-no-disponible">
                 ⚠️ El precio de la entrada no está disponible. No es posible continuar con la compra.
             </div>
         {% endif %}
+    {% endif %}
 
         <!-- Sección servicios -->
         <section class="seccion-servicios">
