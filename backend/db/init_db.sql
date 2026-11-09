@@ -68,7 +68,17 @@ CREATE TABLE compra (
     id_usuario INT NOT NULL,
     fecha_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
     total DECIMAL(10,2) NOT NULL,
-    estado VARCHAR(20) NOT NULL CHECK (estado IN ('pendiente', 'confirmada', 'expirada', 'cancelada')),
+    estado VARCHAR(20) NOT NULL,
+    CHECK (
+        estado IN (
+            'pendiente',
+            'aprobada',
+            'confirmada',
+            'expirada',
+            'cancelada',
+            'rechazada'
+        )
+    ),
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario)
 );
 
@@ -80,7 +90,12 @@ CREATE TABLE entrada (
     id_butaca INT NOT NULL,
     qr_token VARCHAR(255) NOT NULL UNIQUE,
     fecha_hora_validacion DATETIME,
-    UNIQUE (id_funcion, id_butaca),
+    ocupacion_activa BOOLEAN NULL DEFAULT TRUE,
+    UNIQUE KEY uq_entrada_ocupacion_activa (
+        id_funcion,
+        id_butaca,
+        ocupacion_activa
+    ),
     FOREIGN KEY (id_compra) REFERENCES compra(id_compra),
     FOREIGN KEY (id_funcion) REFERENCES funcion(id_funcion),
     FOREIGN KEY (id_butaca) REFERENCES butaca(id_butaca)

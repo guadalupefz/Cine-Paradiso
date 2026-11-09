@@ -12,8 +12,8 @@ SET estado = 'expirada'
 WHERE estado = 'pendiente' 
   AND fecha_hora &lt;= NOW() - INTERVAL 15 MINUTE;
 
--- 3. Liberar asientos: eliminar las entradas asociadas a compras expiradas
-DELETE e 
-FROM entrada e
-INNER JOIN compra c ON c.id_compra = e.id_compra
-WHERE c.estado = 'expirada';
+-- Liberar las butacas sin eliminar el historial de entradas
+UPDATE entrada
+JOIN compra ON entrada.id_compra = compra.id_compra
+SET entrada.ocupacion_activa = NULL
+WHERE compra.estado IN ('cancelada', 'expirada');

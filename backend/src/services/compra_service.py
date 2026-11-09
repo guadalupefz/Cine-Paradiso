@@ -56,7 +56,7 @@ def realizar_compra(id_usuario, id_funcion, ids_butacas):
                     f"La butaca {id_butaca} no pertenece a la sala de esta función."
                 )
 
-        limpiar_reservas_expiradas(cursor, id_funcion, ids_butacas)
+        limpiar_reservas_expiradas(cursor, id_funcion)
         butacas_ocupadas = obtener_butacas_ocupadas(cursor, id_funcion)
         ids_ocupados = {b["id_butaca"] for b in butacas_ocupadas}
 
@@ -173,9 +173,19 @@ def confirmar_compra(id_usuario, id_compra):
                 """,
                 (id_compra,)
             )
+
+            cursor.execute(
+                """
+                UPDATE entrada
+                SET ocupacion_activa = NULL
+                WHERE id_compra = %s
+                """,
+                (id_compra,)
+            )
+
             conn.commit()
             raise ValueError(
-                "La reserva venció. Debe realizar una nueva reserva."
+            "La reserva venció. Debe realizar una nueva reserva"
             )
 
         entradas = obtener_entradas_por_compra(cursor, id_compra)

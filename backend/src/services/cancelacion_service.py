@@ -80,6 +80,15 @@ def cancelar_compra(id_usuario, id_compra):
                 (id_compra,)
             )
 
+            cursor.execute(
+                """
+                UPDATE entrada
+                SET ocupacion_activa = NULL
+                WHERE id_compra = %s
+                """,
+                (id_compra,)
+            )
+
         conexion.commit()
 
         return {

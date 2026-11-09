@@ -29,7 +29,6 @@ def crear_reserva(id_usuario: int, id_funcion: int,
 
         with conn.cursor(dictionary=True) as cursor:
 
-            # Leer la función bajo el mismo bloqueo usado para reservar.
             funcion = obtener_funcion(cursor, id_funcion)
 
             if funcion is None:
@@ -58,12 +57,9 @@ def crear_reserva(id_usuario: int, id_funcion: int,
                     "mensaje": "Una o más butacas no pertenecen a la sala de esta función.",
                     "status_code": 400,
                 }
-
-            # Limpiar reservas vencidas
         
             limpiar_reservas_expiradas(cursor, id_funcion)
 
-            # Comprobar disponibilidad de butacas
             ocupadas = obtener_butacas_ocupadas_con_bloqueo(
                 cursor, id_funcion, lista_id_butacas
             )
@@ -77,7 +73,6 @@ def crear_reserva(id_usuario: int, id_funcion: int,
                     "status_code": 409
                 }
 
-            # Calcular precio de las entradas
             total_entradas = (
                 Decimal(str(precio_base)) * len(lista_id_butacas)
             )
@@ -85,7 +80,6 @@ def crear_reserva(id_usuario: int, id_funcion: int,
             total_servicios = Decimal("0.00")
             servicios_a_guardar = []
 
-            # Consultar y calcular los servicios seleccionados
             for servicio in servicios:
 
                 id_servicio = servicio["id_servicio"]
@@ -112,20 +106,16 @@ def crear_reserva(id_usuario: int, id_funcion: int,
                     "precio_unitario": precio_unitario
                 })
 
-            # Calcular total general
             total_calculado = total_entradas + total_servicios
 
-            # Crear una única compra pendiente
             id_compra = crear_compra_pendiente(
                 cursor, id_usuario, total_calculado
             )
 
-            # Crear las entradas de la reserva
             crear_entradas_reserva(
                 cursor, id_compra, id_funcion, lista_id_butacas
             )
 
-            # Guardar los servicios asociados a esa misma compra
             for servicio in servicios_a_guardar:
                 agregar_servicio_a_compra(
                     cursor,
@@ -161,8 +151,7 @@ def crear_reserva(id_usuario: int, id_funcion: int,
         if conn is not None:
             conn.rollback()
 
-        # Si MySQL detecta una butaca duplicada para la misma función
-        if e.errno == 1062 and "entrada.id_funcion" in str(e):
+        if e.errno == 1062 and "uq_entrada_ocupacion_activa" in str(e):
             return None, {
                 "error": "BUTACAS_OCUPADAS",
                 "mensaje": "Una o más butacas seleccionadas ya están reservadas o vendidas.",

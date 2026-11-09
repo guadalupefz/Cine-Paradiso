@@ -30,9 +30,18 @@ def obtener_butacas_de_funcion(cursor, id_funcion):
 
 def obtener_butacas_ocupadas(cursor, id_funcion):
     query = """
-        SELECT id_butaca
+        SELECT entrada.id_butaca
         FROM entrada
-        WHERE id_funcion = %s
+        JOIN compra ON entrada.id_compra = compra.id_compra
+        WHERE entrada.id_funcion = %s
+          AND entrada.ocupacion_activa = 1
+          AND (
+              compra.estado IN ('aprobada', 'confirmada')
+              OR (
+                  compra.estado = 'pendiente'
+                  AND compra.fecha_hora > NOW() - INTERVAL 15 MINUTE
+              )
+          )
         FOR UPDATE
     """
     cursor.execute(query, (id_funcion,))
