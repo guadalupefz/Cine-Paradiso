@@ -22,8 +22,32 @@ class ContinuidadAcceso(unittest.TestCase):
     def backend(self,metodo,ruta,**datos):
         self.llamadas.append((metodo,ruta,datos))
         if ruta=='/auth/login':return self.login
-        if ruta=='/usuarios/me':return self.usuario,200
-        return [],200
+        if ruta == '/usuarios/me':
+            return self.usuario, 200
+
+        if ruta == '/cartelera':
+            return {
+                "cartelera": [{
+                "id_funcion": 15,
+                "id_pelicula": 3,
+                "titulo": "Película de prueba",
+                "fecha_hora_inicio": "Wed, 04 Nov 2026 20:00:37 GMT",
+                "precio_base": "8000.00",
+                "poster": "",
+                "local_nombre": "Cine de prueba",
+                "sala_nombre": "Sala 1"
+             }]
+        }, 200
+
+        if ruta == '/funciones/15/butacas':
+             return {
+                "butacas": [
+                {"id_butaca": 1, "fila": "A", "numero": 1},
+                {"id_butaca": 2, "fila": "A", "numero": 2}
+            ]
+         }, 200
+
+        return [], 200
 
     def post_login(self,**datos):
         with self.client.session_transaction() as sesion:csrf=sesion['csrf_token']
@@ -92,7 +116,7 @@ class ContinuidadAcceso(unittest.TestCase):
         respuesta=self.client.get('/compra?id_funcion=15&butacas=A1%2CA2')
         self.assertEqual(respuesta.status_code,200)
         self.assertIn('A1',respuesta.text)
-        self.assertIn('La compra todavía no está',respuesta.text)
+        self.assertIn('La compra todavía no se realizó.', respuesta.text)
 
     def test_login_sin_csrf_no_llama_a_la_api(self):
         respuesta=self.client.post('/login',data={'email':'cliente@example.com','password':'ClavePrueba2026!'})
