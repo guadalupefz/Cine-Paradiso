@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from backend.src.validators.reservas_validator import validar_datos_reserva
-from backend.src.services.reservas_service import crear_reserva, rechazar_reserva_pendiente
+from backend.src.services.reservas_service import crear_reserva, rechazar_reserva_pendiente, abandonar_reserva_pendiente
 from backend.seguridad import cliente_required
 
 reservas_bp = Blueprint("reservas", __name__)
@@ -43,5 +43,20 @@ def rechazar_reserva(id_usuario, id_compra):
 
     return jsonify({
         "mensaje": "La reserva fue rechazada correctamente.",
+        "reserva": reserva
+    }), 200
+
+
+@reservas_bp.route("/reservas/<int:id_compra>/abandonar", methods=["POST"])
+@cliente_required
+def abandonar_reserva(id_usuario, id_compra):
+    reserva, error = abandonar_reserva_pendiente(id_compra, id_usuario)
+
+    if error:
+        status_code = error.pop("status_code", 400)
+        return jsonify(error), status_code
+
+    return jsonify({
+        "mensaje": "La reserva fue abandonada correctamente.",
         "reserva": reserva
     }), 200
