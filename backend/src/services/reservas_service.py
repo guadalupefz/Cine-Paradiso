@@ -60,9 +60,8 @@ def crear_reserva(id_usuario: int, id_funcion: int,
                 }
 
             # Limpiar reservas vencidas
-            limpiar_reservas_expiradas(
-                cursor, id_funcion, lista_id_butacas
-            )
+        
+            limpiar_reservas_expiradas(cursor, id_funcion)
 
             # Comprobar disponibilidad de butacas
             ocupadas = obtener_butacas_ocupadas_con_bloqueo(
