@@ -50,7 +50,7 @@ def validar_pelicula(datos):
     duracion = datos.get("duracion_minutos")
     if type(duracion) is not int or not 1 <= duracion <= 1440:
         raise ValueError("La duración debe ser un entero entre 1 y 1440 minutos")
-    resultado["duracion_minutos"] = str(duracion)
+    resultado["duracion_minutos"] = duracion
     return resultado
 
 @peliculas_bp.post("/peliculas")
