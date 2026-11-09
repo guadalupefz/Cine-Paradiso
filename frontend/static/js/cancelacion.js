@@ -1,8 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Activar la interactividad de las pestañas (Tabs)
     configurarTabs();
-
-    // 2. Activar la lógica del modal de cancelación
     configurarModalCancelacion();
 });
 
@@ -15,11 +12,9 @@ function configurarTabs() {
         tab.addEventListener("click", () => {
             const targetId = tab.getAttribute("data-tab");
 
-            // Remover la clase active de todas las pestañas y contenidos
             tabs.forEach(t => t.classList.remove("active"));
             contenidos.forEach(c => c.classList.remove("active"));
 
-            // Activar la pestaña clickeada y su sección correspondiente
             tab.classList.add("active");
             const seccionActiva = document.getElementById(targetId);
             if (seccionActiva) {
@@ -65,13 +60,11 @@ function configurarModalCancelacion() {
     if (cerrarModal) cerrarModal.addEventListener("click", cerrarAccion);
     if (conservarEntradas) conservarEntradas.addEventListener("click", cerrarAccion);
 
-    // Habilitar botón de confirmación solo si tilda el checkbox
     if (aceptarCheckbox && confirmarBtn) {
         aceptarCheckbox.addEventListener("change", (e) => {
             confirmarBtn.disabled = !e.target.checked;
         });
 
-        // Manejar la petición POST al backend cuando confirma
         confirmarBtn.addEventListener("click", async () => {
             if (!compraIdSeleccionada) return;
 
