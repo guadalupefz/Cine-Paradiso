@@ -59,7 +59,7 @@ def pelicula_hallada (datos_omdb):
                 'titulo': datos_omdb.get('Title'),
                 'sinopsis': datos_omdb.get('Plot'),
                 'poster'  : datos_omdb.get('Poster'),
-                'duracion_minutos': str(minutos_de_duracion(datos_omdb.get('Runtime'))),
+                'duracion_minutos': minutos_de_duracion(datos_omdb.get('Runtime')),
                 'clasificacion': datos_omdb.get('Rated'),
                 'genero': datos_omdb.get('Genre')
              }
@@ -79,7 +79,7 @@ def pelicula_a_guardar (datos_omdb, url):
                 'titulo': datos_omdb.get('Title'),
                 'sinopsis': datos_omdb.get('Plot'),
                 'poster'  : url,
-                'duracion_minutos': str(minutos_de_duracion(datos_omdb.get('Runtime'))),
+                'duracion_minutos': minutos_de_duracion(datos_omdb.get('Runtime')),
                 'clasificacion': datos_omdb.get('Rated'),
                 'genero': datos_omdb.get('Genre')
              }
