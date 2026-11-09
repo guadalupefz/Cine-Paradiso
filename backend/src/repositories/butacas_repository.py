@@ -6,8 +6,10 @@ def obtener_butacas_por_funcion(cursor, id_funcion):
             b.fila,
             b.numero,
             CASE
-                WHEN c.estado = 'confirmada' THEN 'ocupada'
-                WHEN c.estado = 'pendiente' AND c.fecha_hora > NOW() - INTERVAL 15 MINUTE THEN 'reservada'
+                WHEN c.estado IN ('aprobada', 'confirmada') THEN 'ocupada'
+                WHEN c.estado = 'pendiente'
+                    AND c.fecha_hora > NOW() - INTERVAL 15 MINUTE
+                    THEN 'reservada'
                 ELSE 'disponible'
             END AS estado
         FROM funcion f
