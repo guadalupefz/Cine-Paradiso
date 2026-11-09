@@ -29,7 +29,7 @@ def limpiar_reservas_expiradas(cursor, id_funcion: int):
         SET c.estado = 'expirada'
         WHERE e.id_funcion = %s
             AND c.estado = 'pendiente'
-            AND c.fecha_hora &lt;= NOW() - INTERVAL 15 MINUTE;
+            AND c.fecha_hora <= NOW() - INTERVAL 15 MINUTE;
     """
     cursor.execute(query_upd, (id_funcion,))
 
