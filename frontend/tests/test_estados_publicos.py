@@ -32,7 +32,7 @@ class EstadosPublicos(unittest.TestCase):
             sesion.update(backend_token="token-ficticio",csrf_token="csrf-ficticio")
 
     def test_error_cartelera_no_anuncia_catalogo_vacio(self):
-        self.errores["/cartelera"]=503
+        self.errores["/peliculas"]=503
         respuesta=self.client.get("/")
         self.assertIn("No pudimos cargar la cartelera",respuesta.text)
         self.assertNotIn("No hay películas disponibles en este momento.",respuesta.text)
