@@ -42,6 +42,7 @@ CREATE TABLE usuario (
 -- Creacion de tabla pelicula
 CREATE TABLE pelicula (
     id_pelicula INT AUTO_INCREMENT PRIMARY KEY,
+    id_externo_api VARCHAR(20) UNIQUE,
     titulo VARCHAR(150) NOT NULL,
     sinopsis TEXT NOT NULL,
     poster VARCHAR (100) NOT NULL,
