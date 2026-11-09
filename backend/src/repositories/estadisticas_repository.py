@@ -1,5 +1,5 @@
 def obtener_ventas_por_genero(cursor, desde=None, hasta=None):
-    filtros = ["LOWER(c.estado) = 'confirmada'"]
+    filtros = ["LOWER(c.estado) IN ('aprobada', 'confirmada')"]
     parametros = []
 
     if desde:
@@ -14,15 +14,33 @@ def obtener_ventas_por_genero(cursor, desde=None, hasta=None):
 
     query = f"""
         SELECT
-            p.genero,
-            COUNT(e.id_entrada) AS entradas_vendidas,
-            COALESCE(SUM(f.precio_base), 0) AS importe_estimado_entradas
-        FROM entrada e
-        JOIN compra c ON c.id_compra = e.id_compra
-        JOIN funcion f ON f.id_funcion = e.id_funcion
-        JOIN pelicula p ON p.id_pelicula = f.id_pelicula
-        WHERE {" AND ".join(filtros)}
-        GROUP BY p.genero
+            datos.genero,
+            SUM(datos.entradas_vendidas) AS entradas_vendidas,
+            COALESCE(SUM(datos.importe_entradas), 0)
+                AS importe_estimado_entradas
+        FROM (
+            SELECT
+                c.id_compra,
+                p.genero,
+                COUNT(e.id_entrada) AS entradas_vendidas,
+                c.total - (
+                    SELECT COALESCE(
+                        SUM(cs.cantidad * cs.precio_unitario), 0
+                    )
+                    FROM compra_servicio cs
+                    WHERE cs.id_compra = c.id_compra
+                ) AS importe_entradas
+            FROM entrada e
+            JOIN compra c ON c.id_compra = e.id_compra
+            JOIN funcion f ON f.id_funcion = e.id_funcion
+            JOIN pelicula p ON p.id_pelicula = f.id_pelicula
+            WHERE {" AND ".join(filtros)}
+            GROUP BY
+                c.id_compra,
+                p.genero,
+                c.total
+        ) AS datos
+        GROUP BY datos.genero
         ORDER BY entradas_vendidas DESC
     """
 
@@ -31,7 +49,7 @@ def obtener_ventas_por_genero(cursor, desde=None, hasta=None):
 
 
 def obtener_ventas_por_franja(cursor, desde=None, hasta=None):
-    filtros = ["LOWER(c.estado) = 'confirmada'"]
+    filtros = ["LOWER(c.estado) IN ('aprobada', 'confirmada')"]
     parametros = []
 
     if desde:
@@ -46,18 +64,36 @@ def obtener_ventas_por_franja(cursor, desde=None, hasta=None):
 
     query = f"""
         SELECT
-            CASE
-                WHEN HOUR(f.fecha_hora_inicio) < 12 THEN 'Mañana'
-                WHEN HOUR(f.fecha_hora_inicio) < 18 THEN 'Tarde'
-                ELSE 'Noche'
-            END AS franja_horaria,
-            COUNT(e.id_entrada) AS entradas_vendidas,
-            COALESCE(SUM(f.precio_base), 0) AS importe_estimado_entradas
-        FROM entrada e
-        JOIN compra c ON c.id_compra = e.id_compra
-        JOIN funcion f ON f.id_funcion = e.id_funcion
-        WHERE {" AND ".join(filtros)}
-        GROUP BY franja_horaria
+            datos.franja_horaria,
+            SUM(datos.entradas_vendidas) AS entradas_vendidas,
+            COALESCE(SUM(datos.importe_entradas), 0)
+                AS importe_estimado_entradas
+        FROM (
+            SELECT
+                c.id_compra,
+                CASE
+                    WHEN HOUR(f.fecha_hora_inicio) < 12 THEN 'Mañana'
+                    WHEN HOUR(f.fecha_hora_inicio) < 18 THEN 'Tarde'
+                    ELSE 'Noche'
+                END AS franja_horaria,
+                COUNT(e.id_entrada) AS entradas_vendidas,
+                c.total - (
+                    SELECT COALESCE(
+                        SUM(cs.cantidad * cs.precio_unitario), 0
+                    )
+                    FROM compra_servicio cs
+                    WHERE cs.id_compra = c.id_compra
+                ) AS importe_entradas
+            FROM entrada e
+            JOIN compra c ON c.id_compra = e.id_compra
+            JOIN funcion f ON f.id_funcion = e.id_funcion
+            WHERE {" AND ".join(filtros)}
+            GROUP BY
+                c.id_compra,
+                franja_horaria,
+                c.total
+        ) AS datos
+        GROUP BY datos.franja_horaria
         ORDER BY entradas_vendidas DESC
     """
 
@@ -89,12 +125,12 @@ def obtener_ocupacion_por_funcion(cursor, desde=None, hasta=None):
             s.nombre AS sala,
             s.capacidad,
             COUNT(DISTINCT CASE
-                WHEN LOWER(c.estado) = 'confirmada'
+                WHEN LOWER(c.estado) IN ('aprobada', 'confirmada')
                 THEN e.id_butaca
             END) AS butacas_ocupadas,
             ROUND(
                 100.0 * COUNT(DISTINCT CASE
-                    WHEN LOWER(c.estado) = 'confirmada'
+                    WHEN LOWER(c.estado) IN ('aprobada', 'confirmada')
                     THEN e.id_butaca
                 END) / NULLIF(s.capacidad, 0),
                 2
@@ -152,7 +188,7 @@ def obtener_ocupacion_por_pelicula(cursor, desde=None, hasta=None):
                 p.titulo AS pelicula,
                 s.capacidad,
                 COUNT(DISTINCT CASE
-                    WHEN LOWER(c.estado) = 'confirmada'
+                    WHEN LOWER(c.estado) IN ('aprobada', 'confirmada')
                     THEN e.id_butaca
                 END) AS butacas_ocupadas
             FROM funcion f
