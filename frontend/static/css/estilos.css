@@ -182,6 +182,13 @@ footer {
     color: #8c1d18;
 }
 
+.butaca.reservada {
+    border-color: #d97706;
+    background-color: #fef3c7;
+    color: #92400e;
+    cursor: not-allowed;
+}
+
 .butaca.seleccionada {
     border-color: #174ea6;
     background-color: #dbeafe;
