@@ -110,27 +110,23 @@
 
                                 {% for butaca in butacas_fila %}
 
-                                    {% set estado = butaca.estado|lower %}
-                                    {% set ocupada = estado in [
-                                        'ocupada',
-                                        'ocupado',
-                                        'reservada',
-                                        'reservado',
-                                        'no disponible'
-                                    ] %}
+                                   {% set estado = butaca.estado|lower %}
+                                   {% set ocupada = estado in ['ocupada', 'ocupado'] %}
+                                   {% set reservada = estado in ['reservada', 'reservado'] %}
+                                   {% set bloqueada = ocupada or reservada %}
 
                                     {% if butaca.numero == 6 %}
-                                         <span class="pasillo-butacas" aria-hidden="true"></span>
+                                        <span class="pasillo-butacas" aria-hidden="true"></span>
                                     {% endif %}
 
                                     <button
                                         type="button"
-                                        class="butaca {% if ocupada %}ocupada{% else %}disponible{% endif %}"
+                                        class="butaca {% if ocupada %}ocupada{% elif reservada %}reservada{% else %}disponible{% endif %}"
                                         data-id-butaca="{{ butaca.id_butaca }}"
                                         data-etiqueta="{{ fila }}{{ butaca.numero }}"
-                                        {% if ocupada %}
+                                        {% if bloqueada %}
                                             disabled
-                                            aria-label="Butaca {{ fila }}{{ butaca.numero }}, ocupada"
+                                            aria-label="Butaca {{ fila }}{{ butaca.numero }}, no disponible"
                                         {% else %}
                                             aria-pressed="false"
                                             aria-label="Butaca {{ fila }}{{ butaca.numero }}, disponible"
@@ -273,6 +269,14 @@ document.addEventListener("DOMContentLoaded", function () {
     butacas.forEach(function (butaca) {
 
         butaca.addEventListener("click", function () {
+
+            // No permitir seleccionar butacas ocupadas o reservadas.
+            if (
+                butaca.classList.contains("ocupada") ||
+                butaca.classList.contains("reservada")
+            ){
+                return;
+            }
 
             const seleccionada = butaca.classList.toggle("seleccionada");
 
