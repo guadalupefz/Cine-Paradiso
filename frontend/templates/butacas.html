@@ -39,7 +39,8 @@
     {% elif butacas %}
 
         <div class="contenido-seleccion-butacas"
-             data-precio="{{ funcion.precio_base or 0 }}">
+            data-precio="{{ funcion.precio_base or 0 }}"
+            data-id-funcion="{{ id_funcion }}">
 
             <!-- Columna izquierda -->
             <div class="sector-mapa">
@@ -200,115 +201,6 @@
 
 </section>
 
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const butacas = document.querySelectorAll(".butaca.disponible");
-    const contador = document.getElementById("cantidad-seleccionadas");
-    const continuar = document.getElementById("continuar-compra");
-    const mensaje = document.getElementById("mensaje-seleccion");
-    const detalle = document.getElementById("detalle-butacas");
-    const total = document.getElementById("total-butacas");
-    const contenedor = document.querySelector(".contenido-seleccion-butacas");
-
-    if (!contador || !continuar || !mensaje || !detalle || !total || !contenedor) {
-        return;
-    }
-
-    const precioUnitario = Number(contenedor.dataset.precio);
-
-    function obtenerSeleccionadas() {
-        return Array.from(
-            document.querySelectorAll(".butaca.seleccionada")
-        );
-    }
-
-
-    function actualizarSeleccion() {
-
-        const seleccionadas = obtenerSeleccionadas();
-        const cantidad = seleccionadas.length;
-        const importe = cantidad * precioUnitario;
-
-        contador.textContent = cantidad;
-        continuar.disabled = cantidad === 0;
-
-        detalle.innerHTML = "";
-
-        if (cantidad > 0) {
-
-
-            seleccionadas.forEach(function (butaca) {
-                const elemento = document.createElement("li");
-                elemento.classList.add("item-butaca-resumen");
-
-                const nombre = document.createElement("span");
-                nombre.textContent = "FILA " + butaca.dataset.etiqueta.charAt(0) +
-                    " - Asiento " + butaca.dataset.etiqueta.slice(1);
-
-                const precio = document.createElement("strong");
-                precio.textContent = "ARS " + precioUnitario.toLocaleString("es-AR");
-
-                elemento.appendChild(nombre);
-                elemento.appendChild(precio);
-
-                detalle.appendChild(elemento);
-            });
-
-            mensaje.textContent =
-                "Seleccionaste " + cantidad + " butaca(s).";
-
-        } else {
-            mensaje.textContent = "";
-        }
-
-        total.textContent = "$" + importe.toFixed(2);
-    }
-
-
-    butacas.forEach(function (butaca) {
-
-        butaca.addEventListener("click", function () {
-
-            // No permitir seleccionar butacas ocupadas o reservadas.
-            if (
-                butaca.classList.contains("ocupada") ||
-                butaca.classList.contains("reservada")
-            ){
-                return;
-            }
-
-            const seleccionada = butaca.classList.toggle("seleccionada");
-
-            butaca.setAttribute("aria-pressed", seleccionada);
-
-            actualizarSeleccion();
-        });
-
-    });
-
-    continuar.addEventListener("click", function () {
-
-        const seleccionadas = obtenerSeleccionadas();
-
-        if (seleccionadas.length === 0) {
-            return;
-        }
-
-        const idsSeleccionados = seleccionadas.map(function (butaca) {
-            return Number(butaca.dataset.idButaca);
-        });
-
-        const params = new URLSearchParams({
-            id_funcion: "{{ id_funcion }}",
-            butacas: idsSeleccionados.join(",")
-        });
-
-        window.location.href = "/servicios?" + params.toString();
-
-    });
-
-});
-</script>
+<script src="{{ url_for('static', filename='js/butacas.js') }}"></script>
 
 {% endblock %}
