@@ -114,7 +114,7 @@ class ImportacionOMDbTest(unittest.TestCase):
             "titulo": datos["Title"],
             "sinopsis": datos["Plot"],
             "poster": datos["Poster"],
-            "duracion_minutos": "175",
+            "duracion_minutos": 175,
             "clasificacion": datos["Rated"],
             "genero": datos["Genre"],
         }

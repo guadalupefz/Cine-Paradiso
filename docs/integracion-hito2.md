@@ -54,6 +54,12 @@ Ver [propuesta JWT y correcciones](propuesta-jwt-y-correcciones.md) para prepara
 
 El precio de servicios se envía como texto decimal (`"2000.00"`), con máximo dos decimales. Los cambios de catálogo no reescriben detalles de compras anteriores.
 
+## Contrato de reservas y películas
+
+- Una reserva queda pendiente durante **15 minutos** desde su creación. El vencimiento se calcula desde la fecha `compra.fecha_hora`; al confirmar, la misma ventana determina si sigue vigente.
+- Los estados válidos de compra son `pendiente`, `confirmada`, `expirada`, `cancelada` y `rechazada`. `aprobada` es un valor legado: la migración lo transforma en `confirmada`. Los estados de butaca (`disponible`, `reservada`, `ocupada`) son estados de visualización, no estados de compra.
+- `pelicula.duracion_minutos` se almacena como `INT`, en minutos. Para bases existentes, ejecutar `backend/db/migraciones/migration_v2_nov_b09.sql` una sola vez; la migración convierte formatos como `108 min` a `108` y se detiene si encuentra una duración inválida.
+
 La API externa requiere `OMDB_API_KEY`; si no está configurada, el panel informa el problema y permite carga manual. La ruta `/api/pelicula` es la integración externa; `/api/peliculas` es el catálogo local. Son operaciones diferentes y no deben registrarse con el mismo nombre de Blueprint.
 
 ## Comprobaciones
