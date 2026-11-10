@@ -103,6 +103,16 @@ def destino_interno(valor):
             if parametros["id_funcion"] <= 0:
                 return None
             parametros["butacas"] = consulta.get("butacas", [""])[0]
+        elif endpoint == "mis_compras":
+            id_compra = consulta.get("cancelar", [None])[0]
+
+            if id_compra is not None:
+                id_compra = int(id_compra)
+
+                if id_compra <= 0:
+                    return None
+
+                parametros["cancelar"] = id_compra
         elif endpoint in ("admin_peliculas", "admin_funciones", "admin_servicios"):
             editar = consulta.get("editar", [""])[0]
             if editar:
@@ -1028,7 +1038,26 @@ def mis_compras():
         compra["entradas"] = lista(entradas, "entradas") if estado_entradas == 200 else []
         compra["error_entradas"] = estado_entradas != 200
 
-    return render_template("compras.html", compras=compras, error=estado != 200)
+    id_compra_cancelar = request.args.get("cancelar", type=int)
+
+    compra_cancelable = next(
+        (
+            compra for compra in compras
+            if compra["id_compra"] == id_compra_cancelar
+            and compra["estado"].lower() in ("aprobada", "confirmada")
+        ),
+        None
+    )
+
+    if id_compra_cancelar is not None and compra_cancelable is None and estado == 200:
+        flash("La compra indicada no existe o no se puede cancelar", "error")
+
+    return render_template(
+        "compras.html",
+        compras=compras,
+        error=estado != 200,
+        id_compra_cancelar=compra_cancelable["id_compra"] if compra_cancelable else None
+    )
 
 @app.post("/mis-compras/<int:id_compra>/cancelar")
 @requiere_usuario
@@ -1038,9 +1067,12 @@ def cancelar_compra_frontend(id_compra):
         f"/compras/{id_compra}/cancelar"
     )
 
-
     if estado == 200:
         flash(mensaje_error(datos), "ok")
+    else:
+        flash(mensaje_error(datos), "error")
+
+    return redirect(url_for("mis_compras"))
 
 
 

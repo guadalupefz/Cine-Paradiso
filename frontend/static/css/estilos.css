@@ -648,3 +648,25 @@ a { color: #8d1515; }
     min-width: 220px;
     text-align: center;
 }
+
+#modal-cancelacion {
+    position: fixed;
+    margin: auto;
+    width: min(90%, 460px);
+    padding: 24px;
+    border: none;
+    border-radius: 12px;
+    background-color: #fffaf0;
+    color: #333;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+}
+
+#modal-cancelacion::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.contenido-modal-cancelacion {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}

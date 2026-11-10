@@ -56,6 +56,9 @@ def enviar_mail_compra(comprobante, entradas_qr):
 
     frontend_url = current_app.config["FRONTEND_URL"]
     enlace_compras = f"{frontend_url}/mis-compras"
+    enlace_cancelacion = (
+        f"{enlace_compras}?cancelar={compra['id_compra']}"
+    )
 
     mensaje.body = (
         f"hola {compra['nombre']}!\n\n"
@@ -65,7 +68,9 @@ def enviar_mail_compra(comprobante, entradas_qr):
         f"\ntus entradas:\n{detalle_entradas}\n"
         "Estos son los codigos qr de tus entradas\n\n"
         "Consultá tus entradas y gestioná tus compras:\n"
-        f"\n{enlace_compras}\n"
+        f"{enlace_compras}\n\n"
+        "Para cancelar esta compra:\n"
+        f"{enlace_cancelacion}\n\n"
     )
 
     for entrada in entradas_qr:

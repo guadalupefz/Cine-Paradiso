@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block content %}
@@ -6,86 +5,76 @@
 <h2>Mis compras</h2>
 
 {% if error %}
-    <p class="mensaje-error">
-        No se pudieron cargar tus compras.
-        <a href="{{ url_for('mis_compras') }}">Volver a intentar</a>.
-    </p>
+<p class="mensaje-error">
+    No se pudieron cargar tus compras.
+    <a href="{{ url_for('mis_compras') }}">Volver a intentar</a>.
+</p>
 {% else %}
 
-    {% for compra in compras %}
+{% for compra in compras %}
+<article class="tarjeta-admin">
+    <h3>Compra {{ compra.id_compra }}</h3>
+    <p>{{ compra.fecha_hora }} · {{ compra.estado }}</p>
+    <p>Total: ${{ compra.total }}</p>
 
+    {% if compra.error_entradas %}
+    <p class="mensaje-error">
+        No se pudieron cargar las entradas de esta compra.
+    </p>
+    {% endif %}
 
-    {% for compra in compras %}
-        <article class="tarjeta-admin">
-            <h3>Compra {{ compra.id_compra }}</h3>
-            <p>{{ compra.fecha_hora }} · {{ compra.estado }}</p>
-            <p>Total: ${{ compra.total }}</p>
+    {% for entrada in compra.entradas %}
+    <div>
+        <p>Entrada {{ entrada.id_entrada }}</p>
+        <p>Función: {{ entrada.id_funcion }}</p>
+        <p>Butaca: {{ entrada.fila }}{{ entrada.numero }}</p>
 
-            {% if compra.error_entradas %}
-                <p class="mensaje-error">
-                    No se pudieron cargar las entradas de esta compra.
-                </p>
-            {% endif %}
-
-            {% for entrada in compra.entradas %}
-                <div>
-                    <p>Entrada {{ entrada.id_entrada }}</p>
-                    <p>Función: {{ entrada.id_funcion }}</p>
-                    <p>Butaca: {{ entrada.fila }}{{ entrada.numero }}</p>
-
-                    {% if compra.estado|lower in ['aprobada', 'confirmada'] %}
-                        <img
-                            src="{{ url_for('ver_qr_cliente', id_entrada=entrada.id_entrada) }}"
-                            alt="QR de la entrada {{ entrada.id_entrada }}"
-                            class="imagen_qr"
-                        >
-                    {% elif compra.estado|lower == 'cancelada' %}
-                        <p>Entrada cancelada. El código QR ya no es válido</p>
-                    {% endif %}
-                </div>
-            {% endfor %}
-
-            <a href="{{ url_for('ver_comprobante', id_compra=compra.id_compra) }}">
-                Ver comprobante
-            </a>
-
-            {% if compra.estado|lower in ['aprobada', 'confirmada'] %}
-                <button
-                    type="button"
-                    class="boton-cancelar-compra"
-                    data-id-compra="{{ compra.id_compra }}"
-                >
-                    Cancelar compra
-                </button>
-            {% endif %}
-        </article>
-    {% else %}
-        <p>No tenés compras registradas.</p>
+        {% if compra.estado|lower in ['aprobada', 'confirmada'] %}
+        <img src="{{ url_for('ver_qr_cliente', id_entrada=entrada.id_entrada) }}"
+            alt="QR de la entrada {{ entrada.id_entrada }}" class="imagen_qr">
+        {% elif compra.estado|lower == 'cancelada' %}
+        <p>Entrada cancelada. El código QR ya no es válido</p>
+        {% endif %}
+    </div>
     {% endfor %}
 
-    <dialog id="modal-cancelacion">
-        <div class="contenido-modal-cancelacion">
-            <h3>¿Cancelar esta compra?</h3>
+    <a href="{{ url_for('ver_comprobante', id_compra=compra.id_compra) }}">
+        Ver comprobante
+    </a>
 
-            <p>
-                ¿Estás segura de que querés cancelar esta compra?
-                Esta acción no se puede deshacer.
-            </p>
+    {% if compra.estado|lower in ['aprobada', 'confirmada'] %}
+    <button type="button" class="boton-cancelar-compra" data-id-compra="{{ compra.id_compra }}">
+        Cancelar compra
+    </button>
+    {% endif %}
+</article>
+{% else %}
+<p>No tenés compras registradas.</p>
+{% endfor %}
 
-            <form method="POST" id="form-cancelacion">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                <button type="button" id="cerrar-modal-cancelacion">
-                    Volver
-                </button>
+<dialog id="modal-cancelacion" data-id-compra-cancelar="{{ id_compra_cancelar or '' }}">
+    <div class="contenido-modal-cancelacion">
+        <h3>¿Cancelar esta compra?</h3>
 
-                <button type="submit">
-                    Sí, cancelar compra
-                </button>
-            </form>
-        </div>
-    </dialog>
+        <p>
+            ¿Estás segura de que querés cancelar esta compra?
+            Esta acción no se puede deshacer.
+        </p>
 
-    <script>
+        <form method="POST" id="form-cancelacion">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="button" id="cerrar-modal-cancelacion">
+                Volver
+            </button>
+
+            <button type="submit">
+                Sí, cancelar compra
+            </button>
+        </form>
+    </div>
+</dialog>
+
+<script>
     document.addEventListener("DOMContentLoaded", function () {
         const modal = document.getElementById("modal-cancelacion");
         const formulario = document.getElementById("form-cancelacion");
@@ -103,8 +92,20 @@
         cerrar.addEventListener("click", function () {
             modal.close();
         });
+
+        const idCompraCancelar = modal.dataset.idCompraCancelar;
+
+        if (idCompraCancelar) {
+            const boton = document.querySelector(
+                `.boton-cancelar-compra[data-id-compra="${idCompraCancelar}"]`
+            );
+
+            if (boton) {
+                boton.click();
+            }
+        }
     });
-    </script>
+</script>
 
 {% endif %}
 
