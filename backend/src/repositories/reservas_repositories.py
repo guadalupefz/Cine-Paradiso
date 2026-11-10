@@ -1,6 +1,13 @@
 import uuid
 from decimal import Decimal
 
+from backend.src.constants import (
+    ESTADO_COMPRA_CONFIRMADA,
+    ESTADO_COMPRA_EXPIRADA,
+    ESTADO_COMPRA_PENDIENTE,
+    RESERVA_DURACION_MINUTOS,
+)
+
 
 def obtener_butacas_ocupadas_con_bloqueo(cursor, id_funcion, lista_id_butacas):
     placeholders = ",".join(["%s"] * len(lista_id_butacas))
@@ -13,16 +20,24 @@ def obtener_butacas_ocupadas_con_bloqueo(cursor, id_funcion, lista_id_butacas):
           AND entrada.id_butaca IN ({placeholders})
           AND entrada.ocupacion_activa = 1
           AND (
-              compra.estado IN ('aprobada', 'confirmada')
+              compra.estado IN (%s, %s)
               OR (
-                  compra.estado = 'pendiente'
-                  AND compra.fecha_hora > NOW() - INTERVAL 15 MINUTE
+                  compra.estado = %s
+                  AND TIMESTAMPADD(MINUTE, %s, compra.fecha_hora) > NOW()
               )
           )
         FOR UPDATE
     """
 
-    parametros = [id_funcion] + list(lista_id_butacas)
+    parametros = (
+        [id_funcion]
+        + list(lista_id_butacas)
+        + [
+            ESTADO_COMPRA_CONFIRMADA,
+            ESTADO_COMPRA_PENDIENTE,
+            RESERVA_DURACION_MINUTOS,
+        ]
+    )
     cursor.execute(query, parametros)
 
     filas = cursor.fetchall()
@@ -33,14 +48,22 @@ def limpiar_reservas_expiradas(cursor, id_funcion):
     query = """
         UPDATE entrada
         JOIN compra ON entrada.id_compra = compra.id_compra
-        SET compra.estado = 'expirada',
+        SET compra.estado = %s,
             entrada.ocupacion_activa = NULL
         WHERE entrada.id_funcion = %s
-          AND compra.estado = 'pendiente'
-          AND compra.fecha_hora <= NOW() - INTERVAL 15 MINUTE
+          AND compra.estado = %s
+          AND TIMESTAMPADD(MINUTE, %s, compra.fecha_hora) <= NOW()
     """
 
-    cursor.execute(query, (id_funcion,))
+    cursor.execute(
+        query,
+        (
+            ESTADO_COMPRA_EXPIRADA,
+            id_funcion,
+            ESTADO_COMPRA_PENDIENTE,
+            RESERVA_DURACION_MINUTOS,
+        ),
+    )
 
 
 def obtener_precio_base_funcion(cursor, id_funcion: int):
@@ -49,12 +72,17 @@ def obtener_precio_base_funcion(cursor, id_funcion: int):
     res = cursor.fetchone()
     return res['precio_base'] if res else None
 
-def crear_compra_pendiente(cursor, id_usuario: int, total: Decimal):
+def crear_compra_pendiente(
+    cursor, id_usuario: int, total: Decimal, fecha_hora_creacion
+):
     query = """
         INSERT INTO compra (id_usuario, fecha_hora, total, estado)
-        VALUES (%s, NOW(), %s, 'pendiente');
+        VALUES (%s, %s, %s, %s);
     """
-    cursor.execute(query, (id_usuario, total))
+    cursor.execute(
+        query,
+        (id_usuario, fecha_hora_creacion, total, ESTADO_COMPRA_PENDIENTE),
+    )
     return cursor.lastrowid
 
 def crear_entradas_reserva(cursor, id_compra: int, id_funcion: int, lista_id_butacas: list):

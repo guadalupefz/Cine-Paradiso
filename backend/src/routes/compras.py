@@ -3,6 +3,10 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from mysql.connector import Error as DatabaseError
 
 from src.db import get_db_connection
+from backend.src.constants import (
+    ESTADO_COMPRA_CANCELADA,
+    ESTADO_COMPRA_CONFIRMADA,
+)
 
 #voy a explicar algunas cosas de JWT porque es nuevo
 """
@@ -81,7 +85,7 @@ def cancelar_compra(id_compra):
             conn.rollback()
             return jsonify({"error": "Compra no encontrada"}), 404
 
-        if compra["estado"].lower() != "confirmada":
+        if compra["estado"].lower() != ESTADO_COMPRA_CONFIRMADA:
             conn.rollback()
             return jsonify({
                 "error": "La compra no está confirmada o ya fue cancelada"
@@ -131,9 +135,9 @@ def cancelar_compra(id_compra):
 
         cursor.execute("""
             UPDATE compra
-            SET estado = 'cancelada'
+            SET estado = %s
             WHERE id_compra = %s AND id_usuario = %s
-        """, (id_compra, id_usuario))
+        """, (ESTADO_COMPRA_CANCELADA, id_compra, id_usuario))
 
         conn.commit()
 

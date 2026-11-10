@@ -1,8 +1,16 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 import mysql.connector
 
 from backend.db.db import get_connection
+from backend.src.constants import (
+    ESTADO_COMPRA_CANCELADA,
+    ESTADO_COMPRA_CONFIRMADA,
+    ESTADO_COMPRA_EXPIRADA,
+    ESTADO_COMPRA_PENDIENTE,
+    ESTADO_COMPRA_RECHAZADA,
+    RESERVA_DURACION_MINUTOS,
+)
 
 from backend.src.repositories.servicios_repository import obtener_servicio
 from backend.src.repositories.compra_repository import obtener_butacas_de_funcion, obtener_funcion, obtener_hora_actual
@@ -12,8 +20,6 @@ from backend.src.repositories.reservas_repositories import (obtener_butacas_ocup
     limpiar_reservas_expiradas, crear_compra_pendiente,
     crear_entradas_reserva, agregar_servicio_a_compra
 )
-
-TIEMPO_EXPIRACION_MINUTOS = 15
 
 def crear_reserva(id_usuario: int, id_funcion: int,
     lista_id_butacas: list, servicios: list = None
@@ -108,8 +114,9 @@ def crear_reserva(id_usuario: int, id_funcion: int,
 
             total_calculado = total_entradas + total_servicios
 
+            fecha_hora_creacion = obtener_hora_actual(cursor)
             id_compra = crear_compra_pendiente(
-                cursor, id_usuario, total_calculado
+                cursor, id_usuario, total_calculado, fecha_hora_creacion
             )
 
             crear_entradas_reserva(
@@ -127,9 +134,8 @@ def crear_reserva(id_usuario: int, id_funcion: int,
 
             conn.commit()
 
-            fecha_vencimiento = (
-                datetime.now() +
-                timedelta(minutes=TIEMPO_EXPIRACION_MINUTOS)
+            fecha_vencimiento = fecha_hora_creacion + timedelta(
+                minutes=RESERVA_DURACION_MINUTOS
             )
 
             reserva = {
@@ -139,7 +145,7 @@ def crear_reserva(id_usuario: int, id_funcion: int,
                 "butacas": lista_id_butacas,
                 "servicios": servicios_a_guardar,
                 "total": float(total_calculado),
-                "estado": "pendiente",
+                "estado": ESTADO_COMPRA_PENDIENTE,
                 "fecha_hora_vencimiento": fecha_vencimiento.strftime(
                     "%Y-%m-%d %H:%M:%S"
                 )
@@ -203,7 +209,7 @@ def rechazar_reserva_pendiente(id_compra: int, id_usuario: int):
                     "status_code": 404
                 }
 
-            if compra["estado"] != "pendiente":
+            if compra["estado"] != ESTADO_COMPRA_PENDIENTE:
                 conn.rollback()
                 return None, {
                     "error": "RESERVA_NO_PENDIENTE",
@@ -213,18 +219,18 @@ def rechazar_reserva_pendiente(id_compra: int, id_usuario: int):
 
             cursor.execute(
                 """
-                SELECT fecha_hora <= NOW() - INTERVAL 15 MINUTE AS vencida
+                SELECT TIMESTAMPADD(MINUTE, %s, fecha_hora) <= NOW() AS vencida
                 FROM compra
                 WHERE id_compra = %s
                 """,
-                (id_compra,)
+                (RESERVA_DURACION_MINUTOS, id_compra)
             )
             vencimiento = cursor.fetchone()
 
             if vencimiento["vencida"]:
                 cursor.execute(
-                    "UPDATE compra SET estado = 'expirada' WHERE id_compra = %s",
-                    (id_compra,)
+                    "UPDATE compra SET estado = %s WHERE id_compra = %s",
+                    (ESTADO_COMPRA_EXPIRADA, id_compra)
                 )
                 cursor.execute(
                     "UPDATE entrada SET ocupacion_activa = NULL WHERE id_compra = %s",
@@ -238,8 +244,8 @@ def rechazar_reserva_pendiente(id_compra: int, id_usuario: int):
                 }
 
             cursor.execute(
-                "UPDATE compra SET estado = 'rechazada' WHERE id_compra = %s",
-                (id_compra,)
+                "UPDATE compra SET estado = %s WHERE id_compra = %s",
+                (ESTADO_COMPRA_RECHAZADA, id_compra)
             )
             cursor.execute(
                 "UPDATE entrada SET ocupacion_activa = NULL WHERE id_compra = %s",
@@ -249,7 +255,7 @@ def rechazar_reserva_pendiente(id_compra: int, id_usuario: int):
             conn.commit()
             return {
                 "id_compra": id_compra,
-                "estado": "rechazada"
+                "estado": ESTADO_COMPRA_RECHAZADA
             }, None
 
     except mysql.connector.Error:
@@ -293,7 +299,7 @@ def abandonar_reserva_pendiente(id_compra: int, id_usuario: int):
                     "status_code": 404
                 }
 
-            if compra["estado"] != "pendiente":
+            if compra["estado"] != ESTADO_COMPRA_PENDIENTE:
                 conn.rollback()
                 return None, {
                     "error": "RESERVA_NO_PENDIENTE",
@@ -303,16 +309,16 @@ def abandonar_reserva_pendiente(id_compra: int, id_usuario: int):
 
             cursor.execute(
                 """
-                SELECT fecha_hora <= NOW() - INTERVAL 15 MINUTE AS vencida
+                SELECT TIMESTAMPADD(MINUTE, %s, fecha_hora) <= NOW() AS vencida
                 FROM compra
                 WHERE id_compra = %s
                 """,
-                (id_compra,)
+                (RESERVA_DURACION_MINUTOS, id_compra)
             )
             if cursor.fetchone()["vencida"]:
                 cursor.execute(
-                    "UPDATE compra SET estado = 'expirada' WHERE id_compra = %s",
-                    (id_compra,)
+                    "UPDATE compra SET estado = %s WHERE id_compra = %s",
+                    (ESTADO_COMPRA_EXPIRADA, id_compra)
                 )
                 cursor.execute(
                     "UPDATE entrada SET ocupacion_activa = NULL WHERE id_compra = %s",
@@ -326,8 +332,8 @@ def abandonar_reserva_pendiente(id_compra: int, id_usuario: int):
                 }
 
             cursor.execute(
-                "UPDATE compra SET estado = 'cancelada' WHERE id_compra = %s",
-                (id_compra,)
+                "UPDATE compra SET estado = %s WHERE id_compra = %s",
+                (ESTADO_COMPRA_CANCELADA, id_compra)
             )
             cursor.execute(
                 "UPDATE entrada SET ocupacion_activa = NULL WHERE id_compra = %s",
@@ -337,7 +343,7 @@ def abandonar_reserva_pendiente(id_compra: int, id_usuario: int):
             conn.commit()
             return {
                 "id_compra": id_compra,
-                "estado": "cancelada"
+                "estado": ESTADO_COMPRA_CANCELADA
             }, None
 
     except mysql.connector.Error:
@@ -384,7 +390,7 @@ def editar_reserva_pendiente(id_compra: int, id_usuario: int, lista_id_butacas: 
                     "status_code": 404
                 }
 
-            if compra["estado"] != "pendiente":
+            if compra["estado"] != ESTADO_COMPRA_PENDIENTE:
                 conn.rollback()
                 return None, {
                     "error": "RESERVA_NO_PENDIENTE",
@@ -394,17 +400,17 @@ def editar_reserva_pendiente(id_compra: int, id_usuario: int, lista_id_butacas: 
 
             cursor.execute(
                 """
-                SELECT fecha_hora <= NOW() - INTERVAL 15 MINUTE AS vencida
+                SELECT TIMESTAMPADD(MINUTE, %s, fecha_hora) <= NOW() AS vencida
                 FROM compra
                 WHERE id_compra = %s
                 """,
-                (id_compra,)
+                (RESERVA_DURACION_MINUTOS, id_compra)
             )
 
             if cursor.fetchone()["vencida"]:
                 cursor.execute(
-                    "UPDATE compra SET estado = 'expirada' WHERE id_compra = %s",
-                    (id_compra,)
+                    "UPDATE compra SET estado = %s WHERE id_compra = %s",
+                    (ESTADO_COMPRA_EXPIRADA, id_compra)
                 )
                 cursor.execute(
                     "UPDATE entrada SET ocupacion_activa = NULL WHERE id_compra = %s",
@@ -482,15 +488,22 @@ def editar_reserva_pendiente(id_compra: int, id_usuario: int, lista_id_butacas: 
                   AND entrada.ocupacion_activa = 1
                   AND entrada.id_compra <> %s
                   AND (
-                      compra.estado IN ('aprobada', 'confirmada')
+                      compra.estado = %s
                       OR (
-                          compra.estado = 'pendiente'
-                          AND compra.fecha_hora > NOW() - INTERVAL 15 MINUTE
+                          compra.estado = %s
+                          AND TIMESTAMPADD(MINUTE, %s, compra.fecha_hora) > NOW()
                       )
                   )
                 FOR UPDATE
                 """,
-                [id_funcion] + lista_id_butacas + [id_compra]
+                [id_funcion]
+                + lista_id_butacas
+                + [
+                    id_compra,
+                    ESTADO_COMPRA_CONFIRMADA,
+                    ESTADO_COMPRA_PENDIENTE,
+                    RESERVA_DURACION_MINUTOS,
+                ]
             )
             ocupadas = [fila["id_butaca"] for fila in cursor.fetchall()]
 
@@ -569,7 +582,7 @@ def editar_reserva_pendiente(id_compra: int, id_usuario: int, lista_id_butacas: 
                 "butacas": lista_id_butacas,
                 "servicios": servicios_a_guardar,
                 "total": float(total),
-                "estado": "pendiente"
+                "estado": ESTADO_COMPRA_PENDIENTE
             }, None
 
     except mysql.connector.Error as error:

@@ -2,6 +2,8 @@ from datetime import datetime, timedelta
 
 import qrcode
 
+from backend.src.constants import ESTADO_COMPRA_CONFIRMADA
+
 def entrada_utilizada(entrada):
 
     if entrada["fecha_hora_validacion"] is not None:
@@ -12,7 +14,7 @@ def entrada_utilizada(entrada):
 
 
 def compra_confirmada(entrada):
-    if entrada["estado_compra"].lower() == "confirmada":
+    if entrada["estado_compra"].lower() == ESTADO_COMPRA_CONFIRMADA:
         return True
 
     return False

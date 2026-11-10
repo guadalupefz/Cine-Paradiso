@@ -1,6 +1,12 @@
+from backend.src.constants import (
+    ESTADO_COMPRA_CANCELADA,
+    ESTADO_COMPRA_CONFIRMADA,
+)
+
+
 def obtener_ventas_por_genero(cursor, desde=None, hasta=None):
-    filtros = ["LOWER(c.estado) IN ('aprobada', 'confirmada')"]
-    parametros = []
+    filtros = ["LOWER(c.estado) = %s"]
+    parametros = [ESTADO_COMPRA_CONFIRMADA]
 
     if desde:
         filtros.append("f.fecha_hora_inicio >= %s")
@@ -49,8 +55,8 @@ def obtener_ventas_por_genero(cursor, desde=None, hasta=None):
 
 
 def obtener_ventas_por_franja(cursor, desde=None, hasta=None):
-    filtros = ["LOWER(c.estado) IN ('aprobada', 'confirmada')"]
-    parametros = []
+    filtros = ["LOWER(c.estado) = %s"]
+    parametros = [ESTADO_COMPRA_CONFIRMADA]
 
     if desde:
         filtros.append("f.fecha_hora_inicio >= %s")
@@ -103,7 +109,7 @@ def obtener_ventas_por_franja(cursor, desde=None, hasta=None):
 
 def obtener_ocupacion_por_funcion(cursor, desde=None, hasta=None):
     filtros = []
-    parametros = []
+    parametros = [ESTADO_COMPRA_CONFIRMADA, ESTADO_COMPRA_CONFIRMADA]
 
     if desde:
         filtros.append("f.fecha_hora_inicio >= %s")
@@ -125,12 +131,12 @@ def obtener_ocupacion_por_funcion(cursor, desde=None, hasta=None):
             s.nombre AS sala,
             s.capacidad,
             COUNT(DISTINCT CASE
-                WHEN LOWER(c.estado) IN ('aprobada', 'confirmada')
+                WHEN LOWER(c.estado) = %s
                 THEN e.id_butaca
             END) AS butacas_ocupadas,
             ROUND(
                 100.0 * COUNT(DISTINCT CASE
-                    WHEN LOWER(c.estado) IN ('aprobada', 'confirmada')
+                    WHEN LOWER(c.estado) = %s
                     THEN e.id_butaca
                 END) / NULLIF(s.capacidad, 0),
                 2
@@ -156,7 +162,7 @@ def obtener_ocupacion_por_funcion(cursor, desde=None, hasta=None):
 
 def obtener_ocupacion_por_pelicula(cursor, desde=None, hasta=None):
     filtros = []
-    parametros = []
+    parametros = [ESTADO_COMPRA_CONFIRMADA]
 
     if desde:
         filtros.append("f.fecha_hora_inicio >= %s")
@@ -188,7 +194,7 @@ def obtener_ocupacion_por_pelicula(cursor, desde=None, hasta=None):
                 p.titulo AS pelicula,
                 s.capacidad,
                 COUNT(DISTINCT CASE
-                    WHEN LOWER(c.estado) IN ('aprobada', 'confirmada')
+                    WHEN LOWER(c.estado) = %s
                     THEN e.id_butaca
                 END) AS butacas_ocupadas
             FROM funcion f
@@ -215,9 +221,8 @@ def obtener_cantidad_cancelaciones(cursor):
     query = """
         SELECT COUNT(*) AS cantidad_cancelaciones
         FROM compra
-        WHERE LOWER(estado) = 'cancelada'
+        WHERE LOWER(estado) = %s
     """
 
-    cursor.execute(query)
+    cursor.execute(query, (ESTADO_COMPRA_CANCELADA,))
     return cursor.fetchone()
-

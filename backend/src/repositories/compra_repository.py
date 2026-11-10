@@ -1,3 +1,10 @@
+from backend.src.constants import (
+    ESTADO_COMPRA_CONFIRMADA,
+    ESTADO_COMPRA_PENDIENTE,
+    RESERVA_DURACION_MINUTOS,
+)
+
+
 def obtener_funcion(cursor, id_funcion):
     query = """
         SELECT id_funcion, id_sala, precio_base, fecha_hora_inicio
@@ -36,15 +43,23 @@ def obtener_butacas_ocupadas(cursor, id_funcion):
         WHERE entrada.id_funcion = %s
           AND entrada.ocupacion_activa = 1
           AND (
-              compra.estado IN ('aprobada', 'confirmada')
+              compra.estado IN (%s, %s)
               OR (
-                  compra.estado = 'pendiente'
-                  AND compra.fecha_hora > NOW() - INTERVAL 15 MINUTE
+                  compra.estado = %s
+                  AND TIMESTAMPADD(MINUTE, %s, compra.fecha_hora) > NOW()
               )
           )
         FOR UPDATE
     """
-    cursor.execute(query, (id_funcion,))
+    cursor.execute(
+        query,
+        (
+            id_funcion,
+            ESTADO_COMPRA_CONFIRMADA,
+            ESTADO_COMPRA_PENDIENTE,
+            RESERVA_DURACION_MINUTOS,
+        ),
+    )
     return cursor.fetchall()
 
 

@@ -4,6 +4,7 @@ from urllib.parse import quote_plus
 from flask import current_app
 
 from backend.src.services.qr_service import generar_qr
+from backend.src.constants import ESTADO_COMPRA_CONFIRMADA
 
 mail = Mail()
 
@@ -12,7 +13,7 @@ def enviar_mail_compra(comprobante, entradas_qr):
     compra = comprobante["compra"]
     entradas = comprobante["entradas"]
 
-    if compra["estado"] != "confirmada":
+    if compra["estado"] != ESTADO_COMPRA_CONFIRMADA:
         raise ValueError("La compra no está confirmada")
 
     mensaje = Message(

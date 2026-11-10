@@ -4,6 +4,12 @@ from decimal import Decimal
 from datetime import datetime, timedelta
 
 from backend.db.db import get_connection
+from backend.src.constants import (
+    ESTADO_COMPRA_CONFIRMADA,
+    ESTADO_COMPRA_EXPIRADA,
+    ESTADO_COMPRA_PENDIENTE,
+    RESERVA_DURACION_MINUTOS,
+)
 from backend.src.validators.inicio_funcion_validator import validar_inicio_funcion
 from backend.src.repositories.reservas_repositories import limpiar_reservas_expiradas
 from backend.src.repositories.compra_repository import (
@@ -71,7 +77,7 @@ def realizar_compra(id_usuario, id_funcion, ids_butacas):
             cursor,
             id_usuario,
             total,
-            "confirmada"
+            ESTADO_COMPRA_CONFIRMADA
         )
 
         entradas = []
@@ -98,7 +104,7 @@ def realizar_compra(id_usuario, id_funcion, ids_butacas):
         resultado = {
             "id_compra": id_compra,
             "total": str(total),
-            "estado": "confirmada",
+            "estado": ESTADO_COMPRA_CONFIRMADA,
             "entradas": entradas
         }
 
@@ -145,12 +151,12 @@ def confirmar_compra(id_usuario, id_compra):
         cursor.execute(
             """
             SELECT id_compra, id_usuario, fecha_hora, total, estado,
-                   (fecha_hora + INTERVAL 15 MINUTE > NOW()) AS vigente
+                   (TIMESTAMPADD(MINUTE, %s, fecha_hora) > NOW()) AS vigente
             FROM compra
             WHERE id_compra = %s
             FOR UPDATE
             """,
-            (id_compra,)
+            (RESERVA_DURACION_MINUTOS, id_compra)
         )
 
         compra = cursor.fetchone()
@@ -161,17 +167,17 @@ def confirmar_compra(id_usuario, id_compra):
         if compra["id_usuario"] != id_usuario:
             raise ValueError("La compra no pertenece a este usuario.")
 
-        if compra["estado"] != "pendiente":
+        if compra["estado"] != ESTADO_COMPRA_PENDIENTE:
             raise ValueError("La compra no está pendiente de confirmación.")
 
         if not compra["vigente"]:
             cursor.execute(
                 """
                 UPDATE compra
-                SET estado = 'expirada'
+                SET estado = %s
                 WHERE id_compra = %s
                 """,
-                (id_compra,)
+                (ESTADO_COMPRA_EXPIRADA, id_compra)
             )
 
             cursor.execute(
@@ -199,10 +205,10 @@ def confirmar_compra(id_usuario, id_compra):
         cursor.execute(
             """
             UPDATE compra
-            SET estado = 'confirmada'
-            WHERE id_compra = %s AND estado = 'pendiente'
+            SET estado = %s
+            WHERE id_compra = %s AND estado = %s
             """,
-            (id_compra,)
+            (ESTADO_COMPRA_CONFIRMADA, id_compra, ESTADO_COMPRA_PENDIENTE)
         )
 
         if cursor.rowcount != 1:
@@ -233,7 +239,7 @@ def confirmar_compra(id_usuario, id_compra):
         resultado = {
             "id_compra": id_compra,
             "total": str(compra["total"]),
-            "estado": "confirmada",
+            "estado": ESTADO_COMPRA_CONFIRMADA,
             "entradas": entradas_confirmadas
         }
 

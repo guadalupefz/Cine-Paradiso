@@ -1,3 +1,6 @@
+from backend.src.constants import ESTADO_COMPRA_CONFIRMADA
+
+
 def validar_entrada(cursor, qr_token):
     query = """
         SELECT entrada.*, compra.estado AS estado_compra,
@@ -32,11 +35,11 @@ def obtener_entrada_para_qr(cursor, id_entrada, id_usuario):
         JOIN compra ON entrada.id_compra = compra.id_compra
         WHERE entrada.id_entrada = %s
           AND compra.id_usuario = %s
-          AND compra.estado IN ('aprobada', 'confirmada')
+          AND compra.estado = %s
           AND entrada.ocupacion_activa = 1
     """
 
-    cursor.execute(query, (id_entrada, id_usuario))
+    cursor.execute(query, (id_entrada, id_usuario, ESTADO_COMPRA_CONFIRMADA))
     return cursor.fetchone()
 
     

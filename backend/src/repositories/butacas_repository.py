@@ -1,3 +1,13 @@
+from backend.src.constants import (
+    ESTADO_BUTACA_DISPONIBLE,
+    ESTADO_BUTACA_OCUPADA,
+    ESTADO_BUTACA_RESERVADA,
+    ESTADO_COMPRA_CONFIRMADA,
+    ESTADO_COMPRA_PENDIENTE,
+    RESERVA_DURACION_MINUTOS,
+)
+
+
 def obtener_butacas_por_funcion(cursor, id_funcion):
     query = """
         SELECT
@@ -5,12 +15,12 @@ def obtener_butacas_por_funcion(cursor, id_funcion):
             butaca.fila,
             butaca.numero,
             CASE
-                WHEN compra.estado IN ('aprobada', 'confirmada')
-                    THEN 'ocupada'
-                WHEN compra.estado = 'pendiente'
-                    AND compra.fecha_hora > NOW() - INTERVAL 15 MINUTE
-                    THEN 'reservada'
-                ELSE 'disponible'
+                WHEN compra.estado = %s
+                    THEN %s
+                WHEN compra.estado = %s
+                    AND TIMESTAMPADD(MINUTE, %s, compra.fecha_hora) > NOW()
+                    THEN %s
+                ELSE %s
             END AS estado
         FROM funcion
         JOIN sala ON funcion.id_sala = sala.id_sala
@@ -24,5 +34,16 @@ def obtener_butacas_por_funcion(cursor, id_funcion):
         WHERE funcion.id_funcion = %s
         ORDER BY butaca.fila, butaca.numero
     """
-    cursor.execute(query, (id_funcion,))
+    cursor.execute(
+        query,
+        (
+            ESTADO_COMPRA_CONFIRMADA,
+            ESTADO_BUTACA_OCUPADA,
+            ESTADO_COMPRA_PENDIENTE,
+            RESERVA_DURACION_MINUTOS,
+            ESTADO_BUTACA_RESERVADA,
+            ESTADO_BUTACA_DISPONIBLE,
+            id_funcion,
+        ),
+    )
     return cursor.fetchall()

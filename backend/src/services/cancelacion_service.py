@@ -1,4 +1,8 @@
 from backend.db.db import get_connection
+from backend.src.constants import (
+    ESTADO_COMPRA_CANCELADA,
+    ESTADO_COMPRA_CONFIRMADA,
+)
 
 
 def cancelar_compra(id_usuario, id_compra):
@@ -24,7 +28,7 @@ def cancelar_compra(id_usuario, id_compra):
                 conexion.rollback()
                 return {"error": "Compra no encontrada"}, 404
 
-            if compra["estado"] not in ("aprobada", "confirmada"):
+            if compra["estado"] != ESTADO_COMPRA_CONFIRMADA:
                 conexion.rollback()
                 return {
                     "error": "La compra no se puede cancelar en su estado actual"
@@ -74,10 +78,10 @@ def cancelar_compra(id_usuario, id_compra):
             cursor.execute(
                 """
                 UPDATE compra
-                SET estado = 'cancelada'
+                SET estado = %s
                 WHERE id_compra = %s
                 """,
-                (id_compra,)
+                (ESTADO_COMPRA_CANCELADA, id_compra)
             )
 
             cursor.execute(
@@ -93,7 +97,7 @@ def cancelar_compra(id_usuario, id_compra):
 
         return {
             "id_compra": id_compra,
-            "estado": "cancelada",
+            "estado": ESTADO_COMPRA_CANCELADA,
             "mensaje": "Compra cancelada correctamente"
         }, 200
 
