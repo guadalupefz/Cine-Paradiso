@@ -69,10 +69,9 @@ CREATE TABLE compra (
     fecha_hora DATETIME DEFAULT CURRENT_TIMESTAMP,
     total DECIMAL(10,2) NOT NULL,
     estado VARCHAR(20) NOT NULL,
-    CHECK (
+    CONSTRAINT chk_compra_estado CHECK (
         estado IN (
             'pendiente',
-            'aprobada',
             'confirmada',
             'expirada',
             'cancelada',

@@ -43,7 +43,7 @@ VALUES ('Luis', 'Prueba', 'luis.demo@example.com', @hash_prueba, 'cliente');
 -- Luis queda sin compras para comprobar aislamiento y listas vacias.
 
 INSERT INTO pelicula (titulo, sinopsis, poster, duracion_minutos, clasificacion, genero)
-VALUES ('Aventura de prueba', 'Pelicula ficticia para desarrollo.', '/static/img/default.svg', '108', '+13', 'Aventura');
+VALUES ('Aventura de prueba', 'Pelicula ficticia para desarrollo.', '/static/img/default.svg', 108, '+13', 'Aventura');
 SET @pelicula_prueba = LAST_INSERT_ID();
 -- Poster de demostracion servido por el backend.
 
@@ -69,7 +69,7 @@ VALUES ('Caramelos Demo', 'Bolsa de caramelos masticables.', 1000.00);
 
 -- Una entrada de8000 + dos pochoclos a4500 historicos + un agua a2000 =19000.
 INSERT INTO compra (id_usuario, total, estado)
-VALUES (@usuario_ana, 19000.00, 'aprobada');
+VALUES (@usuario_ana, 19000.00, 'confirmada');
 SET @compra_con_servicios = LAST_INSERT_ID();
 
 INSERT INTO entrada (id_compra, id_funcion, id_butaca, qr_token)
@@ -82,7 +82,7 @@ VALUES
 -- Precio historico4500 distinto del catalogo5000, de forma intencional.
 
 INSERT INTO compra (id_usuario, total, estado)
-VALUES (@usuario_ana, 8000.00, 'aprobada');
+VALUES (@usuario_ana, 8000.00, 'confirmada');
 SET @compra_sin_servicios = LAST_INSERT_ID();
 
 -- Mismo asiento fisico que antes, pero en otra funcion: es valido.
