@@ -4,6 +4,10 @@ from backend.src.constants import (
     ESTADO_COMPRA_CONFIRMADA,
 )
 
+ESTADOS_CANCELABLES = (
+    ESTADO_COMPRA_CONFIRMADA,
+    "aprobada",
+)
 
 def cancelar_compra(id_usuario, id_compra):
     conexion = get_connection()
@@ -28,7 +32,7 @@ def cancelar_compra(id_usuario, id_compra):
                 conexion.rollback()
                 return {"error": "Compra no encontrada"}, 404
 
-            if compra["estado"] != ESTADO_COMPRA_CONFIRMADA:
+            if compra["estado"] not in ESTADOS_CANCELABLES:
                 conexion.rollback()
                 return {
                     "error": "La compra no se puede cancelar en su estado actual"
