@@ -20,12 +20,12 @@ def obtener_butacas_ocupadas_con_bloqueo(cursor, id_funcion, lista_id_butacas):
           AND entrada.id_butaca IN ({placeholders})
           AND entrada.ocupacion_activa = 1
           AND (
-              compra.estado IN (%s, %s)
-              OR (
-                  compra.estado = %s
-                  AND TIMESTAMPADD(MINUTE, %s, compra.fecha_hora) > NOW()
-              )
-          )
+                compra.estado = %s
+                OR (
+                    compra.estado = %s
+                    AND TIMESTAMPADD(MINUTE, %s, compra.fecha_hora) > NOW()
+                )
+            )
         FOR UPDATE
     """
 
