@@ -4,8 +4,16 @@ from flask import Blueprint, jsonify, request
 from backend.db.db import get_connection
 from backend.seguridad import admin_required
 from backend.src.repositories.locales_repository import obtener_locales
+from backend.src.services.eliminacion_estructura_service import eliminar_estructura
 
 locales_bp = Blueprint("locales", __name__)
+
+
+@locales_bp.delete("/locales/<int:id_local>")
+@admin_required
+def eliminar_local(id_usuario, id_local):
+    resultado, estado = eliminar_estructura("local", id_local)
+    return jsonify(resultado), estado
 
 
 @locales_bp.route("/locales", methods=["GET"])
