@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!modal || !formulario || !cerrar) return;
 
+    // Abrir el modal y configurar la ruta de cancelación.
     document.querySelectorAll(".boton-cancelar-compra").forEach(function (boton) {
         boton.addEventListener("click", function () {
             const idCompra = boton.dataset.idCompra;
@@ -14,10 +15,21 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    // Confirmar antes de enviar el formulario.
+    formulario.addEventListener("submit", function (event) {
+        const confirmar = window.confirm("¿Querés cancelar esta compra?");
+
+        if (!confirmar) {
+            event.preventDefault();
+        }
+    });
+
+    // Cerrar el modal sin cancelar la compra.
     cerrar.addEventListener("click", function () {
         modal.close();
     });
 
+    // Recuperar la apertura del modal si hay una compra pendiente de cancelar.
     const idCompraCancelar = modal.dataset.idCompraCancelar;
 
     if (idCompraCancelar) {
