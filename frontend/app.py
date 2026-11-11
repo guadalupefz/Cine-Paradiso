@@ -1150,6 +1150,19 @@ def mis_compras():
         id_compra_cancelar=compra_cancelable["id_compra"] if compra_cancelable else None
     )
 
+@app.get("/mis-entradas")
+@requiere_usuario
+def mis_entradas():
+    datos, estado = llamar_backend("GET", "/compras")
+    compras = lista(datos, "compras") if estado == 200 else []
+    
+    return render_template(
+        "entradas.html",
+        compras=compras,
+        usuario=usuario_actual(),
+        error=estado != 200
+    )
+
 @app.post("/mis-compras/<int:id_compra>/cancelar")
 @requiere_usuario
 def cancelar_compra_frontend(id_compra):
