@@ -54,6 +54,16 @@ Ver [propuesta JWT y correcciones](propuesta-jwt-y-correcciones.md) para prepara
 
 El precio de servicios se envía como texto decimal (`"2000.00"`), con máximo dos decimales. Los cambios de catálogo no reescriben detalles de compras anteriores.
 
+Los servicios requieren `nombre`, `descripcion` y `precio`. El backoffice conserva los tres campos al crear, editar o corregir un error. Para una base antigua que no tenga `servicio_adicional.descripcion`, seleccionar la base correspondiente y ejecutar `backend/db/migraciones/2026_11_11_descripcion_servicios.sql`. La migración conserva los datos y utiliza el nombre como descripción inicial cuando falta. No ejecutar otra vez `init_db.sql` sobre una base ya utilizada.
+
+Instalar las dependencias desde `requirements.txt` en la raíz antes de iniciar ambas aplicaciones. Los archivos por componente también declaran Flask-Mail en backend y ReportLab en frontend.
+
+### Imágenes de servicios
+
+El backoffice envía los campos con formulario y, si se seleccionó una imagen, con `multipart/form-data`. La API conserva también el contrato JSON para nombre, descripción y precio. La imagen es opcional: al crear sin imagen se guarda una cadena vacía; al editar sin subir otra se conserva la anterior. Se admiten extensiones PNG, JPG, JPEG y WEBP; se genera un nombre único y se guardan bajo `backend/static/img/servicios`. Si falla la escritura SQL, se descarta el archivo nuevo de esa operación.
+
+Para bases existentes seleccionar primero la base y ejecutar `backend/db/migraciones/migracion_imagen_servicios.sql`. Puede repetirse, añade la columna si falta y normaliza los NULL antiguos sin cambiar rutas existentes. La migración de descripción es independiente y también debe ejecutarse en bases antiguas. No importar el esquema inicial encima de una base utilizada.
+
 ## Contrato de reservas y películas
 
 - Una reserva queda pendiente durante **15 minutos** desde su creación. El vencimiento se calcula desde la fecha `compra.fecha_hora`; al confirmar, la misma ventana determina si sigue vigente.
@@ -68,13 +78,12 @@ La API externa requiere `OMDB_API_KEY`; si no está configurada, el panel inform
 python -m unittest discover -s backend/tests -v
 ```
 
-La propuesta actual pasa 60 pruebas de regresión y trece escenarios de integración con MySQL 8.4 aislado. Incluye verificación de JWT, revocación persistente, roles, privacidad, reservas concurrentes, vencimiento y formularios administrativos. El detalle y los límites están en propuesta-jwt-y-correcciones.md.
+Ejecutar también `python -m unittest discover -s frontend/tests -v`. Las pruebas de contrato de servicios usan el validador real del backend para no aceptar campos incompletos en la simulación. Los tests con sustitutos verifican lógica, errores y formularios; no sustituyen una prueba de compra completa con MySQL, SMTP y el proveedor externo en el entorno donde se presente el proyecto. Las verificaciones históricas con una base aislada se describen en propuesta-jwt-y-correcciones.md y no acreditan el entorno actual.
 
 ## Pendientes del conjunto
 
-- Reserva temporal/concurrencia y vencimiento: no están demostrados como flujo completo.
-- Compra/confirmación: faltan integración de servicios y confirmación de pago según el contrato del equipo.
-- Cancelaciones: revisar unicidad función-butaca sin eliminar historial y liberación para reventa.
+- Reserva temporal, confirmación, servicios y cancelación ya tienen implementación; verificar el flujo completo y migraciones con una base real antes de marcar la integración como terminada.
+- Comprobar unicidad de ocupación activa y liberación para reventa con solicitudes concurrentes; los tests simulados no comprueban índices MySQL.
 - Verificar solapamiento de funciones y política de modificación con entradas vendidas.
 - Importación externa real con credenciales, proveedor y traducción: debe revisarse con su responsable. La falta de clave se maneja; no se declara verificada una importación real por una prueba local sin proveedor.
 - El historial frontend permite consultar compras; cancelación y entradas completas siguen dependiendo de sus endpoints.

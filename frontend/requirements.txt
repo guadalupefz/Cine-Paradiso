@@ -1,2 +1,4 @@
 Flask
 requests
+python-dotenv==1.2.4
+reportlab==5.1.0
