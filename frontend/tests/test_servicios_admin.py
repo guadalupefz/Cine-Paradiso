@@ -74,6 +74,27 @@ class ServiciosAdmin(unittest.TestCase):
         respuesta = self.client.get("/admin/servicios")
         self.assertIn((frontend.BACKEND_ORIGEN + "/static/img/servicios/agua.png").encode(), respuesta.data)
 
+    def test_imagen_de_dos_megabytes_llega_al_backend(self):
+        contenido = b"x" * (2 * 1024 * 1024)
+        imagenes = []
+        def capturar(metodo, ruta, **argumentos):
+            if argumentos.get("files"):
+                imagenes.append(argumentos["files"]["imagen"][1].read())
+            return self.backend(metodo, ruta, **argumentos)
+        with patch.object(frontend, "llamar_backend", side_effect=capturar):
+            respuesta = self.post(accion="crear", nombre="Combo", precio="6000.00",
+                                  imagen=(BytesIO(contenido), "combo.png"))
+        self.assertEqual(respuesta.status_code, 302)
+        self.assertEqual(imagenes, [contenido])
+
+    def test_imagen_excesiva_muestra_mensaje_y_no_envia_escritura(self):
+        respuesta = self.post(accion="crear", nombre="Combo", precio="6000.00",
+                              imagen=(BytesIO(b"x" * (6 * 1024 * 1024)), "combo.png"))
+        self.assertEqual(respuesta.status_code, 413)
+        self.assertIn(b"5 MB", respuesta.data)
+        self.assertNotIn(b"Request Entity Too Large", respuesta.data)
+        self.assertFalse(any(metodo in ("POST", "PUT") for metodo, _, _ in self.llamadas))
+
     def test_descripcion_invalida_rechazada_por_validador_real(self):
         for descripcion in ("", "   ", "x" * 251):
             with self.subTest(descripcion=descripcion):

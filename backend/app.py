@@ -38,7 +38,7 @@ app.config.update(
     SESSION_COOKIE_SAMESITE="Lax",
     SESSION_COOKIE_SECURE=os.environ.get("COOKIE_SECURE", "0") == "1",
     PERMANENT_SESSION_LIFETIME=timedelta(hours=2),
-    MAX_CONTENT_LENGTH=1024 * 1024,
+    MAX_CONTENT_LENGTH=5 * 1024 * 1024,
     JWT_SECRET_KEY=os.environ.get("JWT_SECRET_KEY") or os.environ["SECRET_KEY"],
     JWT_ACCESS_TOKEN_EXPIRES=timedelta(hours=2),
     JWT_TOKEN_LOCATION=["headers"],
@@ -60,6 +60,10 @@ app.config["FRONTEND_URL"] = os.getenv(
 
 mail.init_app(app)
 jwt.init_app(app)
+
+@app.errorhandler(413)
+def carga_demasiado_grande(error):
+    return jsonify({"error": "La imagen o los datos enviados superan el límite de 5 MB."}), 413
 
 @app.errorhandler(mysql.connector.Error)
 def error_base_datos(error):

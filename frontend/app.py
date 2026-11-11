@@ -32,7 +32,7 @@ app.config.update(
     SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE="Lax",
     SESSION_COOKIE_SECURE=os.environ.get("COOKIE_SECURE", "0") == "1",
-    MAX_CONTENT_LENGTH=1024 * 1024,
+    MAX_CONTENT_LENGTH=5 * 1024 * 1024,
 )
 
 def llamar_backend(metodo, ruta, **argumentos):
@@ -225,6 +225,13 @@ def formulario_invalido(error):
 @app.errorhandler(404)
 def pagina_no_encontrada(error):
     return render_template("error.html", mensaje="La página que buscás no está disponible. Podés volver a la cartelera."), 404
+
+@app.errorhandler(413)
+def carga_demasiado_grande(error):
+    return render_template(
+        "error.html",
+        mensaje="La imagen o los datos enviados superan el límite de 5 MB. Elegí una imagen más liviana y volvé a intentarlo.",
+    ), 413
 
 @app.route("/registro", methods=["GET", "POST"])
 def registro():

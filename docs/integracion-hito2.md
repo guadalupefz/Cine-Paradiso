@@ -60,6 +60,8 @@ Instalar las dependencias desde `requirements.txt` en la raíz antes de iniciar 
 
 ### Imágenes de servicios
 
+Frontend y backend admiten solicitudes de hasta 5 MiB, incluido el formulario y su imagen. Una carga que supere ese límite devuelve HTTP 413: JSON en la API y un mensaje en español en la web. El límite se aplica en ambas aplicaciones para que una imagen válida no quede bloqueada antes de llegar al backend.
+
 El backoffice envía los campos con formulario y, si se seleccionó una imagen, con `multipart/form-data`. La API conserva también el contrato JSON para nombre, descripción y precio. La imagen es opcional: al crear sin imagen se guarda una cadena vacía; al editar sin subir otra se conserva la anterior. Se admiten extensiones PNG, JPG, JPEG y WEBP; se genera un nombre único y se guardan bajo `backend/static/img/servicios`. Si falla la escritura SQL, se descarta el archivo nuevo de esa operación.
 
 Para bases existentes seleccionar primero la base y ejecutar `backend/db/migraciones/migracion_imagen_servicios.sql`. Puede repetirse, añade la columna si falta y normaliza los NULL antiguos sin cambiar rutas existentes. La migración de descripción es independiente y también debe ejecutarse en bases antiguas. No importar el esquema inicial encima de una base utilizada.
