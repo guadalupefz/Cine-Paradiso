@@ -53,16 +53,7 @@
        class="boton-principal">
         Descargar comprobante PDF
     </a>
-
-    <form
-        method="POST"
-        action="{{ url_for('cancelar_compra_frontend', id_compra=comprobante.compra.id_compra) }}"
-        onsubmit="return confirm('¿Querés cancelar esta compra?');"
-    >
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-        <button type="submit">Cancelar compra</button>
-    </form>
-
+   
     <a href="{{ url_for('mis_compras') }}" class="boton-secundario">
         Volver a mis compras
     </a>
@@ -72,5 +63,4 @@
     Volver a mis compras
 </a>
 {% endif %}
-
 {% endblock %}
