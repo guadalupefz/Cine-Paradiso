@@ -52,7 +52,7 @@
 <p>No tenés compras registradas.</p>
 {% endfor %}
 
-<dialog id="modal-cancelacion" data-id-compra-cancelar="{{ id_compra_cancelar or '' }}">
+<dialog id="modal-cancelacion">
     <div class="contenido-modal-cancelacion">
         <h3>¿Cancelar esta compra?</h3>
 
@@ -74,7 +74,7 @@
     </div>
 </dialog>
 
-<script src="{{ url_for('static', filename='js/mis_compras.js') }}" defer></script>
+<script src="{{ url_for('static', filename='js/cancelacion.js') }}" defer></script>
 
 {% endif %}
 
