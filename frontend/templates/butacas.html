@@ -99,6 +99,8 @@
                         </span>
                     </div>
 
+                    <p class="ayuda-mapa" id="ayuda-mapa-butacas">Deslizá el mapa hacia los costados para ver todas las butacas.</p>
+                    <div class="desplazamiento-butacas" role="region" aria-label="Mapa de butacas de la sala" aria-describedby="ayuda-mapa-butacas" tabindex="0">
                     <div class="lista-butacas">
 
                         {% for fila, butacas_fila in butacas|groupby("fila") %}
@@ -142,6 +144,7 @@
 
                         {% endfor %}
 
+                    </div>
                     </div>
 
                 </div>

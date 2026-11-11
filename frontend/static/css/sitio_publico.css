@@ -608,6 +608,7 @@
 
 .sitio-publico .informacion-funcion {
     grid-column: 1;
+    min-width: 0;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -676,6 +677,7 @@
 
 .sitio-publico .mapa-cine {
     grid-column: 2;
+    min-width: 0;
     padding: 25px 18px;
     background: #fffdf8;
     border: 1px solid var(--borde-publico);
@@ -744,21 +746,40 @@
     background: #f6d66f;
 }
 
+.sitio-publico .ayuda-mapa {
+    margin: 0 0 12px;
+    color: var(--texto-suave);
+    font-size: 12px;
+}
+
+.sitio-publico .desplazamiento-butacas {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding: 6px 4px 16px;
+}
+
 .sitio-publico .lista-butacas {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     gap: 12px;
-    max-width: 100%;
+    width: max-content;
+    min-width: 100%;
+    max-width: none;
     margin: 0 auto;
 }
 
 .sitio-publico .fila-butacas {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
     gap: 5px;
-    width: 100%;
+    width: max-content;
+    min-width: 100%;
 }
 
 .sitio-publico .pasillo-butacas {
@@ -768,16 +789,25 @@
 }
 
 .sitio-publico .nombre-fila {
-    width: 20px;
+    flex: 0 0 28px;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    align-self: stretch;
+    background: #fffdf8;
     color: var(--texto-suave);
     font-size: 12px;
     font-weight: bold;
 }
 
 .sitio-publico button.butaca {
-    width: 34px;
-    min-width: 0;
-    min-height: 34px;
+    flex: 0 0 40px;
+    width: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    white-space: nowrap;
     margin: 0;
     padding: 5px;
     border: 1px solid #568b5b;
@@ -805,6 +835,7 @@
 
 .sitio-publico .resumen-butacas {
     grid-column: 3;
+    min-width: 0;
     position: sticky;
     top: 20px;
     padding: 22px;
@@ -932,9 +963,15 @@
 }
 
 
-@media (max-width: 800px) {
+@media (max-width: 1050px) {
     .sitio-publico .contenido-seleccion-butacas {
         grid-template-columns: minmax(0, 1fr);
+    }
+
+    .sitio-publico .informacion-funcion,
+    .sitio-publico .mapa-cine,
+    .sitio-publico .resumen-butacas {
+        grid-column: 1;
     }
 
     .sitio-publico .resumen-butacas {
@@ -962,8 +999,7 @@
     }
 
     .sitio-publico button.butaca {
-        width: 30px;
-        min-height: 32px;
+        min-height: 40px;
         padding: 3px;
         font-size: 9px;
     }
@@ -1489,6 +1525,7 @@ body.sitio-publico {
     color: #34251f;
 }
 body.sitio-publico:has(.seleccion-butacas) {
+    min-width: 0;
     background: #fff8e8;
 }
 
