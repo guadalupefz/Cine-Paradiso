@@ -91,8 +91,13 @@ def obtener_compra_por_id(cursor, id_compra):
     return cursor.fetchone()
 
 
-def obtener_entradas_por_compra(cursor, id_compra):
-    query = """
+def obtener_entradas_por_compra(cursor, id_compra, solo_activas=False):
+    filtro_activas = ""
+
+    if solo_activas:
+        filtro_activas = "AND entrada.ocupacion_activa = 1"
+
+    query = f"""
         SELECT
             entrada.id_entrada,
             entrada.id_funcion,
@@ -105,6 +110,7 @@ def obtener_entradas_por_compra(cursor, id_compra):
         INNER JOIN butaca
             ON entrada.id_butaca = butaca.id_butaca
         WHERE entrada.id_compra = %s
+        {filtro_activas}
     """
     cursor.execute(query, (id_compra,))
     return cursor.fetchall()
@@ -153,8 +159,13 @@ def obtener_datos_comprobante(cursor, id_compra, id_usuario):
 
     return cursor.fetchone()
 
-def obtener_entradas_comprobante(cursor, id_compra):
-    query = """
+def obtener_entradas_comprobante(cursor, id_compra, solo_activas=False):
+    filtro_activas = ""
+
+    if solo_activas:
+        filtro_activas = "AND entrada.ocupacion_activa = 1"
+
+    query = f"""
         SELECT entrada.id_entrada, entrada.id_butaca,
             butaca.fila, butaca.numero,
             funcion.fecha_hora_inicio,
@@ -168,12 +179,13 @@ def obtener_entradas_comprobante(cursor, id_compra):
         JOIN sala ON funcion.id_sala = sala.id_sala
         JOIN local ON sala.id_local = local.id_local
         WHERE entrada.id_compra = %s
+        {filtro_activas}
         ORDER BY entrada.id_entrada
     """
 
     cursor.execute(query, (id_compra,))
-
     return cursor.fetchall()
+
 
 def obtener_hora_actual(cursor):
     # Se consulta después de adquirir los bloqueos de la operación.

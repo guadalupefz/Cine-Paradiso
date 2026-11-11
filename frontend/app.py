@@ -753,11 +753,52 @@ def procesar_compra():
         ))
 
     if not pago_aprobado():
-        flash("El pago fue rechazado, Intenta nuevamente", "error")
+        reserva_pendiente = session.get("reserva_pendiente")
+
+        if reserva_pendiente:
+            misma_seleccion = (
+                reserva_pendiente.get("id_funcion") == id_funcion
+                and reserva_pendiente.get("butacas") == ids_butacas
+                and reserva_pendiente.get("servicios", []) == servicios_seleccionados
+            )
+
+            if not misma_seleccion:
+                flash(
+                    "El pago fue rechazado. Tenés otra reserva pendiente "
+                    "que no fue modificada.",
+                    "error"
+                )
+                return redirect(url_for("mis_compras"))
+
+        if reserva_pendiente:
+            id_compra = reserva_pendiente.get("id_compra")
+
+            if not id_compra:
+                flash("No se pudo identificar la reserva pendiente.", "error")
+                return redirect(url_for("mis_compras"))
+
+            resultado, estado = llamar_backend(
+                "POST",
+                f"/reservas/{id_compra}/rechazar"
+            )
+
+            if estado != 200:
+                flash(
+                    "El pago fue rechazado, pero no se pudo liberar "
+                    "la reserva: " + mensaje_error(resultado),
+                    "error"
+                )
+                return redirect(url_for("mis_compras"))
+
+            session.pop("reserva_pendiente", None)
+
+        flash("El pago fue rechazado. Intentá nuevamente.", "error")
+
         return redirect(url_for(
             "ver_compra",
             id_funcion=id_funcion,
-            butacas=butacas_texto
+            butacas=butacas_texto,
+            servicios=servicios_texto
         ))
 
 
@@ -794,19 +835,50 @@ def procesar_compra():
             return redirect(url_for("mis_compras"))
 
     if reserva_pendiente:
-        if (
-            reserva_pendiente["id_funcion"] != id_funcion
-            or reserva_pendiente["butacas"] != ids_butacas
-            or reserva_pendiente.get("servicios", []) != servicios_seleccionados
-        ):
+        id_compra = reserva_pendiente["id_compra"]
+
+        if reserva_pendiente["id_funcion"] != id_funcion:
             flash(
-                "Ya tenés otra reserva pendiente"
+                "Ya tenés una reserva pendiente para otra función"
                 "Terminala antes de realizar una nueva",
                 "error"
             )
             return redirect(url_for("index"))
 
-        id_compra = reserva_pendiente["id_compra"]
+        cambio_butacas = reserva_pendiente["butacas"] != ids_butacas
+        cambio_servicios = (
+            reserva_pendiente.get("servicios", []) != servicios_seleccionados
+        )
+
+        if cambio_butacas or cambio_servicios:
+            resultado, estado = llamar_backend(
+                "PUT",
+                f"/reservas/{id_compra}",
+                json={
+                    "butacas": ids_butacas,
+                    "servicios": servicios_seleccionados
+                }
+            )
+
+            if estado != 200:
+                flash(
+                    "No se pudo modificar la reserva: "
+                    + mensaje_error(resultado),
+                    "error"
+                )
+                return redirect(url_for(
+                    "ver_compra",
+                    id_funcion=id_funcion,
+                    butacas=butacas_texto,
+                    servicios=servicios_texto
+                ))
+
+            session["reserva_pendiente"] = {
+                "id_compra": id_compra,
+                "id_funcion": id_funcion,
+                "butacas": ids_butacas,
+                "servicios": servicios_seleccionados
+            }
 
     else:
         resultado, estado = llamar_backend(

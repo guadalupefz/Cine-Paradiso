@@ -194,7 +194,7 @@ def confirmar_compra(id_usuario, id_compra):
             "La reserva venció. Debe realizar una nueva reserva"
             )
 
-        entradas = obtener_entradas_por_compra(cursor, id_compra)
+        entradas = obtener_entradas_por_compra(cursor,id_compra,solo_activas=True)
 
         if not entradas:
             raise ValueError("La compra no tiene entradas asociadas.")

@@ -542,7 +542,7 @@ def editar_reserva_pendiente(id_compra: int, id_usuario: int, lista_id_butacas: 
                 })
 
             cursor.execute(
-                "UPDATE entrada SET ocupacion_activa = NULL WHERE id_compra = %s",
+                "DELETE FROM entrada WHERE id_compra = %s",
                 (id_compra,)
             )
 
