@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", () => {
     configurarModalCancelacion();
 });
 
-// --- LÓGICA DE LAS PESTAÑAS ---
 function configurarTabs() {
     const tabs = document.querySelectorAll(".tab");
     const contenidos = document.querySelectorAll(".contenido-tab");
@@ -24,85 +23,30 @@ function configurarTabs() {
     });
 }
 
-// --- LÓGICA DEL MODAL Y CANCELACIÓN DE COMPRAS ---
 function configurarModalCancelacion() {
-    const modal = document.getElementById("modalCancelacion");
-    const botonesAbrir = document.querySelectorAll(".btn-cancelar"); // Los botones en cada tarjeta
-    const cerrarModal = document.getElementById("cerrarModal");
-    const conservarEntradas = document.getElementById("conservarEntradas");
-    const aceptarCheckbox = document.getElementById("aceptarCancelacion");
-    const confirmarBtn = document.getElementById("confirmarCancelacion");
+    const modal = document.getElementById("modal-cancelacion");
+    const formulario = document.getElementById("form-cancelacion");
+    const cerrarModal = document.getElementById("cerrar-modal-cancelacion");
+    const botonesAbrir = document.querySelectorAll(".boton-cancelar-compra");
 
-    let compraIdSeleccionada = null;
-
-    // Abrir modal al hacer clic en "Cancelar compra"
     botonesAbrir.forEach(btn => {
         btn.addEventListener("click", (e) => {
-            // Si el botón está dentro de un form, evitamos que recargue la página por defecto
             e.preventDefault();
-            
-            // Obtenemos el id_compra del atributo data (o podemos extraerlo del HTML)
-            compraIdSeleccionada = btn.getAttribute("data-id-compra");
-            
-            if (modal) {
-                modal.style.display = "flex";
+            const idCompra = btn.getAttribute("data-id-compra");
+
+            if (formulario && idCompra) {
+                formulario.action = `/mis-compras/${idCompra}/cancelar`;
+            }
+
+            if (modal && typeof modal.showModal === "function") {
+                modal.showModal();
             }
         });
     });
 
-    // Cerrar modal
-    const cerrarAccion = () => {
-        if (modal) modal.style.display = "none";
-        if (aceptarCheckbox) aceptarCheckbox.checked = false;
-        if (confirmarBtn) confirmarBtn.disabled = true;
-    };
-
-    if (cerrarModal) cerrarModal.addEventListener("click", cerrarAccion);
-    if (conservarEntradas) conservarEntradas.addEventListener("click", cerrarAccion);
-
-    if (aceptarCheckbox && confirmarBtn) {
-        aceptarCheckbox.addEventListener("change", (e) => {
-            confirmarBtn.disabled = !e.target.checked;
-        });
-
-        confirmarBtn.addEventListener("click", async () => {
-            if (!compraIdSeleccionada) return;
-
-            const token = localStorage.getItem("access_token");
-            if (!token) {
-                window.location.href = "/login";
-                return;
-            }
-
-            try {
-                const response = await fetch(`/compras/${compraIdSeleccionada}/cancelar`, {
-                    method: "POST",
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json"
-                    }
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    // Ocultar modal de cancelación y mostrar el de éxito (o recargar)
-                    modal.style.display = "none";
-                    const modalExito = document.getElementById("modalExito");
-                    if (modalExito) {
-                        modalExito.style.display = "flex";
-                        document.getElementById("finalizar").onclick = () => location.reload();
-                    } else {
-                        alert(data.mensaje || "Compra cancelada correctamente.");
-                        location.reload();
-                    }
-                } else {
-                    alert(data.error || "No se pudo cancelar la compra.");
-                }
-            } catch (error) {
-                console.error("Error de red:", error);
-                alert("Ocurrió un error al procesar la cancelación.");
-            }
+    if (cerrarModal && modal) {
+        cerrarModal.addEventListener("click", () => {
+            modal.close();
         });
     }
 }
