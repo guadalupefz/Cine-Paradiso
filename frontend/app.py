@@ -1722,6 +1722,11 @@ def descargar_comprobante_pdf(id_compra):
         abort(estado)
 
     compra = comprobante["compra"]
+
+    # Solo se permite descargar el comprobante de compras aprobadas o confirmadas.
+    if compra["estado"].lower() not in ("aprobada", "confirmada"):
+        abort(403)
+
     entradas = comprobante["entradas"]
     servicios = comprobante.get("servicios", [])
 
@@ -1777,55 +1782,53 @@ def descargar_comprobante_pdf(id_compra):
     elementos.append(Spacer(1, 18))
     elementos.append(Paragraph("ENTRADAS", estilos["Heading2"]))
 
-    if compra["estado"] in ("aprobada", "confirmada"):
+    for entrada in entradas:
 
-        for entrada in entradas:
+        elementos.append(Paragraph(
+            f"<b>{escape(str(entrada['pelicula']))}</b>",
+            estilos["Heading3"]
+        ))
 
-            elementos.append(Paragraph(
-                f"<b>{escape(str(entrada['pelicula']))}</b>",
-                estilos["Heading3"]
-            ))
+        datos_entrada = [
+            ["Función", escape(str(entrada["fecha_hora_inicio"]))],
+            ["Cine", escape(str(entrada["local"]))],
+            ["Dirección", escape(str(entrada.get("direccion", "No disponible")))],
+            ["Sala", escape(str(entrada["sala"]))],
+            ["Butaca", f"{escape(str(entrada['fila']))}{escape(str(entrada['numero']))}"]
+        ]
 
-            datos_entrada = [
-                ["Función", escape(str(entrada["fecha_hora_inicio"]))],
-                ["Cine", escape(str(entrada["local"]))],
-                ["Dirección", escape(str(entrada.get("direccion", "No disponible")))],
-                ["Sala", escape(str(entrada["sala"]))],
-                ["Butaca", f"{escape(str(entrada['fila']))}{escape(str(entrada['numero']))}"]
-            ]
+        tabla_entrada = Table(
+            datos_entrada,
+            colWidths=[35 * mm, 120 * mm]
+        )
 
-            tabla_entrada = Table(
-                datos_entrada,
-                colWidths=[35 * mm, 120 * mm]
-            )
+        tabla_entrada.setStyle(TableStyle([
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+            ("PADDING", (0, 0), (-1, -1), 7)
+        ]))
 
-            tabla_entrada.setStyle(TableStyle([
-                ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-                ("PADDING", (0, 0), (-1, -1), 7)
-            ]))
+        elementos.append(tabla_entrada)
+        elementos.append(Spacer(1, 8))
 
-            elementos.append(tabla_entrada)
-            elementos.append(Spacer(1, 8))
+        respuesta_qr = requests.get(
+            f"{BACKEND_URL}/qr/{entrada['id_entrada']}",
+            headers={
+                "Authorization": "Bearer " + session.get("backend_token", "")
+            },
+            timeout=15
+        )
 
-            respuesta_qr = requests.get(
-                f"{BACKEND_URL}/qr/{entrada['id_entrada']}",
-                headers={
-                    "Authorization": "Bearer " + session.get("backend_token", "")
-                },
-                timeout=15
-            )
+        if respuesta_qr.status_code != 200:
+            abort(respuesta_qr.status_code)
 
-            if respuesta_qr.status_code != 200:
-                abort(respuesta_qr.status_code)
+        imagen_qr = Image(
+            BytesIO(respuesta_qr.content),
+            width=35 * mm,
+            height=35 * mm
+        )
 
-            imagen_qr = Image(
-                BytesIO(respuesta_qr.content),
-                width=35 * mm,
-                height=35 * mm
-            )
-
-            elementos.append(imagen_qr)
-            elementos.append(Spacer(1, 15))
+        elementos.append(imagen_qr)
+        elementos.append(Spacer(1, 15))
 
     elementos.append(Paragraph(
         "SERVICIOS ADICIONALES",
