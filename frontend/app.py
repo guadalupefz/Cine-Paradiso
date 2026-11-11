@@ -931,6 +931,18 @@ def ver_servicios():
 
     datos, estado = llamar_backend("GET", "/servicios")
     servicios = lista(datos, "servicios")
+    for s in servicios:
+        img = s.get("imagen")
+        if img:
+            if img.startswith(("http://", "https://")):
+                s["imagen_url"] = img
+            else:
+                ruta_limpia = img.lstrip("/")
+                if not ruta_limpia.startswith("static/"):
+                    ruta_limpia = f"static/{ruta_limpia}"
+                s["imagen_url"] = f"{BACKEND_ORIGEN}/{ruta_limpia}"
+        else:
+            s["imagen_url"] = None
 
 
     if not id_funcion and not ids_butacas:
@@ -1094,7 +1106,7 @@ def admin_resumen():
 @requiere_admin
 def admin_servicios():
     servicio_editar = None
-    datos_formulario = {"nombre": "", "precio": ""}
+    datos_formulario = {"nombre": "", "descripcion": "", "precio": ""}
     error_formulario = None
     estado_formulario = 200
 
@@ -1110,9 +1122,17 @@ def admin_servicios():
         ruta = "/servicios" + (f"/{identificador}" if accion != "crear" else "")
         datos_formulario = {
             "nombre": request.form.get("nombre", ""),
+            "descripcion": request.form.get("descripcion", ""),
             "precio": request.form.get("precio", ""),
         }
-        argumentos = {} if accion == "eliminar" else {"json": datos_formulario}
+        
+        argumentos = {}
+        if accion != "eliminar":
+            argumentos["data"] = datos_formulario
+            archivo = request.files.get("imagen")
+            if archivo and archivo.filename != "":
+                argumentos["files"] = {"imagen": (archivo.filename, archivo.stream, archivo.mimetype)}
+
         resultado, estado = llamar_backend(metodo, ruta, **argumentos)
 
         if estado in (200, 201):
@@ -1131,6 +1151,19 @@ def admin_servicios():
     datos, estado = llamar_backend("GET", "/servicios")
     error_listado = estado != 200
     servicios = lista(datos, "servicios") if not error_listado else []
+    for s in servicios:
+        img = s.get("imagen")
+        if img:
+            if img.startswith(("http://", "https://")):
+                s["imagen_url"] = img
+            else:
+                ruta_limpia = img.lstrip("/")
+                if not ruta_limpia.startswith("static/"):
+                    ruta_limpia = f"static/{ruta_limpia}"
+                s["imagen_url"] = f"{BACKEND_ORIGEN}/{ruta_limpia}"
+        else:
+            s["imagen_url"] = None
+
     if error_listado:
         flash(mensaje_error(datos), "error")
 
@@ -1145,6 +1178,7 @@ def admin_servicios():
                 return redirect(url_for("admin_servicios"))
             datos_formulario = {
                 "nombre": servicio_editar["nombre"],
+                "descripcion": servicio_editar["descripcion"],
                 "precio": servicio_editar["precio"],
             }
 
