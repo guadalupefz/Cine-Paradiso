@@ -67,11 +67,15 @@
                 <div class="lista-servicios">
                     {% for servicio in servicios %}
                         <div class="tarjeta-servicio" data-id="{{ servicio.id_servicio }}">
-                            <div class="ilustracion-servicio">
-                                <div class="circulo-icono">
-                                    <span>🍿</span>
-                                </div>
-                                <small>ILUSTRACIÓN DE MUESTRA</small>
+                            <div class="ilustracion-servicio {% if servicio.imagen_url %}con-imagen{% endif %}">
+                                {% if servicio.imagen_url %}
+                                    <img src="{{ servicio.imagen_url }}" alt="{{ servicio.nombre }}" class="imagen-servicio-cliente">
+                                {% else %}
+                                    <div class="circulo-icono">
+                                        <span>🍿</span>
+                                    </div>
+                                    <small>IMAGEN NO DISPONIBLE</small>
+                                {% endif %}
                             </div>
                             <div class="cuerpo-servicio">
                                 <h4>{{ servicio.nombre }}</h4>

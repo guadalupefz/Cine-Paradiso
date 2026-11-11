@@ -13,7 +13,7 @@
     <div>
         <p class="seccion-servicios">ADMINISTRACIÓN / SERVICIOS</p>
         <h2>{{ 'Editar servicio adicional' if servicio_editar else 'Servicios adicionales' }}</h2>
-        <p class="texto-suave">{{ 'Actualizá el nombre y el precio del producto.' if servicio_editar else 'Gestioná los productos que se ofrecen junto con las entradas.' }}</p>
+        <p class="texto-suave">{{ 'Actualizá la información del producto.' if servicio_editar else 'Gestioná los productos que se ofrecen junto con las entradas.' }}</p>
     </div>
     <span class="etiqueta-catalogo">Catálogo del cine</span>
 </div>
@@ -25,7 +25,8 @@
             <p class="texto-suave">Todos los campos son obligatorios.</p>
         </div>
         {% if error_formulario %}<p role="alert" class="aviso error">{{ error_formulario }}</p>{% endif %}
-        <form method="post" class="datos-servicio">
+        
+        <form method="post" enctype="multipart/form-data" class="datos-servicio">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <input type="hidden" name="accion" value="{{ 'editar' if servicio_editar else 'crear' }}">
             {% if servicio_editar %}<input type="hidden" name="id_servicio" value="{{ servicio_editar.id_servicio }}">{% endif %}
@@ -33,6 +34,13 @@
                 <label for="nombre">Nombre del servicio</label>
                 <input id="nombre" name="nombre" maxlength="100" required value="{{ datos_formulario.nombre }}" placeholder="Ej.: Balde de pochoclos">
             </div>
+
+            <div class="campo-servicio">
+                <label for="descripcion">Descripción</label>
+                <textarea id="descripcion" name="descripcion" maxlength="250" rows="3" required placeholder="Detalle del producto...">{{ datos_formulario.descripcion }}</textarea>
+                <small>Máximo 250 caracteres.</small>
+            </div>
+
             <div class="campo-servicio">
                 <label for="precio">Precio por unidad</label>
                 <div class="precio-servicio">
@@ -41,6 +49,13 @@
                 </div>
                 <small id="ayuda-precio">En pesos argentinos. Mayor que cero, con hasta dos decimales.</small>
             </div>
+
+            <div class="campo-servicio">
+                <label for="imagen">Imagen del producto</label>
+                <input id="imagen" name="imagen" type="file" accept="image/png, image/jpeg, image/webp" {% if not servicio_editar %}required{% endif %}>
+                <small>Formatos permitidos: PNG, JPG, WEBP.</small>
+            </div>
+
             <p class="nota-precios">Los cambios de precio se aplican a nuevas compras. Las compras anteriores conservan el precio pagado.</p>
             <div class="acciones-formulario">
                 {% if servicio_editar %}<a class="accion-secundaria" href="{{ url_for('admin_servicios') }}">Cancelar</a>{% endif %}
@@ -52,7 +67,7 @@
     {% if not servicio_editar %}
     <section class="panel-servicios catalogo-servicios" aria-labelledby="titulo-catalogo">
         <div class="titulo-panel encabezado-catalogo">
-            <div><h3 id="titulo-catalogo">Servicios registrados</h3><p class="texto-suave">Nombre, precio actual y acciones.</p></div>
+            <div><h3 id="titulo-catalogo">Servicios registrados</h3><p class="texto-suave">Nombre, imagen, precio y acciones.</p></div>
             {% if not error_listado %}<span class="cantidad-servicios">{{ servicios|length }} {{ 'producto' if servicios|length == 1 else 'productos' }}</span>{% endif %}
         </div>
         {% if error_listado %}
@@ -61,9 +76,16 @@
         <div class="tabla-scroll">
             <table>
                 <caption class="solo-lectores">Catálogo de servicios adicionales</caption>
-                <thead><tr><th scope="col">Servicio</th><th scope="col">Precio unitario</th><th scope="col">Acciones</th></tr></thead>
+                <thead><tr><th scope="col">Imagen</th><th scope="col">Servicio</th><th scope="col">Precio unitario</th><th scope="col">Acciones</th></tr></thead>
                 <tbody>{% for servicio in servicios %}
                     <tr>
+                        <td>
+                            {% if servicio.imagen_url %}
+                                <img src="{{ servicio.imagen_url }}" alt="{{ servicio.nombre }}" class="miniatura-servicio">
+                            {% else %}
+                                <span>Sin img</span>
+                            {% endif %}
+                        </td>
                         <th scope="row">{{ servicio.nombre }}</th>
                         <td class="importe-servicio">${{ servicio.precio }} <span>ARS</span></td>
                         <td><div class="acciones-servicio">
