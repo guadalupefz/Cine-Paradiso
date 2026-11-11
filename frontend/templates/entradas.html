@@ -1,446 +1,178 @@
 {% extends "base.html" %}
 
-{% block title %}Mis Entradas - Cine Paradiso{% endblock %}
+{% block title %}Mis entradas - Cine Paradiso{% endblock %}
+{% block clase_pagina %}pagina-mis-entradas{% endblock %}
 
 {% block content %}
-<body>
+<div class="pagina">
 
-    <header class="navbar">
-        <a href="#" class="logo">
-            <span class="logo-icon">✦</span>
-            Cine Paradiso
-        </a>
+    <div class="breadcrumb">
+        <a href="{{ url_for('index') }}">← Volver a Cartelera</a>
+        <span>Tu cuenta / Mis entradas</span>
+    </div>
 
-        <nav>
-            <a href="#">Cartelera</a>
-            <a href="#">Comprar</a>
-            <a href="#" class="active">Mis entradas</a>
-
-            <button class="cuenta">
-                ♙ {{ usuario.nombre if usuario else 'Mi cuenta' }} · Mi cuenta         
-            </button>
-        </nav>
-    </header>
-
-    <main class="pagina">
-
-        <div class="breadcrumb">
-            <a href="#">← Volver a Cartelera</a>
-            <span>Tu cuenta / Mis entradas</span>
-        </div>
-
-        <section class="titulo-seccion">
-
-            <div>
-                <span class="overline">TU COLECCIÓN DE HISTORIAS</span>
-                <h1>Mis entradas</h1>
-
-                <p>
-                    Tu próxima visita y las funciones que ya son parte de tu historia.
-                </p>
-            </div>
-
-            <div class="usuario">
-                <strong>{{ usuario.nombre if usuario else '' }}</strong>
-                <span>{{ usuario.email if usuario else '' }}</span>
-            </div>
-
-        </section>
-
-        <div class="tabs">
-            <button class="tab active" data-tab="todas">
-                Todas · {{ compras | length }}
-            </button>
-            <button class="tab" data-tab="proximas">
-                Próximas · {{ compras | selectattr('estado', 'equalto', 'confirmada') | list | length }}
-            </button>
-            <button class="tab" data-tab="historial">
-                Historial · {{ compras | rejectattr('estado', 'equalto', 'confirmada') | list | length }}
-            </button>>
-        </div>
-
-        <section id="todas" class="contenido-tab active">
-
-            <h3 class="seccion-label">PRÓXIMA FUNCIÓN</h3>
-
-            {% set confirmadas = compras | selectattr('estado', 'equalto', 'confirmada') | list %}
-            {% if confirmadas %}
-                {% for compra in confirmadas %}
-                <article class="entrada-card entrada-proxima">
-                    <div class="poster poster-actual">
-                        <span class="poster-top">CINE PARADISO PRESENTA</span>
-                        <div class="poster-figura">
-                            <span class="sol"></span>
-                            <span class="montana"></span>
-                            <span class="linea"></span>
-                        </div>
-                        <strong>COMPRA #{{ compra.id_compra }}</strong>
-                    </div>
-
-                    <div class="entrada-info">
-                        <h2>Compra #{{ compra.id_compra }}</h2>
-                        <strong>{{ compra.fecha_hora.strftime('%A %d de %B de %Y') if compra.fecha_hora else '' }}</strong>
-                        <p class="destacado">{{ compra.fecha_hora.strftime('%H:%M') if compra.fecha_hora else '' }} · Sala Principal</p>
-                        <p>Fila {{ compra.fila }} · Asiento {{ compra.numero }}</p>
-                        
-                        <div class="codigo-compra">
-                            CP-{{ compra.id_compra }} · Registrada en sistema
-                        </div>
-
-                        <div class="resumen-compra">
-                            Total: ARS {{ compra.total }}
-                        </div>
-                    </div>
-
-                    <div class="entrada-acciones">
-                        <span class="estado confirmada">● {{ compra.estado | capitalize }}</span>
-                        <h2 class="precio">ARS {{ compra.total }}</h2>
-                        <button class="btn-dorado">Ver entrada / QR →</button>
-                        
-                        <!-- Formulario o enlace para cancelar conectando con tu ruta POST /compras/<id>/cancelar -->
-                        <form action="/compras/{{ compra.id_compra }}/cancelar" method="POST" style="display:inline;">
-                            <button type="submit" class="btn-cancelar">Cancelar compra</button>
-                        </form>
-                    </div>
-                </article>
-                {% endfor %}
-            {% else %}
-                <p class="sin-resultados">No tenés funciones próximas programadas.</p>
-            {% endif %}
-
-        </section>
-
-        <section id="proximas" class="contenido-tab">
-
-            <h3 class="seccion-label">PRÓXIMAS FUNCIONES</h3>
-
-            <p class="sin-resultados">
-                No hay otras funciones próximas para mostrar.
-            </p>
-
-        </section>
-
-
-        <section id="historial" class="contenido-tab">
-
-            <h3 class="seccion-label">HISTORIAL</h3>
-
-            <article class="historial-card">
-
-                <div class="historial-icon usado">✓</div>
-
-                <div class="historial-info">
-                    <h2>El viaje de Clara</h2>
-                    <p>Sábado 17 de octubre de 2026 · 20:00 · Sala 2</p>
-                    <p>2D en español · Fila C, asientos 3 y 4</p>
-                </div>
-
-                <div class="historial-detalle">
-                    <strong>CP-261017-0218 · ARS 17.000</strong>
-                    <span>Función finalizada · Entradas utilizadas</span>
-                </div>
-
-                <span class="estado historial-estado">Usada</span>
-
-            </article>
-
-
-            <article class="historial-card">
-
-                <div class="historial-icon cancelado-icon">○</div>
-
-                <div class="historial-info">
-                    <h2>Noches de verano</h2>
-                    <p>Viernes 2 de octubre de 2026 · 21:30 · Sala 1</p>
-                    <p>2D en español · Fila D, asientos 5 y 6</p>
-                </div>
-
-                <div class="historial-detalle">
-                    <strong>CP-261002-0108 · ARS 17.000</strong>
-                    <span>Reintegro completado el 03/10/2026</span>
-                </div>
-
-                <span class="estado cancelada">Cancelada</span>
-
-            </article>
-
-        </section>
-
-
-        <div class="volver-cartelera">
-            <a href="#">Volver a Cartelera y elegir otra historia →</a>
-        </div>
-
-    </main>
-
-
-
-    <footer class="footer">
-
-        <p>El cine de siempre. Las historias de hoy.</p>
+    <section class="titulo-seccion">
 
         <div>
-            <span>Buenos Aires, Argentina</span>
-            <span>Todos los precios en ARS</span>
-            <span>© 2026 Cine Paradiso</span>
+            <span class="overline">TU COLECCIÓN DE HISTORIAS</span>
+            <h1>Mis entradas</h1>
+            <p>Tu próxima visita y las funciones que ya son parte de tu historia.</p>
+        </div>
+        <div class="usuario">
+            <strong>{{ usuario.nombre if usuario else '' }}</strong>
+            <span>{{ usuario.email if usuario else '' }}</span>
         </div>
 
-    </footer>
+    </section>
 
-    <div class="modal-overlay" id="modalCancelacion">
+    {% set proximas = compras | selectattr('es_proxima') | list %}
+    {% set historial = compras | rejectattr('es_proxima') | list %}
 
-        <div class="modal-cancelacion">
+    <div class="tabs" role="tablist">
+        <button type="button" class="tab active" data-tab="todas">Todas · {{ compras|length }}</button>
+        <button type="button" class="tab" data-tab="proximas">Próximas · {{ proximas|length }}</button>
+        <button type="button" class="tab" data-tab="historial">Historial · {{ historial|length }}</button>
+    </div>
 
-            <div class="modal-header">
+    {% if error %}
+        <p class="sin-resultados">No se pudieron cargar tus compras. <a href="{{ url_for('mis_compras') }}">Volvé a intentar</a>.</p>
+    {% else %}
 
-                <div>
-                    <span class="overline">ANTES DE CONFIRMAR</span>
+    <section id="todas" class="contenido-tab active">
 
-                    <h2>¿Cancelamos tu visita?</h2>
+        <h3 class="seccion-label">TUS COMPRAS</h3>
 
+        {% for compra in compras %}
+        <article class="entrada-card {% if compra.es_proxima %}entrada-proxima{% endif %}">
+           
+            <div class="poster poster-actual">
+                <span class="poster-top">CINE PARADISO PRESENTA</span>
+                <div class="poster-figura"><span class="sol"></span><span class="montana"></span><span class="linea"></span></div>
+                <strong>COMPRA #{{ compra.id_compra }}</strong>
+            </div>
+            
+            <div class="entrada-info">
+                {% set primera = compra.entradas[0] if compra.entradas else none %}
+                <h2>{{ primera.pelicula if primera else 'Compra de entradas' }}</h2>
+                {% if primera %}
+                    <strong>{{ primera.fecha_funcion_texto or primera.fecha_hora_inicio }}</strong>
+                    <p class="destacado">{{ primera.hora_funcion_texto or '' }} · {{ primera.sala or 'Sala no disponible' }}</p>
                     <p>
-                        Revisá el detalle. La compra CP-261112-0482
-                        sigue confirmada hasta que confirmes.
+                        {% for entrada in compra.entradas %}
+                            Fila {{ entrada.fila }} · Asiento {{ entrada.numero }}{% if not loop.last %}; {% endif %}
+                        {% endfor %}
                     </p>
+                {% elif compra.error_entradas %}
+                    <p>No se pudo recuperar el detalle de las entradas.</p>
+                {% else %}
+                    <p>Esta compra no tiene entradas asociadas.</p>
+                {% endif %}
+                <div class="codigo-compra">Compra #{{ compra.id_compra }} · Registrada en el sistema</div>
+                <div class="resumen-compra">Total: ARS {{ '%.2f'|format(compra.total|float) }}</div>
+            </div>
+            
+            <div class="entrada-acciones">
+                <span class="estado {% if compra.estado|lower == 'cancelada' %}cancelada{% elif compra.es_proxima %}confirmada{% else %}historial-estado{% endif %}">● {{ compra.estado|capitalize }}</span>
+                <h2 class="precio">ARS {{ '%.2f'|format(compra.total|float) }}</h2>
+                <a class="btn-dorado" href="{{ url_for('ver_comprobante', id_compra=compra.id_compra) }}">Ver comprobante / QR →</a>
+                {% if compra.estado|lower in ['aprobada', 'confirmada'] %}
+                    <button type="button" class="btn-cancelar boton-cancelar-compra" data-id-compra="{{ compra.id_compra }}" data-pelicula="{{ primera.pelicula if primera else 'Compra de entradas' }}" data-fecha="{{ primera.fecha_funcion_texto if primera else '' }}" data-hora="{{ primera.hora_funcion_texto if primera else '' }}" data-sala="{{ primera.sala if primera else '' }}" data-total="{{ compra.total }}" data-butacas="{% for e in compra.entradas %}{{ e.fila }}{{ e.numero }}{% if not loop.last %}, {% endif %}{% endfor %}">Cancelar compra</button>
+                {% endif %}
+            </div>
+        
+        </article>
+
+        {% else %}
+            <p class="sin-resultados">Todavía no tenés compras registradas.</p>
+        {% endfor %}
+
+    </section>
+
+    <section id="proximas" class="contenido-tab">
+
+        <h3 class="seccion-label">PRÓXIMAS FUNCIONES</h3>
+
+        {% for compra in proximas %}
+            {% set primera = compra.entradas[0] if compra.entradas else none %}
+            
+            <article class="historial-card">
+                <div class="historial-icon usado">✓</div>
+                <div class="historial-info">
+                    <h2>{{ primera.pelicula if primera else 'Compra #' ~ compra.id_compra }}</h2>
+                    <p>{{ primera.fecha_funcion_texto if primera else '' }} · {{ primera.hora_funcion_texto if primera else '' }} · {{ primera.sala if primera else '' }}</p>
+                    <p>{% for e in compra.entradas %}Fila {{ e.fila }}, asiento {{ e.numero }}{% if not loop.last %}; {% endif %}{% endfor %}</p>
                 </div>
+                <div class="historial-detalle"><strong>Compra #{{ compra.id_compra }} · ARS {{ compra.total }}</strong><a href="{{ url_for('ver_comprobante', id_compra=compra.id_compra) }}">Ver comprobante</a></div>
+                <span class="estado confirmada">Confirmada</span>
+            </article>
 
-                <button class="cerrar-modal" id="cerrarModal">
-                    ×
-                </button>
+        {% else %}<p class="sin-resultados">No tenés próximas funciones.</p>{% endfor %}
 
+    </section>
+
+    <section id="historial" class="contenido-tab">
+
+        <h3 class="seccion-label">HISTORIAL DE COMPRAS</h3>
+
+        {% for compra in historial %}
+            {% set primera = compra.entradas[0] if compra.entradas else none %}
+            <article class="historial-card">
+                <div class="historial-icon {% if compra.estado|lower == 'cancelada' %}cancelado-icon{% else %}usado{% endif %}">{% if compra.estado|lower == 'cancelada' %}○{% else %}✓{% endif %}</div>
+                <div class="historial-info">
+
+                    <h2>{{ primera.pelicula if primera else 'Compra #' ~ compra.id_compra }}</h2>
+                    <p>{{ primera.fecha_funcion_texto if primera else 'Fecha no disponible' }} · {{ primera.hora_funcion_texto if primera else '' }} · {{ primera.sala if primera else '' }}</p>
+                    <p>{% for e in compra.entradas %}Fila {{ e.fila }}, asiento {{ e.numero }}{% if not loop.last %}; {% endif %}{% endfor %}</p>
+                
+                </div>
+                <div class="historial-detalle"><strong>Compra #{{ compra.id_compra }} · ARS {{ compra.total }}</strong><a href="{{ url_for('ver_comprobante', id_compra=compra.id_compra) }}">Ver comprobante</a></div>
+                <span class="estado {% if compra.estado|lower == 'cancelada' %}cancelada{% else %}historial-estado{% endif %}">{{ compra.estado|capitalize }}</span>
+            </article>
+        {% else %}<p class="sin-resultados">Todavía no tenés historial de compras.</p>{% endfor %}
+    
+    </section>
+    {% endif %}
+
+    <div class="volver-cartelera"><a href="{{ url_for('index') }}">Volver a Cartelera y elegir otra historia →</a></div>
+
+</div>
+
+<div class="modal-overlay" id="modalCancelacion" aria-hidden="true">
+
+    <div class="modal-cancelacion" role="dialog" aria-modal="true" aria-labelledby="tituloModalCancelacion">
+        <div class="modal-header">
+            <div><span class="overline">ANTES DE CONFIRMAR</span><h2 id="tituloModalCancelacion">¿Cancelamos tu visita?</h2><p id="textoCompraModal">Revisá los datos de la compra antes de continuar.</p></div>
+            <button type="button" class="cerrar-modal" id="cerrarModal" aria-label="Cerrar">×</button>
+        </div>
+
+        <div class="alerta"><strong>Se invalidarán las entradas y sus códigos QR.</strong><p>La cancelación afecta a toda la compra. Una vez confirmada, las entradas ya no podrán utilizarse.</p></div>
+        
+        <div class="modal-contenido">
+
+            <div class="columna-compra">
+                <div class="compra-card">
+                    <span class="estado confirmada">Compra seleccionada</span>
+                    <div class="pelicula-modal"><div class="poster poster-modal"><span class="poster-top">CINE PARADISO</span><div class="poster-figura"><span class="sol"></span><span class="montana"></span><span class="linea"></span></div><strong id="modalPeliculaPoster">CINE PARADISO</strong></div>
+                    <div class="pelicula-datos"><h3 id="modalPelicula">Compra</h3><p id="modalFecha"></p><p id="modalHoraSala"></p><strong id="modalButacas"></strong></div></div>
+                    <div class="total-linea"><strong>Total de la compra</strong><strong id="modalTotal"></strong></div>
+                </div>
             </div>
 
-
-            <!--ADVERTENCIA-->
-
-            <div class="alerta">
-
-                <strong>! Se invalidarán las dos entradas y sus QR</strong>
-
-                <p>
-                    La cancelación afecta a toda la compra: fila E,
-                    asientos 7 y 8. Ninguna de las dos entradas
-                    podrá usarse para ingresar.
-                </p>
-
-            </div>
-
-            <div class="modal-contenido">
-
-                <div class="columna-compra">
-
-                    <div class="compra-card">
-
-                        <span class="estado confirmada">
-                            ● Confirmada · aún no cancelada
-                        </span>
-
-                        <div class="pelicula-modal">
-
-                            <div class="poster poster-modal">
-                                <span class="poster-top">CINE PARADISO</span>
-
-                                <div class="poster-figura">
-                                    <span class="sol"></span>
-                                    <span class="montana"></span>
-                                    <span class="linea"></span>
-                                </div>
-
-                                <strong>LA ÚLTIMA<br>FUNCIÓN</strong>
-                            </div>
-
-                            <div class="pelicula-datos">
-
-                                <h3>La última función</h3>
-
-                                <p>Drama · 112 min · +13</p>
-
-                                <strong>
-                                    Jueves 12 de noviembre de 2026
-                                </strong>
-
-                                <p class="destacado">18:30 · Sala 1</p>
-
-                                <p>2D en español</p>
-
-                                <strong>Fila E · Asientos 7 y 8</strong>
-
-                            </div>
-
-                        </div>
-
-
-                        <div class="precio-linea">
-                            <span>2 entradas · ARS 8.500 c/u</span>
-                            <strong>ARS 17.000</strong>
-                        </div>
-
-                        <div class="precio-linea">
-                            <span>Servicios agregados: 0</span>
-                            <strong>ARS 0</strong>
-                        </div>
-
-                        <div class="total-linea">
-                            <strong>Total abonado</strong>
-                            <strong>ARS 17.000</strong>
-                        </div>
-
-                        <small>Compra CP-261112-0482</small>
-
-                    </div>
-
-
-                    <!-- REINTEGRO -->
-
-                    <div class="reintegro">
-
-                        <span>Importe a reintegrar · 100% de la compra</span>
-
-                        <h3>ARS 17.000</h3>
-
-                        <p>
-                            El reintegro se solicitará solo después
-                            de confirmar la cancelación.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="columna-formulario">
-
-                    <h3>Contanos el motivo</h3>
-
-                    <label for="motivo">
-                        Motivo de cancelación
-                    </label>
-
-                    <select id="motivo">
-
-                        <option value="No puedo asistir a la función">
-                            No puedo asistir a la función
-                        </option>
-
-                        <option value="Compré entradas por error">
-                            Compré entradas por error
-                        </option>
-
-                        <option value="Problemas con el horario">
-                            Problemas con el horario
-                        </option>
-
-                        <option value="Quiero cambiar la función">
-                            Quiero cambiar la función
-                        </option>
-
-                        <option value="Otro motivo">
-                            Otro motivo
-                        </option>
-
-                    </select>
-
-
-                    <label for="comentario">
-                        Comentario (opcional)
-                    </label>
-
-                    <textarea
-                        id="comentario"
-                        maxlength="300"
-                        placeholder="Contanos el motivo de tu cancelación..."
-                    ></textarea>
-
-                    <div class="contador">
-                        0 / 300 caracteres
-                    </div>
-
-
-                    <label class="checkbox-container">
-
-                        <input type="checkbox" id="aceptarCancelacion">
-
-                        <span>
-                            Entiendo que se invalidarán las dos
-                            entradas y sus QR.
-                        </span>
-
-                    </label>
-
-
-                    <button
-                        class="btn-confirmar"
-                        id="confirmarCancelacion"
-                        disabled
-                    >
-                        Confirmar cancelación
-                    </button>
-
-                    <button class="btn-conservar" id="conservarEntradas">
-                        Conservar mis entradas
-                    </button>
-
-                    <p class="nota">
-                        Si conservás tus entradas, volvés a Mis entradas
-                        con la compra confirmada.
-                    </p>
-
-                </div>
-
-            </div>
-
-
-            <!-- POLÍTICA -->
-
-            <div class="politica">
-
-                <strong>Política de ejemplo para este diseño</strong>
-
-                <p>
-                    Reintegro del 100% al cancelar hasta 24 horas antes
-                    de la función: 11/11/2026 a las 18:30.
-                    Se solicita al medio de pago original y puede
-                    demorar de 3 a 10 días hábiles.
-                    No representa una política real de Cine Paradiso.
-                </p>
-
+            <div class="columna-formulario">
+                <h3>Confirmar cancelación</h3>
+                <p>La cancelación se realizará según las condiciones del sistema: no se permite cancelar dentro de las dos horas previas a la función ni si alguna entrada ya fue utilizada.</p>
+                <form id="formCancelarCompra" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <button type="submit" class="btn-confirmar">Confirmar cancelación</button>
+                </form>
+                <button type="button" class="btn-conservar" id="conservarEntradas">Conservar mis entradas</button>
             </div>
 
         </div>
 
     </div>
 
+</div>
 
-    <!-- ================= CONFIRMACIÓN FINAL ================= -->
-
-    <div class="modal-overlay" id="modalExito">
-
-        <div class="exito-card">
-
-            <div class="exito-icon">✓</div>
-
-            <h2>Cancelación confirmada</h2>
-
-            <p>
-                Tu compra fue cancelada correctamente.
-                Las entradas y sus códigos QR fueron invalidados.
-            </p>
-
-            <div class="exito-total">
-                <span>Importe a reintegrar</span>
-                <strong>ARS 17.000</strong>
-            </div>
-
-            <button class="btn-dorado" id="finalizar">
-                Volver a Mis entradas
-            </button>
-
-        </div>
-
-    </div>
-
-
-    <script src="mis_entradas.js"></script>
-
-</body>
+<script src="{{ url_for('static', filename='js/mis_entradas.js') }}" defer></script>
 {% endblock %}
