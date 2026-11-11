@@ -66,6 +66,10 @@ El backoffice envía los campos con formulario y, si se seleccionó una imagen, 
 
 Para bases existentes seleccionar primero la base y ejecutar `backend/db/migraciones/migracion_imagen_servicios.sql`. Puede repetirse, añade la columna si falta y normaliza los NULL antiguos sin cambiar rutas existentes. La migración de descripción es independiente y también debe ejecutarse en bases antiguas. No importar el esquema inicial encima de una base utilizada.
 
+## Eliminación de salas y locales
+
+El backoffice muestra acciones de eliminación con confirmación. `DELETE /api/salas/<id_sala>` elimina una sala y sus butacas; `DELETE /api/locales/<id_local>` elimina el local, sus salas y sus butacas. Ambas rutas exigen JWT de administrador y rechazan con 409 cualquier función o entrada asociada, incluso si la función todavía no tiene ventas. Los registros inexistentes devuelven 404. Se usan bloqueos y una transacción; una dependencia o error revierte toda la operación. El frontend envía las operaciones desde formularios POST protegidos con CSRF, mediante Python requests.
+
 ## Contrato de reservas y películas
 
 - Una reserva queda pendiente durante **15 minutos** desde su creación. El vencimiento se calcula desde la fecha `compra.fecha_hora`; al confirmar, la misma ventana determina si sigue vigente.

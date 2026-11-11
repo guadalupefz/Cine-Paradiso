@@ -2,7 +2,7 @@
 {% block title %}Locales · Cine Paradiso{% endblock %}
 {% block content %}
 <h2>Administración de locales</h2>
-<p>Registrá y consultá los locales del cine.</p>
+<p>Registrá y consultá los locales del cine. Solo se pueden eliminar locales sin funciones ni entradas asociadas. Al eliminar un local también se eliminan sus salas y butacas.</p>
 
 <section class="panel-funciones">
     <h3>Nuevo local</h3>
@@ -24,7 +24,13 @@
     {% elif locales %}
         <ul>
             {% for local in locales %}
-                <li><strong>{{ local.nombre }}</strong> — {{ local.direccion }}</li>
+                <li>
+                    <strong>{{ local.nombre }}</strong> — {{ local.direccion }}
+                    <form method="post" action="{{ url_for('eliminar_local_admin', id_local=local.id_local) }}" onsubmit="return confirm('¿Eliminar este local junto con todas sus salas y butacas? Esta acción no se puede deshacer.');">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <button type="submit">Eliminar local</button>
+                    </form>
+                </li>
             {% endfor %}
         </ul>
     {% else %}

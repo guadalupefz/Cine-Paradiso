@@ -1513,6 +1513,22 @@ def admin_locales():
     )
 
 
+@app.post("/admin/locales/<int:id_local>/eliminar")
+@requiere_admin
+def eliminar_local_admin(id_local):
+    resultado, estado = llamar_backend("DELETE", f"/locales/{id_local}")
+    flash(mensaje_error(resultado), "ok" if estado == 200 else "error")
+    return redirect(url_for("admin_locales"))
+
+
+@app.post("/admin/salas/<int:id_sala>/eliminar")
+@requiere_admin
+def eliminar_sala_admin(id_sala):
+    resultado, estado = llamar_backend("DELETE", f"/salas/{id_sala}")
+    flash(mensaje_error(resultado), "ok" if estado == 200 else "error")
+    return redirect(url_for("admin_salas"))
+
+
 @app.route("/admin/salas", methods=["GET", "POST"])
 @requiere_admin
 def admin_salas():
