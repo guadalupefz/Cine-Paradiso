@@ -22,7 +22,7 @@
     <section class="panel-servicios formulario-servicio" aria-labelledby="titulo-formulario">
         <div class="titulo-panel">
             <h3 id="titulo-formulario">{{ 'Datos del servicio' if servicio_editar else 'Nuevo servicio' }}</h3>
-            <p class="texto-suave">Todos los campos son obligatorios.</p>
+            <p class="texto-suave">Nombre, descripción y precio son obligatorios. La imagen es opcional.</p>
         </div>
         {% if error_formulario %}<p role="alert" class="aviso error">{{ error_formulario }}</p>{% endif %}
         
@@ -52,7 +52,7 @@
 
             <div class="campo-servicio">
                 <label for="imagen">Imagen del producto</label>
-                <input id="imagen" name="imagen" type="file" accept="image/png, image/jpeg, image/webp" {% if not servicio_editar %}required{% endif %}>
+                <input id="imagen" name="imagen" type="file" accept="image/png, image/jpeg, image/webp">
                 <small>Formatos permitidos: PNG, JPG, WEBP.</small>
             </div>
 

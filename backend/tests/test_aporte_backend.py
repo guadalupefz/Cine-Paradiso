@@ -101,7 +101,7 @@ class AporteBackend(unittest.TestCase):
         r = self.post_servicio()
         self.assertEqual(r.status_code, 201)
         self.assertEqual(r.json['id_servicio'], 37)
-        self.assertEqual(cur.execute.call_args.args[1], ('Agua', 'Agua mineral', Decimal('2000.00')))
+        self.assertEqual(cur.execute.call_args.args[1], ('Agua', 'Agua mineral', Decimal('2000.00'), ''))
         cn.commit.assert_called_once()
         cn.rollback.assert_not_called()
         self.assertCierre(cn, cur)

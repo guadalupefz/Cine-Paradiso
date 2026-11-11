@@ -106,7 +106,7 @@ CREATE TABLE servicio_adicional (
     nombre VARCHAR(100) NOT NULL UNIQUE,
     descripcion VARCHAR(255) NOT NULL,
     precio DECIMAL(10,2) NOT NULL,
-    imagen VARCHAR(255) NOT NULL
+    imagen VARCHAR(255) NOT NULL DEFAULT ''
 );
 
 -- Creacion de tabla compra_servicio
