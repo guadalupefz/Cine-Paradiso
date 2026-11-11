@@ -137,6 +137,17 @@
     border-bottom: 1px solid #dfd1b8;
 }
 
+.ilustracion-servicio.con-imagen {
+    padding: 10px;
+}
+
+.imagen-servicio-cliente {
+    max-height: 90px;
+    max-width: 100%;
+    object-fit: contain;
+    border-radius: 6px;
+}
+
 .circulo-icono {
     width: 60px;
     height: 60px;
@@ -313,8 +324,8 @@
 /* Aviso si el precio no está disponible */
 .alerta-precio-no-disponible {
     display: block;
-    width: fit-content;           /* Se ajusta exactamente al tamaño del texto */
-    margin: 0 auto 20px auto;     /* Centra el cuadro automáticamente y le da margen abajo */
+    width: fit-content;
+    margin: 0 auto 20px auto;
     background-color: #fde8e8;
     border: 1px solid #f8b4b4;
     color: #9b1c1c;
@@ -324,7 +335,7 @@
     font-weight: bold;
     text-align: center;
     position: relative;
-    z-index: 10;                  /* Se ubica por encima sin superponerse mal */
+    z-index: 10;
 }
 
 /* Nota al pie */

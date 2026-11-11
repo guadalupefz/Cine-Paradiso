@@ -16,7 +16,8 @@
 .admin-servicios .campo-servicio { display: grid; gap: 8px; }
 .admin-servicios label { font-size: 14px; font-weight: bold; }
 .admin-servicios .campo-servicio input { width: 100%; min-width: 0; padding: 13px 14px; font: inherit; color: var(--texto); border: 1px solid #43516a; border-radius: 7px; background: #0d1728; }
-.admin-servicios input::placeholder { color: #8898af; }
+.admin-servicios .campo-servicio textarea { width: 100%; min-width: 0; padding: 13px 14px; font: inherit; color: var(--texto); border: 1px solid #43516a; border-radius: 7px; background: #0d1728; resize: vertical; }
+.admin-servicios input::placeholder, .admin-servicios textarea::placeholder { color: #8898af; }
 .admin-servicios .precio-servicio { position: relative; }
 .admin-servicios .precio-servicio input { padding-right: 72px; }
 .admin-servicios .precio-servicio span { position: absolute; right: 14px; top: 14px; color: var(--suave); font-size: 13px; pointer-events: none; }
@@ -31,6 +32,7 @@
 .admin-servicios th, .admin-servicios td { padding: 16px 10px; border-bottom: 1px solid var(--borde); vertical-align: middle; overflow-wrap: anywhere; }
 .admin-servicios thead th { background: #101a2a; color: var(--suave); font-size: 12px; font-weight: normal; }
 .admin-servicios tbody th { background: transparent; color: var(--texto); font-weight: normal; }
+.admin-servicios .miniatura-servicio { width: 40px; height: 40px; object-fit: cover; border-radius: 4px; }
 .admin-servicios .importe-servicio { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .admin-servicios .importe-servicio span { color: var(--suave); font-size: 11px; }
 .admin-servicios .acciones-servicio { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
