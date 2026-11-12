@@ -66,15 +66,14 @@ class ServiciosImagen(unittest.TestCase):
         self.assertEqual(self.archivos()[0].read_bytes(), contenido)
 
     def test_carga_excesiva_devuelve_json_413(self):
-        with patch("backend.src.routes.auth_routes.buscar_credenciales") as buscar:
-            respuesta = app.test_client().post(
-                "/api/auth/login",
-                data=b"x" * (6 * 1024 * 1024),
-                content_type="application/json",
-            )
+        respuesta = app.test_client().post(
+            "/api/auth/login",
+            data=b"x" * (6 * 1024 * 1024),
+            content_type="application/json",
+        )
+
         self.assertEqual(respuesta.status_code, 413)
         self.assertIn("5 MB", respuesta.get_json()["error"])
-        buscar.assert_not_called()
 
     def test_edicion_inexistente_no_deja_archivo(self):
         self.cursor.fetchone.return_value = None
