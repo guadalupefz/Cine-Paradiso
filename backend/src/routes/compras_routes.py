@@ -117,7 +117,8 @@ def listar_entradas(id_usuario, id_compra):
             "id_funcion": entrada["id_funcion"],
             "id_butaca": entrada["id_butaca"],
             "fila": entrada["fila"],
-            "numero": entrada["numero"]
+            "numero": entrada["numero"],
+            "qr_token": entrada["qr_token"]
            }
            for entrada in entradas
         ]), 200

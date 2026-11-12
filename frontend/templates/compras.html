@@ -32,6 +32,7 @@
         {% if compra.estado|lower in ['aprobada', 'confirmada'] %}
         <img src="{{ url_for('ver_qr_cliente', id_entrada=entrada.id_entrada) }}"
             alt="QR de la entrada {{ entrada.id_entrada }}" class="imagen_qr">
+        <p>Código de validación manual: {{ entrada.qr_token }}</p>
         {% elif compra.estado|lower == 'cancelada' %}
         <p>Entrada cancelada. El código QR ya no es válido</p>
         {% endif %}
