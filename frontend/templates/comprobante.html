@@ -53,6 +53,11 @@
        class="boton-principal">
         Descargar comprobante PDF
     </a>
+
+
+    <button type="button" class="boton-cancelar-compra" data-id-compra="{{ comprobante.compra.id_compra }}">
+        Cancelar compra
+    </button>
    
     <a href="{{ url_for('mis_compras') }}" class="boton-secundario">
         Volver a mis compras
@@ -63,4 +68,30 @@
     Volver a mis compras
 </a>
 {% endif %}
+
+
+<dialog id="modal-cancelacion">
+    <div class="contenido-modal-cancelacion">
+        <h3>¿Cancelar esta compra?</h3>
+
+        <p>
+            ¿Estás segura de que querés cancelar esta compra?
+            Esta acción no se puede deshacer.
+        </p>
+
+        <form method="POST" id="form-cancelacion">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="button" id="cerrar-modal-cancelacion">
+                Volver
+            </button>
+
+            <button type="submit">
+                Sí, cancelar compra
+            </button>
+        </form>
+    </div>
+</dialog>
+
+<script src="{{ url_for('static', filename='js/cancelacion.js') }}" defer></script>
+
 {% endblock %}
