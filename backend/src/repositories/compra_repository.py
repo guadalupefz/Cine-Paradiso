@@ -166,7 +166,7 @@ def obtener_entradas_comprobante(cursor, id_compra, solo_activas=False):
         filtro_activas = "AND entrada.ocupacion_activa = 1"
 
     query = f"""
-        SELECT entrada.id_entrada, entrada.id_butaca,
+        SELECT entrada.id_entrada, entrada.qr_token, entrada.id_butaca,
             butaca.fila, butaca.numero,
             funcion.fecha_hora_inicio,
             pelicula.titulo AS pelicula,

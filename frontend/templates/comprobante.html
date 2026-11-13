@@ -33,6 +33,7 @@
 
     {% if comprobante.compra.estado in ["aprobada", "confirmada"] %}
     <img src="{{ url_for('ver_qr_cliente', id_entrada=entrada.id_entrada) }}" alt="QR de la entrada" class="imagen_qr">
+    <p>Código de validación manual: {{ entrada.qr_token }}</p>
     {% endif %}
 
 </article>

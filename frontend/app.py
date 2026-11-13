@@ -1828,6 +1828,23 @@ def descargar_comprobante_pdf(id_compra):
         )
 
         elementos.append(imagen_qr)
+        elementos.append(Spacer(1, 5))
+
+        estilo_codigo = ParagraphStyle(
+            "CodigoValidacion",
+            parent=estilos["Normal"],
+            alignment=TA_CENTER,
+            fontSize=10,
+            textColor=colors.HexColor("#333333")
+        )
+
+        codigo_manual = entrada.get("qr_token", "No disponible")
+        texto_codigo = Paragraph(
+            f"Código: <b>{escape(str(codigo_manual))}</b>",
+            estilo_codigo
+        )
+
+        elementos.append(texto_codigo)
         elementos.append(Spacer(1, 15))
 
     elementos.append(Paragraph(
