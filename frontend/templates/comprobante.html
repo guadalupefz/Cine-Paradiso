@@ -8,28 +8,28 @@
 
 <article class="tarjeta-admin">
 
-    <h3>datos de la compra</h3>
+    <h3>Datos de la compra</h3>
 
-    <p>cliente: {{ comprobante.compra.nombre }} {{ comprobante.compra.apellido }}</p>
-    <p>email: {{ comprobante.compra.email }}</p>
-    <p>fecha: {{ comprobante.compra.fecha_hora }}</p>
-    <p>estado: {{ comprobante.compra.estado }}</p>
-    <p>total: ${{ comprobante.compra.total }}</p>
+    <p>Cliente: {{ comprobante.compra.nombre }} {{ comprobante.compra.apellido }}</p>
+    <p>Email: {{ comprobante.compra.email }}</p>
+    <p>Fecha: {{ comprobante.compra.fecha_hora }}</p>
+    <p>Estado: {{ comprobante.compra.estado }}</p>
+    <p>Total: ${{ comprobante.compra.total }}</p>
 
 </article>
 
-<h3>entradas</h3>
+<h3>Entradas</h3>
 
 {% for entrada in comprobante.entradas %}
 
 <article class="tarjeta-admin">
 
-    <p>pelicula: {{ entrada.pelicula }}</p>
-    <p>función: {{ entrada.fecha_hora_inicio }}</p>
-    <p>cine: {{ entrada.local }}</p>
-    <p>dirección: {{ entrada.direccion }}</p>
-    <p>sala: {{ entrada.sala }}</p>
-    <p>butaca: {{ entrada.fila }}{{ entrada.numero }}</p>
+    <p>Pelicula: {{ entrada.pelicula }}</p>
+    <p>Función: {{ entrada.fecha_hora_inicio }}</p>
+    <p>Cine: {{ entrada.local }}</p>
+    <p>Dirección: {{ entrada.direccion }}</p>
+    <p>Sala: {{ entrada.sala }}</p>
+    <p>Butaca: {{ entrada.fila }}{{ entrada.numero }}</p>
 
     {% if comprobante.compra.estado in ["aprobada", "confirmada"] %}
     <img src="{{ url_for('ver_qr_cliente', id_entrada=entrada.id_entrada) }}" alt="QR de la entrada" class="imagen_qr">
@@ -40,11 +40,11 @@
 
 {% endfor %}
 
-<h3>servicios adicionales</h3>
+<h3>Servicios adicionales</h3>
 {% for servicio in comprobante.servicios %}
 <p>{{ servicio.nombre }} - Cantidad: {{ servicio.cantidad }} - ${{ servicio.subtotal }}</p>
 {% else %}
-<p>no se compraron servicios adicionales</p>
+<p>No se compraron servicios adicionales</p>
 {% endfor %}
 
 
@@ -76,7 +76,7 @@
         <h3>¿Cancelar esta compra?</h3>
 
         <p>
-            ¿Estás segura de que querés cancelar esta compra?
+            ¿Estás seguro de que querés cancelar esta compra?
             Esta acción no se puede deshacer.
         </p>
 
