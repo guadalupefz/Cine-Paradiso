@@ -1252,6 +1252,171 @@ def admin_resumen():
         ocupacion_ok=eo == 200
     )
 
+
+def _tabla_informe_pdf(titulo, encabezados, filas, anchos, estilos):
+    contenido = [
+        [
+            Paragraph(escape(str(valor if valor is not None else "")), estilos["BodyText"])
+            for valor in encabezados
+        ]
+    ]
+    for fila in filas:
+        contenido.append([
+            Paragraph(
+                escape(str(valor if valor is not None else "")),
+                estilos["BodyText"],
+            )
+            for valor in fila
+        ])
+    if not filas:
+        contenido.append([
+            Paragraph(
+                "Sin datos para mostrar.",
+                estilos["BodyText"],
+            ),
+            *[Paragraph("", estilos["BodyText"]) for _ in encabezados[1:]],
+        ])
+
+    tabla = Table(contenido, colWidths=anchos, repeatRows=1, hAlign="LEFT")
+    tabla.setStyle(TableStyle([
+        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#922632")),
+        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+        ("GRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#dfd1b8")),
+        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [
+            colors.white,
+            colors.HexColor("#fff8e9"),
+        ]),
+        ("LEFTPADDING", (0, 0), (-1, -1), 5),
+        ("RIGHTPADDING", (0, 0), (-1, -1), 5),
+        ("TOPPADDING", (0, 0), (-1, -1), 5),
+        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+    ]))
+    return [Paragraph(escape(titulo), estilos["Heading2"]), Spacer(1, 5), tabla, Spacer(1, 12)]
+
+
+def _crear_informe_estadisticas_pdf(ventas, ocupacion):
+    buffer = BytesIO()
+    documento = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=20 * mm,
+        leftMargin=20 * mm,
+        topMargin=18 * mm,
+        bottomMargin=18 * mm,
+        title="Informe de ventas y rendimiento",
+        author="Cine Paradiso",
+    )
+    estilos = getSampleStyleSheet()
+    historia = [
+        Paragraph("Informe de ventas y rendimiento", estilos["Title"]),
+        Paragraph(
+            f"Generado el {datetime.now().strftime('%d/%m/%Y %H:%M')}. "
+            "Incluye los datos históricos disponibles.",
+            estilos["BodyText"],
+        ),
+        Spacer(1, 14),
+    ]
+
+    historia.extend(_tabla_informe_pdf(
+        "Ventas por género",
+        ["Género", "Entradas vendidas", "Recaudación estimada"],
+        [
+            [
+                fila.get("genero") or "Sin género",
+                fila.get("entradas_vendidas", 0),
+                f"${fila.get('importe_estimado_entradas', 0)}",
+            ]
+            for fila in ventas.get("ventas_por_genero", [])
+        ],
+        [52 * mm, 48 * mm, 70 * mm],
+        estilos,
+    ))
+    historia.extend(_tabla_informe_pdf(
+        "Ventas por franja horaria",
+        ["Franja", "Entradas vendidas", "Recaudación estimada"],
+        [
+            [
+                fila.get("franja_horaria", ""),
+                fila.get("entradas_vendidas", 0),
+                f"${fila.get('importe_estimado_entradas', 0)}",
+            ]
+            for fila in ventas.get("ventas_por_franja_horaria", [])
+        ],
+        [52 * mm, 48 * mm, 70 * mm],
+        estilos,
+    ))
+    historia.extend([
+        Paragraph("Cancelaciones", estilos["Heading2"]),
+        Paragraph(
+            f"Compras canceladas: {ventas.get('cantidad_cancelaciones', 0)}",
+            estilos["BodyText"],
+        ),
+        Spacer(1, 12),
+    ])
+    historia.extend(_tabla_informe_pdf(
+        "Ocupación por función",
+        ["Película", "Inicio", "Sala", "Butacas", "Capacidad", "Ocupación"],
+        [
+            [
+                fila.get("pelicula", ""),
+                fila.get("fecha_hora_inicio", ""),
+                fila.get("sala", ""),
+                fila.get("butacas_ocupadas", 0),
+                fila.get("capacidad", 0),
+                f"{fila.get('porcentaje_ocupacion', 0)}%",
+            ]
+            for fila in ocupacion.get("ocupacion_por_funcion", [])
+        ],
+        [40 * mm, 36 * mm, 28 * mm, 22 * mm, 22 * mm, 22 * mm],
+        estilos,
+    ))
+    historia.extend(_tabla_informe_pdf(
+        "Ocupación por película",
+        ["Película", "Butacas ocupadas", "Capacidad total", "Ocupación"],
+        [
+            [
+                fila.get("pelicula", ""),
+                fila.get("butacas_ocupadas", 0),
+                fila.get("capacidad_total", 0),
+                f"{fila.get('porcentaje_ocupacion', 0)}%",
+            ]
+            for fila in ocupacion.get("ocupacion_por_pelicula", [])
+        ],
+        [60 * mm, 35 * mm, 40 * mm, 35 * mm],
+        estilos,
+    ))
+
+    documento.build(historia)
+    buffer.seek(0)
+    return buffer
+
+
+@app.get("/admin/estadisticas/pdf")
+@requiere_admin
+def descargar_informe_estadisticas():
+    ventas, estado_ventas = llamar_backend("GET", "/estadisticas/ventas")
+    ocupacion, estado_ocupacion = llamar_backend(
+        "GET", "/estadisticas/ocupacion"
+    )
+    if estado_ventas != 200 or estado_ocupacion != 200:
+        error = (
+            mensaje_error(ventas) if estado_ventas != 200
+            else mensaje_error(ocupacion)
+        )
+        flash(f"No se pudo generar el informe: {error}", "error")
+        return redirect(url_for("admin_resumen"))
+
+    archivo = _crear_informe_estadisticas_pdf(ventas, ocupacion)
+    nombre = f"informe_ventas_rendimiento_{datetime.now():%Y%m%d}.pdf"
+    return send_file(
+        archivo,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=nombre,
+    )
+
+
 @app.route("/admin/servicios", methods=["GET", "POST"])
 @requiere_admin
 def admin_servicios():
