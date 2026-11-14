@@ -87,7 +87,8 @@ def destino_interno(valor):
         endpoint, parametros = app.url_map.bind("localhost").match(ruta, method="GET")
         permitidos = {
             "ver_butacas", "ver_compra", "mis_compras", "ver_comprobante", "ver_qr_cliente",
-            "admin_resumen", "admin_peliculas", "admin_funciones", "admin_servicios", "validar_qr",
+            "admin_resumen", "admin_peliculas", "admin_funciones", "admin_servicios",
+            "validar_qr", "ver_resenas_pelicula",
         }
         if endpoint not in permitidos or any(valor <= 0 for valor in parametros.values() if isinstance(valor, int)):
             return None
@@ -309,6 +310,63 @@ def index():
     if estado != 200:
         flash(mensaje_error(datos), "error")
     return render_template("cartelera.html", peliculas=peliculas, error=estado != 200)
+
+
+@app.route("/peliculas/<int:id_pelicula>/resenas", methods=["GET", "POST"])
+def ver_resenas_pelicula(id_pelicula):
+    ruta_resenas = f"/peliculas/{id_pelicula}/resenas"
+
+    if request.method == "POST":
+        usuario = usuario_actual()
+        if usuario is None:
+            flash("Iniciá sesión para publicar una reseña.", "error")
+            destino = url_for("ver_resenas_pelicula", id_pelicula=id_pelicula)
+            session["destino_acceso"] = destino
+            return redirect(url_for("login", next=destino))
+
+        if usuario.get("rol", "").strip().casefold() != "cliente":
+            abort(403)
+
+        try:
+            puntuacion = int(request.form.get("puntuacion", ""))
+        except (TypeError, ValueError):
+            puntuacion = None
+
+        resultado, estado = llamar_backend(
+            "POST",
+            ruta_resenas,
+            json={
+                "puntuacion": puntuacion,
+                "comentario": request.form.get("comentario", ""),
+            },
+        )
+        if estado == 200:
+            flash(mensaje_error(resultado), "ok")
+        else:
+            flash(mensaje_error(resultado), "error")
+        return redirect(url_for("ver_resenas_pelicula", id_pelicula=id_pelicula))
+
+    datos, estado = llamar_backend("GET", ruta_resenas)
+    if estado == 404:
+        abort(404)
+
+    propia = None
+    error_propio = None
+    usuario = usuario_actual()
+    if usuario and usuario.get("rol", "").strip().casefold() == "cliente":
+        propia, estado_propio = llamar_backend("GET", ruta_resenas + "/propia")
+        if estado_propio != 200:
+            error_propio = mensaje_error(propia)
+            propia = None
+
+    return render_template(
+        "resenas.html",
+        datos=datos if estado == 200 else {},
+        error_resenas=mensaje_error(datos) if estado != 200 else None,
+        propia=propia,
+        error_propio=error_propio,
+    ), 200 if estado == 200 else estado
+
 
 @app.get("/funciones")
 def ver_funciones():

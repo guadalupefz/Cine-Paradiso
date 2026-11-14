@@ -51,6 +51,15 @@ Ver [propuesta JWT y correcciones](propuesta-jwt-y-correcciones.md) para prepara
 - Backoffice de funciones: selección de película/sala, alta y modificación.
 - Backoffice de servicios: listado, alta, modificación y eliminación de servicios sin compras. Las FK impiden borrar servicios usados; el precio histórico permanece en `compra_servicio.precio_unitario`.
 - Resumen administrativo con las estadísticas y pantalla de QR del equipo.
+- Reseñas de películas: un cliente puede publicar o editar una reseña por película
+  únicamente después de que una de sus entradas haya sido validada por QR.
+  La puntuación va de 1 a 5 y el comentario es opcional (máximo 1000 caracteres).
+- El resumen administrativo permite descargar un PDF con ventas por género y
+  franja horaria, cancelaciones y ocupación por función y película.
+
+Para una base existente, ejecutar `backend/db/migraciones/2026_11_14_resenas.sql`
+una vez con la base `cine_paradiso` seleccionada. El esquema inicial ya incluye
+la tabla `resena`.
 
 El precio de servicios se envía como texto decimal (`"2000.00"`), con máximo dos decimales. Los cambios de catálogo no reescriben detalles de compras anteriores.
 

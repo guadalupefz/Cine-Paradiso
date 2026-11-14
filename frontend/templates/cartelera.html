@@ -78,6 +78,9 @@
                        href="{{ url_for('ver_funciones', id_pelicula=pelicula.id_pelicula) }}">
                         <span>Ver funciones</span>
                     </a>
+                    <a href="{{ url_for('ver_resenas_pelicula', id_pelicula=pelicula.id_pelicula) }}">
+                        Reseñas y puntuación
+                    </a>
                 </div>
             {% else %}
                 <p class="estado-vacio">

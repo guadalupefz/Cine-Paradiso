@@ -43,6 +43,15 @@
 - `POST /api/peliculas/sincronizar` — Sincronizar películas con una API externa.
   Permiso: Administrador.
 
+- `GET /api/peliculas/{id}/resenas` — Consultar puntuación promedio y reseñas públicas.
+  Permiso: Público.
+
+- `GET /api/peliculas/{id}/resenas/propia` — Consultar elegibilidad y reseña propia.
+  Permiso: Cliente.
+
+- `POST /api/peliculas/{id}/resenas` — Crear o actualizar la reseña propia (puntuación 1–5).
+  Permiso: Cliente con asistencia validada por QR.
+
 ## Butacas y compras
 
 - `GET /api/funciones/{id}/butacas` — Consultar las butacas disponibles para una función.
