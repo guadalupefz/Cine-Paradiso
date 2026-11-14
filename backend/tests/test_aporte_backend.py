@@ -16,7 +16,6 @@ from flask_jwt_extended import create_access_token, decode_token
 from backend.src.routes import auth_routes as auth, compras_routes as compras, servicios_routes as servicios
 from mysql.connector import Error, IntegrityError
 from werkzeug.security import generate_password_hash
-from backend.src.repositories import auth_repository
 
 class AporteBackend(unittest.TestCase):
     @classmethod
@@ -166,7 +165,7 @@ class AporteBackend(unittest.TestCase):
         self.assertCierre(cn, cur)
 
     def test_login_valido_sesion_y_consulta_parametrizada(self):
-        cn, cur = self.base(auth_repository, fila={'id_usuario': 8, 'password_hash': self.hash, 'rol': 'cliente'})
+        cn, cur = self.base(auth, fila={'id_usuario': 8, 'password_hash': self.hash, 'rol': 'cliente'})
         r = self.client.post('/api/auth/login', json={'email': ' x@example.com ', 'password': 'clave-ficticia'})
         self.assertEqual(r.status_code, 200)
         self.assertEqual(cur.execute.call_args.args[1], ('x@example.com',))
@@ -178,7 +177,7 @@ class AporteBackend(unittest.TestCase):
     def test_login_inexistente_o_clave_incorrecta_401(self):
         for fila in [None, {'id_usuario': 8, 'password_hash': self.hash}]:
             with self.subTest(existe=fila is not None):
-                cn, cur = self.base(auth_repository, fila=fila)
+                cn, cur = self.base(auth, fila=fila)
                 r = self.client.post('/api/auth/login', json={'email': 'x@example.com', 'password': 'incorrecta'})
                 self.assertEqual(r.status_code, 401)
                 self.assertEqual(r.json, {'error': 'Credenciales inválidas'})

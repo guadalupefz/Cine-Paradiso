@@ -8,9 +8,9 @@ from backend.src.repositories.auth_repository import (
 )
 
 
-def registrar_usuario(nombre, apellido, email, password):
+def registrar_usuario(cursor, nombre, apellido, email, password):
 
-    usuario_existente = obtener_usuario_por_email(email)
+    usuario_existente = obtener_usuario_por_email(cursor, email)
 
     if usuario_existente:
         return None, [{
@@ -23,7 +23,9 @@ def registrar_usuario(nombre, apellido, email, password):
 
     rol_seguro = 'cliente'
 
-    id_creado = crear_usuario(nombre, apellido, email, pwd_hash, rol_seguro)
+    id_creado = crear_usuario(
+        cursor, nombre, apellido, email, pwd_hash, rol_seguro
+    )
 
     usuario_publico = {
         'id_usuario': id_creado,
@@ -36,9 +38,9 @@ def registrar_usuario(nombre, apellido, email, password):
     return usuario_publico, []
 
 
-def autenticar_usuario(email, password):
+def autenticar_usuario(cursor, email, password):
 
-    usuario = buscar_credenciales(email)
+    usuario = buscar_credenciales(cursor, email)
 
     if usuario is None:
         return None
@@ -49,8 +51,8 @@ def autenticar_usuario(email, password):
     return usuario
 
 
-def obtener_perfil_usuario(id_usuario):
+def obtener_perfil_usuario(cursor, id_usuario):
 
-    usuario = obtener_perfil(id_usuario)
+    usuario = obtener_perfil(cursor, id_usuario)
 
     return usuario
