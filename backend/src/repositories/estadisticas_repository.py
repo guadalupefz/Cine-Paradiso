@@ -29,13 +29,11 @@ def obtener_ventas_por_genero(cursor, desde=None, hasta=None):
                 c.id_compra,
                 p.genero,
                 COUNT(e.id_entrada) AS entradas_vendidas,
-                c.total - (
-                    SELECT COALESCE(
-                        SUM(cs.cantidad * cs.precio_unitario), 0
-                    )
+                c.total - COALESCE((
+                    SELECT SUM(cs.cantidad * cs.precio_unitario)
                     FROM compra_servicio cs
                     WHERE cs.id_compra = c.id_compra
-                ) AS importe_entradas
+                ), 0) AS importe_entradas
             FROM entrada e
             JOIN compra c ON c.id_compra = e.id_compra
             JOIN funcion f ON f.id_funcion = e.id_funcion
@@ -51,7 +49,8 @@ def obtener_ventas_por_genero(cursor, desde=None, hasta=None):
     """
 
     cursor.execute(query, tuple(parametros))
-    return cursor.fetchall()
+    res = cursor.fetchall()
+    return res if res is not None else []
 
 
 def obtener_ventas_por_franja(cursor, desde=None, hasta=None):
@@ -83,20 +82,22 @@ def obtener_ventas_por_franja(cursor, desde=None, hasta=None):
                     ELSE 'Noche'
                 END AS franja_horaria,
                 COUNT(e.id_entrada) AS entradas_vendidas,
-                c.total - (
-                    SELECT COALESCE(
-                        SUM(cs.cantidad * cs.precio_unitario), 0
-                    )
+                c.total - COALESCE((
+                    SELECT SUM(cs.cantidad * cs.precio_unitario)
                     FROM compra_servicio cs
                     WHERE cs.id_compra = c.id_compra
-                ) AS importe_entradas
+                ), 0) AS importe_entradas
             FROM entrada e
             JOIN compra c ON c.id_compra = e.id_compra
             JOIN funcion f ON f.id_funcion = e.id_funcion
             WHERE {" AND ".join(filtros)}
             GROUP BY
                 c.id_compra,
-                franja_horaria,
+                CASE
+                    WHEN HOUR(f.fecha_hora_inicio) < 12 THEN 'Mañana'
+                    WHEN HOUR(f.fecha_hora_inicio) < 18 THEN 'Tarde'
+                    ELSE 'Noche'
+                END,
                 c.total
         ) AS datos
         GROUP BY datos.franja_horaria
@@ -104,7 +105,8 @@ def obtener_ventas_por_franja(cursor, desde=None, hasta=None):
     """
 
     cursor.execute(query, tuple(parametros))
-    return cursor.fetchall()
+    res = cursor.fetchall()
+    return res if res is not None else []
 
 
 def obtener_ocupacion_por_funcion(cursor, desde=None, hasta=None):
@@ -157,7 +159,8 @@ def obtener_ocupacion_por_funcion(cursor, desde=None, hasta=None):
     """
 
     cursor.execute(query, tuple(parametros))
-    return cursor.fetchall()
+    res = cursor.fetchall()
+    return res if res is not None else []
 
 
 def obtener_ocupacion_por_pelicula(cursor, desde=None, hasta=None):
@@ -214,7 +217,8 @@ def obtener_ocupacion_por_pelicula(cursor, desde=None, hasta=None):
     """
 
     cursor.execute(query, tuple(parametros))
-    return cursor.fetchall()
+    res = cursor.fetchall()
+    return res if res is not None else []
 
 
 def obtener_cantidad_cancelaciones(cursor):
@@ -225,4 +229,7 @@ def obtener_cantidad_cancelaciones(cursor):
     """
 
     cursor.execute(query, (ESTADO_COMPRA_CANCELADA,))
-    return cursor.fetchone()
+    res = cursor.fetchone()
+    if res and "cantidad_cancelaciones" in res:
+        return res
+    return {"cantidad_cancelaciones": 0}

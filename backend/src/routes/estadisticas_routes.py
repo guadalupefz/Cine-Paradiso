@@ -57,10 +57,16 @@ def consultar_estadisticas_ventas(id_usuario):
             por_franja = obtener_ventas_por_franja(cursor, desde, hasta)
             cancelaciones = obtener_cantidad_cancelaciones(cursor)
 
+        cant_cancelaciones = (
+            cancelaciones.get("cantidad_cancelaciones", 0)
+            if isinstance(cancelaciones, dict)
+            else 0
+        )
+
         return jsonify({
-            "ventas_por_genero": por_genero,
-            "ventas_por_franja_horaria": por_franja,
-            "cantidad_cancelaciones": cancelaciones["cantidad_cancelaciones"],
+            "ventas_por_genero": por_genero or [],
+            "ventas_por_franja_horaria": por_franja or [],
+            "cantidad_cancelaciones": cant_cancelaciones,
             "filtros": {
                 "desde": desde,
                 "hasta": hasta
@@ -105,8 +111,8 @@ def consultar_estadisticas_ocupacion(id_usuario):
             por_pelicula = obtener_ocupacion_por_pelicula(cursor, desde, hasta)
 
         return jsonify({
-            "ocupacion_por_funcion": por_funcion,
-            "ocupacion_por_pelicula": por_pelicula,
+            "ocupacion_por_funcion": por_funcion or [],
+            "ocupacion_por_pelicula": por_pelicula or [],
             "filtros": {
                 "desde": desde,
                 "hasta": hasta
@@ -128,6 +134,3 @@ def consultar_estadisticas_ocupacion(id_usuario):
     finally:
         if conn is not None and conn.is_connected():
             conn.close()
-
-
-
