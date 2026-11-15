@@ -670,3 +670,60 @@ a { color: #8d1515; }
     flex-direction: column;
     gap: 16px;
 }
+
+/* Alineación horizontal continua para la barra de filtros del Administrador */
+.barra-filtros-admin {
+    margin: 20px 0 30px 0;
+}
+
+.formulario-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px;
+}
+
+.grupo-filtro {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.grupo-filtro label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.grupo-filtro input[type="date"],
+.grupo-filtro select {
+    padding: 6px 12px;
+    border: 1px solid #1c2b4a;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    font-size: 14px;
+}
+
+.acciones-filtros {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.boton-principal {
+    padding: 8px 18px;
+    background-color: #f3c644;
+    color: #000000;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.boton-secundario {
+    color: #f3c644;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+}
