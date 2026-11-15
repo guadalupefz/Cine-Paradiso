@@ -12,6 +12,37 @@
     </a>
 </section>
 
+<section class="barra-filtros-admin">
+    <form method="GET" action="{{ url_for('admin_resumen') }}" class="formulario-filtros">
+        <div class="grupo-filtro">
+            <label for="desde">Desde:</label>
+            <input type="date" id="desde" name="desde" value="{{ filtros.desde }}">
+        </div>
+
+        <div class="grupo-filtro">
+            <label for="hasta">Hasta:</label>
+            <input type="date" id="hasta" name="hasta" value="{{ filtros.hasta }}">
+        </div>
+
+        <div class="grupo-filtro">
+            <label for="id_local">Local:</label>
+            <select id="id_local" name="id_local">
+                <option value="">Todos los locales</option>
+                {% for local in locales %}
+                <option value="{{ local.id_local }}" {% if filtros.id_local == local.id_local %}selected{% endif %}>
+                    {{ local.nombre }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="acciones-filtros">
+            <button type="submit" class="boton-principal">Filtrar</button>
+            <a href="{{ url_for('admin_resumen') }}" class="boton-secundario">Limpiar</a>
+        </div>
+    </form>
+</section>
+
 <section class="dashboard-seccion">
     <h3>Ventas por género</h3>
 
