@@ -1241,15 +1241,36 @@ def cancelar_compra_frontend(id_compra):
 @app.get("/admin")
 @requiere_admin
 def admin_resumen():
-    ventas, ev = llamar_backend("GET", "/estadisticas/ventas")
-    ocupacion, eo = llamar_backend("GET", "/estadisticas/ocupacion")
+    desde = request.args.get("desde", "")
+    hasta = request.args.get("hasta", "")
+    id_local = request.args.get("id_local", type=int)
+
+    params = {}
+    if desde:
+        params["desde"] = desde
+    if hasta:
+        params["hasta"] = hasta
+    if id_local:
+        params["id_local"] = id_local
+
+    ventas, ev = llamar_backend("GET", "/estadisticas/ventas", params=params)
+    ocupacion, eo = llamar_backend("GET", "/estadisticas/ocupacion", params=params)
+
+    datos_locales, estado_locales = llamar_backend("GET", "/locales")
+    locales = lista(datos_locales, "locales") if estado_locales == 200 else []
 
     return render_template(
         "admin/resumen_admin.html",
         ventas=ventas if ev == 200 else {},
         ocupacion=ocupacion if eo == 200 else {},
         ventas_ok=ev == 200,
-        ocupacion_ok=eo == 200
+        ocupacion_ok=eo == 200,
+        locales=locales,
+        filtros={
+            "desde": desde,
+            "hasta": hasta,
+            "id_local": id_local
+        }
     )
 
 
