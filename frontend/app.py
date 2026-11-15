@@ -2139,4 +2139,5 @@ def descargar_comprobante_pdf(id_compra):
     )
 
 if __name__ == "__main__":
-    app.run("127.0.0.1",port=8080,debug=os.environ.get("FLASK_DEBUG") == "1")
+    host = os.environ.get("FLASK_HOST", "127.0.0.1")
+    app.run(host, port=8080, debug=os.environ.get("FLASK_DEBUG") == "1")

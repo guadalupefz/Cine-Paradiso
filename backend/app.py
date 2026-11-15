@@ -79,4 +79,5 @@ def index():
     return "Backend de Cine Paradiso"
 
 if __name__ == "__main__":
-    app.run("127.0.0.1", port=5001, debug=os.environ.get("FLASK_DEBUG") == "1")
+    host = os.environ.get("FLASK_HOST", "127.0.0.1")
+    app.run(host, port=5001, debug=os.environ.get("FLASK_DEBUG") == "1")
