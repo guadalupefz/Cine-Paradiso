@@ -4,7 +4,7 @@ from backend.src.constants import (
 )
 
 
-def obtener_ventas_por_genero(cursor, desde=None, hasta=None):
+def obtener_ventas_por_genero(cursor, desde=None, hasta=None, id_local=None):
     filtros = ["LOWER(c.estado) = %s"]
     parametros = [ESTADO_COMPRA_CONFIRMADA]
 
@@ -17,6 +17,10 @@ def obtener_ventas_por_genero(cursor, desde=None, hasta=None):
             "f.fecha_hora_inicio < DATE_ADD(%s, INTERVAL 1 DAY)"
         )
         parametros.append(hasta)
+
+    if id_local:
+        filtros.append("s.id_local = %s")
+        parametros.append(id_local)
 
     query = f"""
         SELECT
@@ -38,6 +42,7 @@ def obtener_ventas_por_genero(cursor, desde=None, hasta=None):
             JOIN compra c ON c.id_compra = e.id_compra
             JOIN funcion f ON f.id_funcion = e.id_funcion
             JOIN pelicula p ON p.id_pelicula = f.id_pelicula
+            JOIN sala s ON s.id_sala = f.id_sala
             WHERE {" AND ".join(filtros)}
             GROUP BY
                 c.id_compra,
@@ -53,7 +58,7 @@ def obtener_ventas_por_genero(cursor, desde=None, hasta=None):
     return res if res is not None else []
 
 
-def obtener_ventas_por_franja(cursor, desde=None, hasta=None):
+def obtener_ventas_por_franja(cursor, desde=None, hasta=None, id_local=None):
     filtros = ["LOWER(c.estado) = %s"]
     parametros = [ESTADO_COMPRA_CONFIRMADA]
 
@@ -66,6 +71,10 @@ def obtener_ventas_por_franja(cursor, desde=None, hasta=None):
             "f.fecha_hora_inicio < DATE_ADD(%s, INTERVAL 1 DAY)"
         )
         parametros.append(hasta)
+
+    if id_local:
+        filtros.append("s.id_local = %s")
+        parametros.append(id_local)
 
     query = f"""
         SELECT
@@ -90,6 +99,7 @@ def obtener_ventas_por_franja(cursor, desde=None, hasta=None):
             FROM entrada e
             JOIN compra c ON c.id_compra = e.id_compra
             JOIN funcion f ON f.id_funcion = e.id_funcion
+            JOIN sala s ON s.id_sala = f.id_sala
             WHERE {" AND ".join(filtros)}
             GROUP BY
                 c.id_compra,
@@ -109,7 +119,7 @@ def obtener_ventas_por_franja(cursor, desde=None, hasta=None):
     return res if res is not None else []
 
 
-def obtener_ocupacion_por_funcion(cursor, desde=None, hasta=None):
+def obtener_ocupacion_por_funcion(cursor, desde=None, hasta=None, id_local=None):
     filtros = []
     parametros = [ESTADO_COMPRA_CONFIRMADA, ESTADO_COMPRA_CONFIRMADA]
 
@@ -122,6 +132,10 @@ def obtener_ocupacion_por_funcion(cursor, desde=None, hasta=None):
             "f.fecha_hora_inicio < DATE_ADD(%s, INTERVAL 1 DAY)"
         )
         parametros.append(hasta)
+
+    if id_local:
+        filtros.append("s.id_local = %s")
+        parametros.append(id_local)
 
     where = f"WHERE {' AND '.join(filtros)}" if filtros else ""
 
@@ -163,7 +177,7 @@ def obtener_ocupacion_por_funcion(cursor, desde=None, hasta=None):
     return res if res is not None else []
 
 
-def obtener_ocupacion_por_pelicula(cursor, desde=None, hasta=None):
+def obtener_ocupacion_por_pelicula(cursor, desde=None, hasta=None, id_local=None):
     filtros = []
     parametros = [ESTADO_COMPRA_CONFIRMADA]
 
@@ -176,6 +190,10 @@ def obtener_ocupacion_por_pelicula(cursor, desde=None, hasta=None):
             "f.fecha_hora_inicio < DATE_ADD(%s, INTERVAL 1 DAY)"
         )
         parametros.append(hasta)
+
+    if id_local:
+        filtros.append("s.id_local = %s")
+        parametros.append(id_local)
 
     where = f"WHERE {' AND '.join(filtros)}" if filtros else ""
 
@@ -221,14 +239,38 @@ def obtener_ocupacion_por_pelicula(cursor, desde=None, hasta=None):
     return res if res is not None else []
 
 
-def obtener_cantidad_cancelaciones(cursor):
-    query = """
-        SELECT COUNT(*) AS cantidad_cancelaciones
-        FROM compra
-        WHERE LOWER(estado) = %s
+def obtener_cantidad_cancelaciones(cursor, desde=None, hasta=None, id_local=None):
+    filtros = ["LOWER(c.estado) = %s"]
+    parametros = [ESTADO_COMPRA_CANCELADA]
+
+    if desde:
+        filtros.append("c.fecha_hora >= %s")
+        parametros.append(desde)
+
+    if hasta:
+        filtros.append("c.fecha_hora < DATE_ADD(%s, INTERVAL 1 DAY)")
+        parametros.append(hasta)
+
+    joins = ""
+    if id_local:
+        joins = """
+            JOIN entrada e ON e.id_compra = c.id_compra
+            JOIN funcion f ON f.id_funcion = e.id_funcion
+            JOIN sala s ON s.id_sala = f.id_sala
+        """
+        filtros.append("s.id_local = %s")
+        parametros.append(id_local)
+
+    count_expr = "COUNT(DISTINCT c.id_compra)" if id_local else "COUNT(*)"
+
+    query = f"""
+        SELECT {count_expr} AS cantidad_cancelaciones
+        FROM compra c
+        {joins}
+        WHERE {" AND ".join(filtros)}
     """
 
-    cursor.execute(query, (ESTADO_COMPRA_CANCELADA,))
+    cursor.execute(query, (tuple(parametros)))
     res = cursor.fetchone()
     if res and "cantidad_cancelaciones" in res:
         return res
