@@ -19,6 +19,7 @@ estadisticas_bp = Blueprint("estadisticas", __name__)
 def obtener_filtros_fecha():
     desde = request.args.get("desde")
     hasta = request.args.get("hasta")
+    id_local = request.args.get("id_local", type=int)
 
     try:
         if desde:
@@ -28,18 +29,18 @@ def obtener_filtros_fecha():
             datetime.strptime(hasta, "%Y-%m-%d")
 
     except ValueError:
-        return None, None, "Las fechas deben tener formato AAAA-MM-DD."
+        return None, None, id_local, "Las fechas deben tener formato AAAA-MM-DD."
 
     if desde and hasta and desde > hasta:
-        return None, None, "La fecha desde no puede ser posterior a hasta."
+        return None, None, id_local, "La fecha desde no puede ser posterior a hasta."
 
-    return desde, hasta, None
+    return desde, hasta, id_local, None
 
 
 @estadisticas_bp.route("/estadisticas/ventas", methods=["GET"])
 @admin_required
 def consultar_estadisticas_ventas(id_usuario):
-    desde, hasta, error = obtener_filtros_fecha()
+    desde, hasta, id_local, error = obtener_filtros_fecha()
 
     if error:
         return jsonify({
@@ -53,9 +54,9 @@ def consultar_estadisticas_ventas(id_usuario):
         conn = get_connection()
 
         with conn.cursor(dictionary=True) as cursor:
-            por_genero = obtener_ventas_por_genero(cursor, desde, hasta)
-            por_franja = obtener_ventas_por_franja(cursor, desde, hasta)
-            cancelaciones = obtener_cantidad_cancelaciones(cursor)
+            por_genero = obtener_ventas_por_genero(cursor, desde, hasta, id_local)
+            por_franja = obtener_ventas_por_franja(cursor, desde, hasta, id_local)
+            cancelaciones = obtener_cantidad_cancelaciones(cursor, desde, hasta, id_local)
 
         cant_cancelaciones = (
             cancelaciones.get("cantidad_cancelaciones", 0)
@@ -69,7 +70,8 @@ def consultar_estadisticas_ventas(id_usuario):
             "cantidad_cancelaciones": cant_cancelaciones,
             "filtros": {
                 "desde": desde,
-                "hasta": hasta
+                "hasta": hasta,
+                "id_local": id_local
             }
         }), 200
 
@@ -93,7 +95,7 @@ def consultar_estadisticas_ventas(id_usuario):
 @estadisticas_bp.route("/estadisticas/ocupacion", methods=["GET"])
 @admin_required
 def consultar_estadisticas_ocupacion(id_usuario):
-    desde, hasta, error = obtener_filtros_fecha()
+    desde, hasta, id_local, error = obtener_filtros_fecha()
 
     if error:
         return jsonify({
@@ -107,15 +109,16 @@ def consultar_estadisticas_ocupacion(id_usuario):
         conn = get_connection()
 
         with conn.cursor(dictionary=True) as cursor:
-            por_funcion = obtener_ocupacion_por_funcion(cursor, desde, hasta)
-            por_pelicula = obtener_ocupacion_por_pelicula(cursor, desde, hasta)
+            por_funcion = obtener_ocupacion_por_funcion(cursor, desde, hasta, id_local)
+            por_pelicula = obtener_ocupacion_por_pelicula(cursor, desde, hasta, id_local)
 
         return jsonify({
             "ocupacion_por_funcion": por_funcion or [],
             "ocupacion_por_pelicula": por_pelicula or [],
             "filtros": {
                 "desde": desde,
-                "hasta": hasta
+                "hasta": hasta,
+                "id_local": id_local
             }
         }), 200
 
