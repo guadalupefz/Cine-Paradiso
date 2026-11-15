@@ -80,8 +80,23 @@
 .sitio-publico .compra { max-width: 760px; padding: 28px; border: 1px solid var(--borde-publico); border-radius: 8px; background: var(--papel); }
 .sitio-publico .compra h2 { font-size: 38px; }
 .sitio-publico .lista-butacas { margin: 28px auto; }
-.sitio-publico button.butaca { background: var(--papel); border-color: #809878; color: var(--tinta); }
-.sitio-publico button.butaca.ocupada { background: #e6ddd0; border-color: #aa9c8b; color: #6b5d4d; }
+.sitio-publico button.butaca {
+    background: var(--papel);
+    border-color: #809878;
+    color: var(--tinta);
+}
+.sitio-publico button.butaca.ocupada {
+    background: #e6ddd0;
+    border-color: #aa9c8b;
+    color: #6b5d4d;
+}
+
+.sitio-publico button.butaca.reservada {
+    border-color: #bc6c25;
+    background: #ffcf9f;
+    color: #754010;
+    cursor: not-allowed;
+}
 .sitio-publico button.butaca.seleccionada { background: var(--vino); border-color: var(--vino); color: var(--papel); }
 .sitio-publico button.butaca:disabled { opacity: .75; }
 .sitio-publico .indicador.disponible { border-color: #809878; background: var(--papel); }
@@ -739,6 +754,11 @@
 .sitio-publico .indicador.ocupada {
     border-color: #b94b4b;
     background: #f1d4d1;
+}
+
+.sitio-publico .indicador.reservada {
+    border-color: #bc6c25;
+    background: #ffcf9f;
 }
 
 .sitio-publico .indicador.seleccionada {

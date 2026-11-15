@@ -172,10 +172,33 @@
 
                     <p>
                         Revisá los datos antes de confirmar.
-                        La compra todavía no se realizó.
+                        La compra todavía no fue confirmada.
                     </p>
+                    {% if vencimiento_reserva %}
+                        <p class="aviso-vencimiento">
+                            Tus butacas están reservadas temporalmente.
+                        </p>
 
-                    <button type="submit">Confirmar compra</button>
+                        <p class="aviso-vencimiento">
+                            La reserva vence el {{ vencimiento_reserva }}.
+                        </p>
+
+                        <button type="submit">Confirmar compra</button>
+                    {% else %}
+                        <p class="mensaje-error">
+                            {% if reserva_vencida %}
+                                La reserva venció, selecciona nuevamente tus butacas
+                            {% else %}
+                                No tenés una reserva pendiente
+                            {% endif %}
+                        </p>
+
+                        <a href="{{ url_for('ver_servicios',
+                            id_funcion=id_funcion,
+                            butacas=butacas|join(',')) }}">
+                            Volver a servicios y reservar
+                        </a>
+                    {% endif %}
 
                 </div>
 

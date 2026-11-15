@@ -750,6 +750,35 @@ def ver_compra():
     if isinstance(usuario, dict):
         usuario = usuario.get("usuario", usuario)
 
+    reserva_pendiente = session.get("reserva_pendiente")
+    vencimiento_reserva = None
+    reserva_vencida = False
+
+    if (
+        reserva_pendiente
+        and reserva_pendiente.get("id_funcion") == id_funcion
+        and list(map(str, reserva_pendiente.get("butacas", []))) == ids_butacas
+        and reserva_pendiente.get("servicios", []) == servicios_seleccionados
+    ):
+        vencimiento_texto = reserva_pendiente.get(
+            "fecha_hora_vencimiento"
+        )
+
+        try:
+            vencimiento = datetime.strptime(
+                vencimiento_texto,
+                "%Y-%m-%d %H:%M:%S"
+            )
+        except (TypeError, ValueError):
+            vencimiento = None
+
+        if vencimiento is not None:
+            if datetime.now() >= vencimiento:
+                reserva_vencida = True
+                session.pop("reserva_pendiente", None)
+            else:
+                vencimiento_reserva = vencimiento_texto
+
     return render_template(
         "compra.html",
         id_funcion=id_funcion,
@@ -762,11 +791,170 @@ def ver_compra():
         error=estado_butacas != 200,
         servicios_seleccionados=servicios_seleccionados,
         detalle_servicios=detalle_servicios,
-        servicios_texto=servicios_texto
+        servicios_texto=servicios_texto,
+        vencimiento_reserva=vencimiento_reserva,
+        reserva_vencida=reserva_vencida
     )
 
 def pago_aprobado():
     return os.environ.get("SIMULAR_PAGO_RECHAZADO") != "1"
+
+
+@app.post("/reservar-compra")
+@requiere_usuario
+def reservar_compra():
+    id_funcion = request.form.get("id_funcion", type=int)
+    butacas_texto = request.form.get("butacas", "")
+    servicios_texto = request.form.get("servicios", "")
+
+    if not id_funcion or id_funcion <= 0:
+        flash("La función seleccionada no es válida.", "error")
+        return redirect(url_for("index"))
+
+    try:
+        ids_butacas = [
+            int(valor.strip())
+            for valor in butacas_texto.split(",")
+            if valor.strip()
+        ]
+        servicios = obtener_servicios_seleccionados(servicios_texto)
+    except ValueError:
+        flash("La selección de compra no es válida", "error")
+        return redirect(url_for("ver_butacas", id_funcion=id_funcion))
+
+    if (
+        not ids_butacas
+        or any(id_butaca <= 0 for id_butaca in ids_butacas)
+        or len(ids_butacas) != len(set(ids_butacas))
+    ):
+        flash("La selección de butacas no es válida", "error")
+        return redirect(url_for("ver_butacas", id_funcion=id_funcion))
+
+    reserva_actual = session.get("reserva_pendiente")
+
+    if reserva_actual:
+        compras, estado = llamar_backend("GET", "/compras")
+
+        if estado != 200:
+            flash("No se pudo verificar tu reserva pendiente", "error")
+            return redirect(url_for("mis_compras"))
+
+        compra_guardada = next(
+            (
+                compra for compra in lista(compras, "compras")
+                if compra.get("id_compra") == reserva_actual["id_compra"]
+            ),
+            None
+        )
+
+        if compra_guardada and compra_guardada["estado"] in (
+            "confirmada", "aprobada"
+        ):
+            session.pop("reserva_pendiente", None)
+            return redirect(url_for(
+                "ver_comprobante",
+                id_compra=reserva_actual["id_compra"]
+            ))
+
+        if not compra_guardada or compra_guardada["estado"] in (
+            "expirada", "rechazada", "cancelada"
+        ):
+            session.pop("reserva_pendiente", None)
+            reserva_actual = None
+
+        elif compra_guardada["estado"] == "pendiente":
+            vencimiento_texto = reserva_actual.get(
+                "fecha_hora_vencimiento"
+            )
+
+            if vencimiento_texto:
+                try:
+                    vencimiento = datetime.strptime(
+                        vencimiento_texto,
+                        "%Y-%m-%d %H:%M:%S"
+                    )
+                except (TypeError, ValueError):
+                    flash(
+                        "No se pudo verificar el vencimiento de la reserva",
+                        "error"
+                    )
+                    return redirect(url_for("mis_compras"))
+
+                if datetime.now() >= vencimiento:
+                    session.pop("reserva_pendiente", None)
+                    reserva_actual = None
+
+
+    if reserva_actual:
+        if reserva_actual["id_funcion"] != id_funcion:
+            flash("Ya tenés una reserva pendiente para otra función", "error")
+            return redirect(url_for("mis_compras"))
+
+        cambio_butacas = reserva_actual["butacas"] != ids_butacas
+        cambio_servicios = reserva_actual.get("servicios", []) != servicios
+
+        if cambio_butacas or cambio_servicios:
+            resultado, estado = llamar_backend(
+                "PUT",
+                f"/reservas/{reserva_actual['id_compra']}",
+                json={
+                    "butacas": ids_butacas,
+                    "servicios": servicios
+                }
+            )
+
+            if estado != 200:
+                flash(
+                    "No se pudo modificar la reserva: " + mensaje_error(resultado),
+                    "error"
+                )
+                return redirect(url_for("mis_compras"))
+
+            reserva_actual["butacas"] = ids_butacas
+            reserva_actual["servicios"] = servicios
+            reserva_actual["total"] = resultado.get("reserva", {}).get("total")
+            session["reserva_pendiente"] = reserva_actual
+
+    else:
+        resultado, estado = llamar_backend(
+            "POST",
+            f"/funciones/{id_funcion}/reservas",
+            json={
+                "butacas": ids_butacas,
+                "servicios": servicios
+            }
+        )
+
+        if estado != 201:
+            flash(mensaje_error(resultado), "error")
+            return redirect(url_for(
+                "ver_servicios",
+                id_funcion=id_funcion,
+                butacas=butacas_texto
+            ))
+
+        reserva = resultado.get("reserva", {})
+        id_compra = reserva.get("id_compra")
+
+        if not id_compra:
+            flash("No se pudo identificar la reserva creada", "error")
+            return redirect(url_for("mis_compras"))
+
+        session["reserva_pendiente"] = {
+            "id_compra": id_compra,
+            "id_funcion": id_funcion,
+            "butacas": ids_butacas,
+            "servicios": servicios,
+            "total": reserva.get("total"),
+            "fecha_hora_vencimiento": reserva.get("fecha_hora_vencimiento")
+        }
+
+    return redirect(url_for(
+        "ver_compra",
+        id_funcion=id_funcion,
+        butacas=butacas_texto,
+        servicios=servicios_texto
+    ))
 
 @app.post("/procesar-compra")
 @requiere_usuario
@@ -817,6 +1005,32 @@ def procesar_compra():
             butacas=butacas_texto
         ))
 
+    reserva_pendiente = session.get("reserva_pendiente")
+
+    if not reserva_pendiente or not reserva_pendiente.get("id_compra"):
+        flash(
+            "Primero tenés que reservar las butacas para continuar con el pago",
+            "error"
+        )
+        return redirect(url_for(
+            "ver_servicios",
+            id_funcion=id_funcion,
+            butacas=butacas_texto
+        ))
+
+    misma_seleccion = (
+        reserva_pendiente.get("id_funcion") == id_funcion
+        and reserva_pendiente.get("butacas") == ids_butacas
+        and reserva_pendiente.get("servicios", []) == servicios_seleccionados
+    )
+
+    if not misma_seleccion:
+        flash(
+            "La selección no coincide con tu reserva pendiente",
+            "error"
+        )
+        return redirect(url_for("mis_compras"))
+
     if not pago_aprobado():
         reserva_pendiente = session.get("reserva_pendiente")
 
@@ -857,13 +1071,12 @@ def procesar_compra():
 
             session.pop("reserva_pendiente", None)
 
-        flash("El pago fue rechazado. Intentá nuevamente.", "error")
+        flash("El pago fue rechazado. Seleccioná nuevamente tus servicios y reintentá", "error")
 
         return redirect(url_for(
-            "ver_compra",
+            "ver_servicios",
             id_funcion=id_funcion,
-            butacas=butacas_texto,
-            servicios=servicios_texto
+            butacas=butacas_texto
         ))
 
 
@@ -891,94 +1104,25 @@ def procesar_compra():
                 id_compra=reserva_pendiente["id_compra"]
             ))
 
-        if not compra_guardada or compra_guardada["estado"] in ("expirada", "rechazada", "cancelada"):
+        if not compra_guardada or compra_guardada["estado"] in (
+            "expirada", "rechazada", "cancelada"
+        ):
             session.pop("reserva_pendiente", None)
-            reserva_pendiente = None
 
-        elif compra_guardada["estado"] != "pendiente":
-            flash("No se pudo determinar el estado de tu reserva", "error")
-            return redirect(url_for("mis_compras"))
-
-    if reserva_pendiente:
-        id_compra = reserva_pendiente["id_compra"]
-
-        if reserva_pendiente["id_funcion"] != id_funcion:
             flash(
-                "Ya tenés una reserva pendiente para otra función"
-                "Terminala antes de realizar una nueva",
+                "La reserva ya no está vigente. Seleccioná nuevamente tus butacas",
                 "error"
             )
-            return redirect(url_for("index"))
-
-        cambio_butacas = reserva_pendiente["butacas"] != ids_butacas
-        cambio_servicios = (
-            reserva_pendiente.get("servicios", []) != servicios_seleccionados
-        )
-
-        if cambio_butacas or cambio_servicios:
-            resultado, estado = llamar_backend(
-                "PUT",
-                f"/reservas/{id_compra}",
-                json={
-                    "butacas": ids_butacas,
-                    "servicios": servicios_seleccionados
-                }
-            )
-
-            if estado != 200:
-                flash(
-                    "No se pudo modificar la reserva: "
-                    + mensaje_error(resultado),
-                    "error"
-                )
-                return redirect(url_for(
-                    "ver_compra",
-                    id_funcion=id_funcion,
-                    butacas=butacas_texto,
-                    servicios=servicios_texto
-                ))
-
-            session["reserva_pendiente"] = {
-                "id_compra": id_compra,
-                "id_funcion": id_funcion,
-                "butacas": ids_butacas,
-                "servicios": servicios_seleccionados
-            }
-
-    else:
-        resultado, estado = llamar_backend(
-            "POST",
-            f"/funciones/{id_funcion}/reservas",
-            json={
-                "butacas": ids_butacas,
-                "servicios": servicios_seleccionados
-            }
-        )
-
-        if estado != 201:
-            flash(mensaje_error(resultado), "error")
             return redirect(url_for(
                 "ver_butacas",
                 id_funcion=id_funcion
             ))
 
-        reserva = resultado.get("reserva", {}) if isinstance(resultado, dict) else {}
-        id_compra = reserva.get("id_compra")
-
-        if not id_compra:
-            flash(
-                "No se pudo recuperar el identificador de la reserva. "
-                "Consultá tus compras antes de volver a intentar.",
-                "error"
-            )
+        elif compra_guardada["estado"] != "pendiente":
+            flash("No se pudo determinar el estado de tu reserva", "error")
             return redirect(url_for("mis_compras"))
 
-        session["reserva_pendiente"] = {
-            "id_compra": id_compra,
-            "id_funcion": id_funcion,
-            "butacas": ids_butacas,
-            "servicios": servicios_seleccionados
-    }
+    id_compra = reserva_pendiente["id_compra"]
 
     resultado, estado = llamar_backend(
         "POST",

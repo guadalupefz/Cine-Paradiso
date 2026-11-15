@@ -103,13 +103,13 @@
             {% endif %}
         </section>
     {% if not modo_catalogo %}
-        <form action="{{ url_for('ver_compra') }}" method="GET" id="form-servicios-compra">
+        <form action="/reservar-compra" method="POST" id="form-servicios-compra">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
             <input type="hidden" name="id_funcion" value="{{ id_funcion }}">
             <input type="hidden" name="butacas" value="{{ ids_butacas|join(',') }}">
             <input type="hidden" name="servicios" id="input-servicios-ocultos" value="">
 
             <div class="barra-resumen-compra">
-                <!-- Bloque izquierdo  -->
                 <div class="resumen-izquierda">
                     <div class="item-resumen">
                         {% if funcion and funcion.precio_base %}
