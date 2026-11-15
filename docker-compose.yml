@@ -23,7 +23,7 @@ services:
   backend:
     build:
       context: .
-      dockerfile: backend/Dockerfile
+      dockerfile: backend/dockerfile
     container_name: cine_paradiso_backend
     restart: unless-stopped
     ports:
@@ -42,7 +42,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: frontend/Dockerfile
+      dockerfile: frontend/dockerfile
     container_name: cine_paradiso_frontend
     restart: unless-stopped
     ports:
