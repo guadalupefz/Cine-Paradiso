@@ -1,0 +1,33 @@
+# Entornos virtuales 
+.venv/
+venv/
+env/
+
+# Caché y compilaciones de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.py[cod]
+
+# Control de versiones
+.git/
+.gitignore
+
+# Configuración local
+.env
+.env.*
+
+# Archivos docker
+Dockerfile
+docker-compose.yml
+README.md
+*.md
+
+# Editores de código y temporales del sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
