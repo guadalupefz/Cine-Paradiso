@@ -16,4 +16,6 @@ COPY backend/ ./backend/
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
+EXPOSE 5001
+
 CMD ["python", "backend/app.py"]
