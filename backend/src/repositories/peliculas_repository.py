@@ -1,4 +1,3 @@
-# Obtener el catálogo completo de películas
 def obtener_peliculas(cursor):
     query = """
         SELECT id_pelicula, titulo, sinopsis, poster,
@@ -9,7 +8,6 @@ def obtener_peliculas(cursor):
     return cursor.fetchall()
 
 
-# Sincronizar películas con una API externa
 def sincronizar_pelicula(cursor, pelicula):
     query = """
         INSERT INTO pelicula
