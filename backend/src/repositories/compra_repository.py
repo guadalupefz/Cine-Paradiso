@@ -43,7 +43,7 @@ def obtener_butacas_ocupadas(cursor, id_funcion):
         WHERE entrada.id_funcion = %s
           AND entrada.ocupacion_activa = 1
           AND (
-              compra.estado IN (%s, %s)
+              compra.estado = %s
               OR (
                   compra.estado = %s
                   AND TIMESTAMPADD(MINUTE, %s, compra.fecha_hora) > NOW()
