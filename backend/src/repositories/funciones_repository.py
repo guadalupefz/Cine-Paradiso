@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from backend.src.validators.duracion_validator import minutos_de_duracion
 
-# Consultar la cartelera vigente
 def obtener_cartelera(cursor):
     query = """
         SELECT p.id_pelicula, p.titulo, p.sinopsis, p.poster,
@@ -18,7 +17,6 @@ def obtener_cartelera(cursor):
     cursor.execute(query)
     return cursor.fetchall()
 
-# Listar todas las funciones disponibles
 def obtener_funciones(cursor, solo_vigentes=False):
     query = """
         SELECT f.id_funcion, f.id_pelicula, f.id_sala, f.fecha_hora_inicio, f.precio_base, p.titulo, s.nombre as sala_nombre
@@ -31,13 +29,11 @@ def obtener_funciones(cursor, solo_vigentes=False):
     cursor.execute(query)
     return cursor.fetchall()
 
-# Crear una nueva función (Administrador)
 def crear_funcion(cursor, id_pelicula, id_sala, fecha_hora_inicio, precio_base):
     query = "INSERT INTO funcion (id_pelicula, id_sala, fecha_hora_inicio, precio_base) VALUES (%s, %s, %s, %s)"
     cursor.execute(query, (id_pelicula, id_sala, fecha_hora_inicio, precio_base))
-    return cursor.lastrowid   #Devuelve el ultimo id creado
+    return cursor.lastrowid  
 
-# Modificar una función existente (Administrador)
 def modificar_funcion(cursor, funcion_id, id_pelicula, id_sala, fecha_hora_inicio, precio_base):
     query = """
         UPDATE funcion
@@ -45,16 +41,14 @@ def modificar_funcion(cursor, funcion_id, id_pelicula, id_sala, fecha_hora_inici
         WHERE id_funcion = %s
     """
     cursor.execute(query, (id_pelicula, id_sala, fecha_hora_inicio, precio_base, funcion_id))
-    return cursor.rowcount   #Devuelve la cantidad de filas modificadas
+    return cursor.rowcount  
 
-# Verificar entradas vendidas para una función
 def contar_entradas_por_funcion(cursor, id_funcion):
     query = "SELECT COUNT(*) as total FROM entrada WHERE id_funcion = %s"
     cursor.execute(query, (id_funcion,))
     resultado = cursor.fetchone()
     return resultado["total"] if isinstance(resultado, dict) else resultado[0]
 
-# Comprobar solapamiento de horarios en una sala
 def verificar_solapamiento_sala(cursor, id_sala, fecha_hora_inicio, duracion_nueva_minutos, id_funcion_excluir=None):
     
     query = """
@@ -91,6 +85,6 @@ def verificar_solapamiento_sala(cursor, id_sala, fecha_hora_inicio, duracion_nue
         fin_existente = inicio_existente + timedelta(minutes=duracion_existente)
         
         if inicio_nueva < fin_existente and fin_nueva > inicio_existente:
-            return True # Hay choque de horarios
+            return True
             
-    return False # No hay solapamiento
+    return False 
