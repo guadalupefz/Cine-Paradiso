@@ -1,9 +1,9 @@
 import re
 
-EMAIL_REGEX = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-
 
 def validar_datos_registro(data):
+
+    email_regex = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     errores = []
 
     if not isinstance(data, dict):
@@ -35,7 +35,7 @@ def validar_datos_registro(data):
     if errores:
         return errores
 
-    if not re.fullmatch(EMAIL_REGEX, data["email"].strip()):
+    if not re.fullmatch(email_regex, data["email"].strip()):
         errores.append({
             "code": "EMAIL_FORMATO_INVALIDO",
             "message": "El email no tiene un formato válido.",
