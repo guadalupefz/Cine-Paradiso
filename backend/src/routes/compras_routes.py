@@ -26,6 +26,24 @@ from backend.src.services.cancelacion_service import cancelar_compra
 compras_bp = Blueprint("compras", __name__)
 
 
+def obtener_comprobante_para_envio(id_compra, id_usuario):
+    conexion = None
+
+    try:
+        conexion = get_connection()
+
+        with conexion.cursor(dictionary=True) as cursor:
+            return obtener_comprobante(cursor, id_compra, id_usuario)
+
+    except Exception as error:
+        print(f"Error al obtener el comprobante: {error}")
+        return None
+
+    finally:
+        if conexion is not None:
+            conexion.close()
+
+
 @compras_bp.route("/compras", methods=["POST"])
 @cliente_required
 def registrar_compra(id_usuario):
@@ -57,10 +75,12 @@ def registrar_compra(id_usuario):
 
         conexion.commit()
 
+        comprobante = obtener_comprobante_para_envio(
+            resultado["id_compra"], id_usuario
+        )
+
         informacion_correo = enviar_comprobante_compra(
-            resultado["id_compra"],
-            id_usuario,
-            resultado["entradas"]
+            comprobante, resultado["entradas"]
         )
 
         resultado.update(informacion_correo)
@@ -197,9 +217,15 @@ def listar_entradas(id_usuario, id_compra):
 @compras_bp.get("/compras/<int:id_compra>/comprobante")
 @cualquier_logueado
 def consultar_comprobante(id_usuario, id_compra):
+    conexion = None
 
     try:
-        comprobante = obtener_comprobante(id_compra, id_usuario)
+        conexion = get_connection()
+
+        with conexion.cursor(dictionary=True) as cursor:
+            comprobante = obtener_comprobante(
+                cursor, id_compra, id_usuario
+            )
 
         if comprobante is None:
             return jsonify({
@@ -212,6 +238,10 @@ def consultar_comprobante(id_usuario, id_compra):
         return jsonify({
             "mensaje": "no se pudo obtener el comprobante"
         }), 500
+
+    finally:
+        if conexion is not None:
+            conexion.close()
 
 
 @compras_bp.post("/compras/<int:id_compra>/confirmar")
@@ -257,10 +287,12 @@ def confirmar_compra_route(id_usuario, id_compra):
 
         conexion.commit()
 
+        comprobante = obtener_comprobante_para_envio(
+            resultado["id_compra"], id_usuario
+        )
+
         informacion_correo = enviar_comprobante_compra(
-            resultado["id_compra"],
-            id_usuario,
-            resultado["entradas"]
+            comprobante, resultado["entradas"]
         )
 
         resultado.update(informacion_correo)

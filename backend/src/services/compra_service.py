@@ -27,7 +27,6 @@ from backend.src.repositories.compra_repository import (
     actualizar_qr_entrada,
 )
 
-from backend.src.services.comprobante_service import obtener_comprobante
 from backend.src.services.correo_service import enviar_mail_compra
 
 
@@ -264,17 +263,14 @@ def confirmar_compra(cursor, id_usuario, id_compra):
     return resultado, None
 
 
-def enviar_comprobante_compra(id_compra, id_usuario, entradas):
+def enviar_comprobante_compra(comprobante, entradas):
+    if comprobante is None:
+        return {
+            "correo_enviado": False,
+            "mensaje_correo": "No se pudo obtener el comprobante."
+        }
 
     try:
-        comprobante = obtener_comprobante(id_compra, id_usuario)
-
-        if comprobante is None:
-            return {
-                "correo_enviado": False,
-                "mensaje_correo": "No se pudo obtener el comprobante."
-            }
-
         enviar_mail_compra(comprobante, entradas)
 
         return {
