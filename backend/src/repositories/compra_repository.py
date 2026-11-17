@@ -15,6 +15,7 @@ def obtener_funcion(cursor, id_funcion):
     cursor.execute(query, (id_funcion,))
     return cursor.fetchone()
 
+
 def obtener_usuario(cursor, id_usuario):
     query = """
         SELECT id_usuario
@@ -23,6 +24,7 @@ def obtener_usuario(cursor, id_usuario):
     """
     cursor.execute(query, (id_usuario,))
     return cursor.fetchone()
+
 
 def obtener_butacas_de_funcion(cursor, id_funcion):
     query = """
@@ -91,6 +93,61 @@ def obtener_compra_por_id(cursor, id_compra):
     return cursor.fetchone()
 
 
+def obtener_compra_para_confirmar(cursor, id_compra):
+    query = """
+        SELECT
+            id_compra,
+            id_usuario,
+            fecha_hora,
+            total,
+            estado,
+            (
+                TIMESTAMPADD(MINUTE, %s, fecha_hora) > NOW()
+            ) AS vigente
+        FROM compra
+        WHERE id_compra = %s
+        FOR UPDATE
+    """
+    cursor.execute(
+        query,
+        (RESERVA_DURACION_MINUTOS, id_compra)
+    )
+    return cursor.fetchone()
+
+
+def actualizar_estado_compra(
+    cursor, id_compra, nuevo_estado, estado_actual
+):
+    query = """
+        UPDATE compra
+        SET estado = %s
+        WHERE id_compra = %s AND estado = %s
+    """
+    cursor.execute(
+        query,
+        (nuevo_estado, id_compra, estado_actual)
+    )
+    return cursor.rowcount
+
+
+def liberar_entradas_compra(cursor, id_compra):
+    query = """
+        UPDATE entrada
+        SET ocupacion_activa = NULL
+        WHERE id_compra = %s
+    """
+    cursor.execute(query, (id_compra,))
+
+
+def actualizar_qr_entrada(cursor, id_entrada, qr_token):
+    query = """
+        UPDATE entrada
+        SET qr_token = %s
+        WHERE id_entrada = %s
+    """
+    cursor.execute(query, (qr_token,))
+
+
 def obtener_entradas_por_compra(cursor, id_compra, solo_activas=False):
     filtro_activas = ""
 
@@ -117,47 +174,61 @@ def obtener_entradas_por_compra(cursor, id_compra, solo_activas=False):
 
 
 def obtener_compras_por_usuario(cursor, id_usuario):
-    consulta = """
+    query = """
         SELECT id_compra, fecha_hora, total, estado
         FROM compra
         WHERE id_usuario = %s
     """
-    cursor.execute(consulta, (id_usuario,))
+    cursor.execute(query, (id_usuario,))
     return cursor.fetchall()
+
 
 def obtener_servicios_de_compra(cursor, id_compra):
-    consulta = """
-        SELECT cs.id_servicio, sa.nombre, cs.cantidad, cs.precio_unitario, cs.cantidad * cs.precio_unitario AS subtotal
+    query = """
+        SELECT
+            cs.id_servicio,
+            sa.nombre,
+            cs.cantidad,
+            cs.precio_unitario,
+            cs.cantidad * cs.precio_unitario AS subtotal
         FROM compra_servicio AS cs
         INNER JOIN servicio_adicional AS sa
-        ON cs.id_servicio = sa.id_servicio
+            ON cs.id_servicio = sa.id_servicio
         WHERE cs.id_compra = %s
     """
-    cursor.execute(consulta, (id_compra,))
+    cursor.execute(query, (id_compra,))
     return cursor.fetchall()
 
+
 def obtener_compra_de_usuario(cursor, id_compra, id_usuario):
-    consulta = """
+    query = """
         SELECT id_compra, fecha_hora, total, estado
         FROM compra
         WHERE id_compra = %s AND id_usuario = %s
     """
-    cursor.execute(consulta, (id_compra, id_usuario))
+    cursor.execute(query, (id_compra, id_usuario))
     return cursor.fetchone()
+
 
 def obtener_datos_comprobante(cursor, id_compra, id_usuario):
     query = """
-        SELECT compra.id_compra, compra.fecha_hora,compra.total, compra.estado,
-            usuario.nombre, usuario.apellido, usuario.email
+        SELECT
+            compra.id_compra,
+            compra.fecha_hora,
+            compra.total,
+            compra.estado,
+            usuario.nombre,
+            usuario.apellido,
+            usuario.email
         FROM compra
-        JOIN usuario ON compra.id_usuario = usuario.id_usuario
+        JOIN usuario
+            ON compra.id_usuario = usuario.id_usuario
         WHERE compra.id_compra = %s
           AND compra.id_usuario = %s
     """
-
     cursor.execute(query, (id_compra, id_usuario))
-
     return cursor.fetchone()
+
 
 def obtener_entradas_comprobante(cursor, id_compra, solo_activas=False):
     filtro_activas = ""
@@ -166,23 +237,32 @@ def obtener_entradas_comprobante(cursor, id_compra, solo_activas=False):
         filtro_activas = "AND entrada.ocupacion_activa = 1"
 
     query = f"""
-        SELECT entrada.id_entrada, entrada.qr_token, entrada.id_butaca,
-            butaca.fila, butaca.numero,
+        SELECT
+            entrada.id_entrada,
+            entrada.qr_token,
+            entrada.id_butaca,
+            butaca.fila,
+            butaca.numero,
             funcion.fecha_hora_inicio,
             pelicula.titulo AS pelicula,
             sala.nombre AS sala,
-            local.nombre AS local, local.direccion
+            local.nombre AS local,
+            local.direccion
         FROM entrada
-        JOIN funcion ON entrada.id_funcion = funcion.id_funcion
-        JOIN pelicula ON funcion.id_pelicula = pelicula.id_pelicula
-        JOIN butaca ON entrada.id_butaca = butaca.id_butaca
-        JOIN sala ON funcion.id_sala = sala.id_sala
-        JOIN local ON sala.id_local = local.id_local
+        JOIN funcion
+            ON entrada.id_funcion = funcion.id_funcion
+        JOIN pelicula
+            ON funcion.id_pelicula = pelicula.id_pelicula
+        JOIN butaca
+            ON entrada.id_butaca = butaca.id_butaca
+        JOIN sala
+            ON funcion.id_sala = sala.id_sala
+        JOIN local
+            ON sala.id_local = local.id_local
         WHERE entrada.id_compra = %s
         {filtro_activas}
         ORDER BY entrada.id_entrada
     """
-
     cursor.execute(query, (id_compra,))
     return cursor.fetchall()
 
@@ -194,13 +274,11 @@ def obtener_hora_actual(cursor):
 
 
 def obtener_inicio_funciones_compra(cursor, id_compra):
-    cursor.execute(
-        """
+    query = """
         SELECT MIN(f.fecha_hora_inicio) AS primer_inicio
         FROM entrada e
         JOIN funcion f ON f.id_funcion = e.id_funcion
         WHERE e.id_compra = %s
-        """,
-        (id_compra,),
-    )
+    """
+    cursor.execute(query, (id_compra,))
     return cursor.fetchone()["primer_inicio"]
