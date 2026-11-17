@@ -1,5 +1,8 @@
+import mysql.connector
+
 from flask import Blueprint, jsonify, request
 
+from backend.db.db import get_connection
 from backend.seguridad import admin_required
 from backend.src.services.butacas_service import configurar_butacas_servicio
 from backend.src.validators.butacas_validator import validar_butacas
@@ -19,6 +22,44 @@ def configurar_butacas(id_usuario, id_sala):
     if error:
         return jsonify({"error": error}), 400
 
-    respuesta, codigo = configurar_butacas_servicio(id_sala, butacas)
+    conn = None
 
-    return jsonify(respuesta), codigo
+    try:
+        conn = get_connection()
+        conn.start_transaction()
+
+        with conn.cursor(dictionary=True) as cursor:
+            respuesta, error = configurar_butacas_servicio(
+                cursor, id_sala, butacas
+            )
+
+        if error:
+            conn.rollback()
+
+            if error == "SALA_INEXISTENTE":
+                return jsonify({"error": "No existe la sala indicada."}), 404
+
+            if error == "CAPACIDAD_INVALIDA":
+                return jsonify({
+                    "error": "La cantidad de butacas debe coincidir con la capacidad de la sala.",
+                    **respuesta
+                }), 400
+
+            if error == "BUTACAS_YA_CONFIGURADAS":
+                return jsonify({
+                    "error": "La sala ya tiene butacas configuradas."
+                }), 409
+
+        conn.commit()
+        return jsonify(respuesta), 201
+
+    except mysql.connector.Error:
+        if conn is not None:
+            conn.rollback()
+        return jsonify({
+            "error": "No se pudieron configurar las butacas."
+        }), 500
+
+    finally:
+        if conn is not None:
+            conn.close()
