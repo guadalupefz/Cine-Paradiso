@@ -23,6 +23,7 @@ class RutasResenasTest(unittest.TestCase):
         cursor = self.conexion_seguridad.cursor.return_value
         cursor.__enter__.return_value = cursor
         cursor.fetchone.return_value = self.usuario
+
         parche_seguridad = patch.object(
             seguridad,
             "get_connection",
@@ -48,30 +49,43 @@ class RutasResenasTest(unittest.TestCase):
             "promedio": 4.0,
             "resenas": [],
         }
-        with patch.object(
-            resenas_routes.resenas_service,
-            "obtener_resenas_pelicula",
-            return_value=resultado,
-        ):
+        conexion = MagicMock()
+        cursor = conexion.cursor.return_value
+        cursor.__enter__.return_value = cursor
+
+        with patch.object(resenas_routes, "get_connection", return_value=conexion), \
+             patch.object(
+                 resenas_routes.resenas_service,
+                 "obtener_resenas_pelicula",
+                 return_value=resultado,
+             ):
             self.client.environ_base.pop("HTTP_AUTHORIZATION", None)
             respuesta = self.client.get("/api/peliculas/3/resenas")
 
         self.assertEqual(respuesta.status_code, 200)
         self.assertEqual(respuesta.json, resultado)
+        conexion.close.assert_called_once()
 
     def test_guardar_resena_valida_y_delega_al_servicio(self):
-        with patch.object(
-            resenas_routes.resenas_service,
-            "guardar_resena",
-            return_value=({"mensaje": "Guardada"}, None, 200),
-        ) as guardar:
+        conexion = MagicMock()
+        cursor = conexion.cursor.return_value
+        cursor.__enter__.return_value = cursor
+
+        with patch.object(resenas_routes, "get_connection", return_value=conexion), \
+             patch.object(
+                 resenas_routes.resenas_service,
+                 "guardar_resena",
+                 return_value=({"mensaje": "Guardada"}, None),
+             ) as guardar:
             respuesta = self.client.post(
                 "/api/peliculas/3/resenas",
                 json={"puntuacion": 5, "comentario": "Muy buena"},
             )
 
         self.assertEqual(respuesta.status_code, 200)
-        guardar.assert_called_once_with(8, 3, 5, "Muy buena")
+        guardar.assert_called_once_with(cursor, 8, 3, 5, "Muy buena")
+        conexion.commit.assert_called_once()
+        conexion.close.assert_called_once()
 
     def test_cliente_consulta_su_elegibilidad_y_resena(self):
         propia = {
@@ -80,11 +94,16 @@ class RutasResenasTest(unittest.TestCase):
             "comentario": "Buena",
             "fecha_actualizacion": "2026-11-14",
         }
-        with patch.object(
-            resenas_routes.resenas_service,
-            "obtener_resena_propia",
-            return_value=propia,
-        ):
+        conexion = MagicMock()
+        cursor = conexion.cursor.return_value
+        cursor.__enter__.return_value = cursor
+
+        with patch.object(resenas_routes, "get_connection", return_value=conexion), \
+             patch.object(
+                 resenas_routes.resenas_service,
+                 "obtener_resena_propia",
+                 return_value=propia,
+             ):
             respuesta = self.client.get("/api/peliculas/3/resenas/propia")
 
         self.assertEqual(respuesta.status_code, 200)
@@ -92,7 +111,9 @@ class RutasResenasTest(unittest.TestCase):
         self.assertEqual(respuesta.json["resena"]["puntuacion"], 4)
 
     def test_puntuacion_fuera_de_rango_no_se_guarda(self):
-        with patch.object(resenas_routes.resenas_service, "guardar_resena") as guardar:
+        with patch.object(
+            resenas_routes.resenas_service, "guardar_resena"
+        ) as guardar:
             respuesta = self.client.post(
                 "/api/peliculas/3/resenas",
                 json={"puntuacion": 6, "comentario": ""},
@@ -110,7 +131,9 @@ class RutasResenasTest(unittest.TestCase):
 
     def test_solo_cliente_puede_publicar(self):
         self.usuario["rol"] = "administrador"
-        with patch.object(resenas_routes.resenas_service, "guardar_resena") as guardar:
+        with patch.object(
+            resenas_routes.resenas_service, "guardar_resena"
+        ) as guardar:
             respuesta = self.client.post(
                 "/api/peliculas/3/resenas",
                 json={"puntuacion": 3, "comentario": ""},
@@ -121,69 +144,52 @@ class RutasResenasTest(unittest.TestCase):
 
 
 class ServicioResenasTest(unittest.TestCase):
-    def conexion_falsa(self):
-        conexion = MagicMock()
-        cursor = conexion.cursor.return_value
-        cursor.__enter__.return_value = cursor
-        cursor.__exit__.return_value = False
-        return conexion
-
     def test_usuario_sin_asistencia_qr_no_puede_resenar(self):
-        conexion = self.conexion_falsa()
-        with patch.object(resenas_service, "get_connection", return_value=conexion), \
-             patch.object(
-                 resenas_service.repo,
-                 "obtener_resumen_resenas",
-                 return_value={"id_pelicula": 3, "titulo": "Película"},
-             ), \
-             patch.object(
-                 resenas_service.repo,
-                 "tiene_asistencia_validada",
-                 return_value=False,
-             ), \
-             patch.object(resenas_service.repo, "guardar_resena") as guardar:
-            resultado, error, estado = resenas_service.guardar_resena(
-                8, 3, 4, "Buena"
+        cursor = MagicMock()
+
+        with patch.object(
+            resenas_service.repo,
+            "obtener_resumen_resenas",
+            return_value={"id_pelicula": 3, "titulo": "Película"},
+        ), patch.object(
+            resenas_service.repo,
+            "tiene_asistencia_validada",
+            return_value=False,
+        ), patch.object(
+            resenas_service.repo, "guardar_resena"
+        ) as guardar:
+            resultado, error = resenas_service.guardar_resena(
+                cursor, 8, 3, 4, "Buena"
             )
 
         self.assertIsNone(resultado)
-        self.assertIsInstance(error, str)
-        if error is None:
-            self.fail("Se esperaba un error de elegibilidad.")
-        self.assertIn("validadas por QR", error)
-        self.assertEqual(estado, 403)
-        conexion.rollback.assert_called_once()
-        conexion.commit.assert_not_called()
+        self.assertEqual(error, "ASISTENCIA_NO_VALIDADA")
         guardar.assert_not_called()
-        conexion.close.assert_called_once()
 
     def test_asistencia_validada_permite_crear_o_editar_resena(self):
-        conexion = self.conexion_falsa()
-        with patch.object(resenas_service, "get_connection", return_value=conexion), \
-             patch.object(
-                 resenas_service.repo,
-                 "obtener_resumen_resenas",
-                 return_value={"id_pelicula": 3, "titulo": "Película"},
-             ), \
-             patch.object(
-                 resenas_service.repo,
-                 "tiene_asistencia_validada",
-                 return_value=True,
-             ), \
-             patch.object(resenas_service.repo, "guardar_resena") as guardar:
-            resultado, error, estado = resenas_service.guardar_resena(
-                8, 3, 4, "Buena"
+        cursor = MagicMock()
+
+        with patch.object(
+            resenas_service.repo,
+            "obtener_resumen_resenas",
+            return_value={"id_pelicula": 3, "titulo": "Película"},
+        ), patch.object(
+            resenas_service.repo,
+            "tiene_asistencia_validada",
+            return_value=True,
+        ), patch.object(
+            resenas_service.repo, "guardar_resena"
+        ) as guardar:
+            resultado, error = resenas_service.guardar_resena(
+                cursor, 8, 3, 4, "Buena"
             )
 
-        self.assertEqual(estado, 200)
-        self.assertIsNone(error)
-        if resultado is None:
-            self.fail("Se esperaba una respuesta de guardado.")
-        self.assertEqual(resultado["mensaje"], "La reseña se guardó correctamente.")
-        guardar.assert_called_once_with(conexion.cursor.return_value, 8, 3, 4, "Buena")
-        conexion.commit.assert_called_once()
-        conexion.rollback.assert_not_called()
-        conexion.close.assert_called_once()
+        self.assertEqual(error, None)
+        self.assertEqual(
+            resultado["mensaje"],
+            "La reseña se guardó correctamente.",
+        )
+        guardar.assert_called_once_with(cursor, 8, 3, 4, "Buena")
 
     def test_repositorio_exige_marca_de_validacion_qr(self):
         cursor = MagicMock()
