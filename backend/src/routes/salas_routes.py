@@ -5,6 +5,10 @@ from backend.db.db import get_connection
 from backend.seguridad import admin_required
 from backend.src.repositories.salas_repository import obtener_salas_por_local
 from backend.src.services.eliminacion_estructura_service import eliminar_estructura
+from backend.src.validators.salas_validator import (
+    validar_datos_sala,
+    validar_id_local,
+)
 
 salas_bp = Blueprint("salas", __name__)
 
@@ -18,8 +22,9 @@ def eliminar_sala(id_usuario, id_sala):
 
 @salas_bp.route("/locales/<int:id_local>/salas", methods=["GET"])
 def listar_salas(id_local):
-    if id_local <= 0:
-        return jsonify({"error": "El ID del local debe ser positivo."}), 400
+    error = validar_id_local(id_local)
+    if error:
+        return jsonify({"error": error}), 400
 
     conn = None
     try:
@@ -45,22 +50,18 @@ def listar_salas(id_local):
 @salas_bp.route("/locales/<int:id_local>/salas", methods=["POST"])
 @admin_required
 def crear_sala(id_usuario, id_local):
-    if id_local <= 0:
-        return jsonify({"error": "El ID del local debe ser positivo."}), 400
+    error = validar_id_local(id_local)
+    if error:
+        return jsonify({"error": error}), 400
 
     data = request.get_json(silent=True)
+    error = validar_datos_sala(data)
 
-    if not isinstance(data, dict):
-        return jsonify({"error": "Se requiere un JSON válido."}), 400
+    if error:
+        return jsonify({"error": error}), 400
 
-    nombre = data.get("nombre")
-    capacidad = data.get("capacidad")
-
-    if not isinstance(nombre, str) or not nombre.strip() or len(nombre.strip()) > 50:
-        return jsonify({"error": "El nombre de la sala es obligatorio y debe tener hasta 50 caracteres."}), 400
-
-    if type(capacidad) is not int or capacidad <= 0:
-        return jsonify({"error": "La capacidad debe ser un entero positivo."}), 400
+    nombre = data["nombre"].strip()
+    capacidad = data["capacidad"]
 
     conn = None
     try:
@@ -75,7 +76,7 @@ def crear_sala(id_usuario, id_local):
 
             cursor.execute(
                 "INSERT INTO sala (id_local, nombre, capacidad) VALUES (%s, %s, %s)",
-                (id_local, nombre.strip(), capacidad)
+                (id_local, nombre, capacidad)
             )
             id_sala = cursor.lastrowid
 
