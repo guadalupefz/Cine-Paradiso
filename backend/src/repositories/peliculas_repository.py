@@ -170,15 +170,10 @@ def editar_pelicula(id_pelicula, datos):
 
 
 def sincronizar_pelicula(pelicula):
-    """
-    Inserta una película procedente de OMDb.
-    El IMDb ID evita importar dos veces la misma película.
-    """
     conexion = None
 
     try:
         conexion = get_connection()
-
         with conexion.cursor() as cursor:
             cursor.execute("""
                 INSERT INTO pelicula (
