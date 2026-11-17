@@ -34,6 +34,39 @@ Completar `.env` desde `.env.example`, crear/cargar MySQL y activar `.venv`.
 El backend se inicia con `python -m backend.app` y el frontend con `python frontend/app.py`.
 La autenticación de la API utiliza Flask-JWT-Extended. El frontend envía el token desde Python. Ver [preparación y migración JWT](docs/propuesta-jwt-y-correcciones.md) antes de iniciar con una base existente.
 
+## Ejecución con Docker Compose
+
+Crear el archivo de entorno y definir al menos una contraseña real para MySQL:
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+Los servicios quedan disponibles en:
+
+- Frontend: http://127.0.0.1:8080
+- Backend: http://127.0.0.1:5001/api
+- MySQL: `127.0.0.1:3307`
+
+Docker crea el usuario `cine_app`, definido por `DB_USER`, con acceso a la base
+`cine_paradiso`. El esquema inicial se carga automáticamente la primera vez que
+se crea el volumen `mysql_data`.
+
+Para cargar datos ficticios después del primer arranque:
+
+```bash
+docker compose exec -T db sh -c 'mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' < backend/db/datos_prueba.sql
+```
+
+Si cambias usuario, contraseña o nombre de base después de haber creado el
+volumen, recrea la base local con:
+
+```bash
+docker compose down -v
+docker compose up --build
+```
+
 ## CONEXIÓN Y AYUDANTES SQL
 
 `backend/db/db.py` contiene `get_connection`. `backend/db/__init__.py` exporta

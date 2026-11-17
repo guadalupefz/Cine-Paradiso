@@ -28,6 +28,40 @@ python frontend/app.py
 
 Frontend: http://127.0.0.1:8080. Backend: http://127.0.0.1:5001/api. El registro público siempre crea clientes; el administrador se crea mediante la herramienta de terminal. Los usuarios de la carga ficticia son `ana.demo@example.com` y `luis.demo@example.com`, contraseña `PruebaCine2026!`; no son cuentas para un despliegue público.
 
+## Ejecución con Docker Compose
+
+La alternativa contenerizada levanta MySQL, backend y frontend:
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+El contenedor de MySQL crea `DB_USER` con `DB_PASSWORD` y la base `DB_NAME`.
+También monta `backend/db/init_db.sql` en el directorio de inicialización de
+MySQL, por lo que el esquema se carga solamente al crear el volumen por primera
+vez. Los healthchecks esperan que MySQL, backend y frontend estén listos antes
+de habilitar sus dependencias.
+
+Para cargar datos de prueba una vez que MySQL esté disponible:
+
+```bash
+docker compose exec -T db sh -c 'mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' < backend/db/datos_prueba.sql
+```
+
+Después del arranque:
+
+- Frontend: http://127.0.0.1:8080
+- Backend: http://127.0.0.1:5001/api
+
+Si se modifica la configuración de la base o se necesita iniciar desde cero,
+eliminar también su volumen persistente:
+
+```bash
+docker compose down -v
+docker compose up --build
+```
+
 ## Responsabilidades y contrato
 
 - `backend/db/db.py`: conexión MySQL compartida. Los módulos de compatibilidad reutilizan esa función.
