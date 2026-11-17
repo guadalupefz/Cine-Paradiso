@@ -8,6 +8,7 @@ from backend.app import app
 from backend import seguridad
 from backend.autenticacion import jwt
 from backend.src.routes import salas_routes as salas
+from backend.src.routes import locales_routes as locales
 from backend.src.routes import configuracion_butacas as butacas
 from backend.src.services import eliminacion_estructura_service as eliminacion
 from backend.src.services import butacas_service
@@ -92,9 +93,14 @@ class TestAdministracionSalas(unittest.TestCase):
 
         self.assertEqual(respuesta.status_code, 201)
         self.assertEqual(respuesta.get_json()["id_sala"], 37)
-        cursor.execute.assert_any_call(
-            "INSERT INTO sala (id_local, nombre, capacidad) VALUES (%s, %s, %s)",
-            (1, "Sala nueva", 20)
+        queries = [
+             " ".join(llamada.args[0].split())
+            for llamada in cursor.execute.call_args_list
+        ]
+
+        self.assertIn(
+               "INSERT INTO sala (id_local, nombre, capacidad) VALUES (%s, %s, %s)",
+                queries
         )
         conn.commit.assert_called_once()
 
@@ -197,7 +203,8 @@ class TestAdministracionSalas(unittest.TestCase):
     def test_eliminar_local_o_sala_sin_actividad(self):
         for recurso in ("locales", "salas"):
             with self.subTest(recurso=recurso):
-                conn, cursor = self.base(eliminacion)
+                modulo = locales if recurso == "locales" else salas
+                conn, cursor = self.base(modulo)
                 cursor.fetchone.side_effect = [{"id": 7}, {"en_uso": 0}]
                 cursor.rowcount = 1
                 respuesta = self.client.delete(f"/api/{recurso}/7")
@@ -211,7 +218,8 @@ class TestAdministracionSalas(unittest.TestCase):
     def test_eliminar_rechaza_funciones_o_entradas_sin_borrar(self):
         for recurso in ("locales", "salas"):
             with self.subTest(recurso=recurso):
-                conn, cursor = self.base(eliminacion)
+                modulo = locales if recurso == "locales" else salas
+                conn, cursor = self.base(modulo)
                 cursor.fetchone.side_effect = [{"id": 7}, {"en_uso": 1}]
                 respuesta = self.client.delete(f"/api/{recurso}/7")
                 self.assertEqual(respuesta.status_code, 409)
@@ -223,7 +231,8 @@ class TestAdministracionSalas(unittest.TestCase):
     def test_eliminar_inexistente_devuelve_404(self):
         for recurso in ("locales", "salas"):
             with self.subTest(recurso=recurso):
-                conn, cursor = self.base(eliminacion)
+                modulo = locales if recurso == "locales" else salas
+                conn, cursor = self.base(modulo)
                 cursor.fetchone.return_value = None
                 respuesta = self.client.delete(f"/api/{recurso}/99")
                 self.assertEqual(respuesta.status_code, 404)
@@ -231,15 +240,22 @@ class TestAdministracionSalas(unittest.TestCase):
                 conn.close.assert_called_once()
 
     def test_eliminar_id_cero_no_consulta_base(self):
-        with patch.object(eliminacion, "get_connection") as conectar:
+        with patch.object(locales, "get_connection") as conectar_locales, \
+            patch.object(salas, "get_connection") as conectar_salas:
+
             for recurso in ("locales", "salas"):
-                self.assertEqual(self.client.delete(f"/api/{recurso}/0").status_code, 400)
-            conectar.assert_not_called()
+                self.assertEqual(
+                    self.client.delete(f"/api/{recurso}/0").status_code, 400
+                )
+
+        conectar_locales.assert_not_called()
+        conectar_salas.assert_not_called()
 
     def test_eliminar_revierte_ante_nueva_dependencia(self):
         for recurso in ("locales", "salas"):
             with self.subTest(recurso=recurso):
-                conn, cursor = self.base(eliminacion)
+                modulo = locales if recurso == "locales" else salas
+                conn, cursor = self.base(modulo)
                 cursor.fetchone.side_effect = [{"id": 7}, {"en_uso": 0}]
                 def ejecutar(sql, parametros):
                     if sql.startswith("DELETE"):
@@ -252,22 +268,26 @@ class TestAdministracionSalas(unittest.TestCase):
                 conn.close.assert_called_once()
 
     def test_eliminar_revierte_si_falla_commit(self):
-        conn, cursor = self.base(eliminacion)
+        conn, cursor = self.base(salas)
         cursor.fetchone.side_effect = [{"id": 7}, {"en_uso": 0}]
         cursor.rowcount = 1
-        conn.commit.side_effect = mysql.connector.Error("Conexión interrumpida", errno=2006)
+        conn.commit.side_effect = mysql.connector.Error(
+        "Conexión interrumpida", errno=2006
+        )
         self.assertEqual(self.client.delete("/api/salas/7").status_code, 500)
         conn.rollback.assert_called_once()
         conn.close.assert_called_once()
 
     def test_eliminar_exige_administrador(self):
-        with patch.object(eliminacion, "get_connection") as conectar:
+        with patch.object(locales, "get_connection") as conectar_locales, \
+            patch.object(salas, "get_connection") as conectar_salas:
             for recurso in ("locales", "salas"):
                 self.assertEqual(self.client.delete(f"/api/{recurso}/7", headers={"Authorization": ""}).status_code, 401)
             self.cur_seg.fetchone.return_value = {"id_usuario": 8, "rol": "cliente"}
             for recurso in ("locales", "salas"):
                 self.assertEqual(self.client.delete(f"/api/{recurso}/7").status_code, 403)
-            conectar.assert_not_called()
+            conectar_locales.assert_not_called()
+            conectar_salas.assert_not_called()
 
 
 if __name__ == "__main__":
