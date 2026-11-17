@@ -39,7 +39,6 @@ class InicioFuncionCompra(unittest.TestCase):
         self.actualizar_estado = self.parche("actualizar_estado_compra", return_value=1)
         self.liberar_entradas = self.parche("liberar_entradas_compra")
         self.actualizar_qr = self.parche("actualizar_qr_entrada")
-        self.comprobante = self.parche("obtener_comprobante", return_value={})
         self.correo = self.parche("enviar_mail_compra")
 
     def parche(self, nombre, **argumentos):
@@ -123,16 +122,21 @@ class InicioFuncionCompra(unittest.TestCase):
         self.actualizar_qr.assert_not_called()
 
     def test_enviar_comprobante_correctamente(self):
+        comprobante = {"compra": {"id_compra": 17}}
+        entradas = [{"id_entrada": 19, "qr_token": "token-prueba"}]
+
         resultado = compras.enviar_comprobante_compra(
-            17, 8, [{"id_entrada": 19, "qr_token": "token-prueba"}]
+            comprobante, entradas
         )
+
         self.assertTrue(resultado["correo_enviado"])
-        self.comprobante.assert_called_once()
-        self.correo.assert_called_once()
+        self.correo.assert_called_once_with(comprobante, entradas)
 
     def test_compra_no_se_ve_afectada_por_error_de_correo(self):
         self.correo.side_effect = RuntimeError("Error SMTP")
-        resultado = compras.enviar_comprobante_compra(17, 8, [{"id_entrada": 19}])
+        resultado = compras.enviar_comprobante_compra(
+            {"compra": {"id_compra": 17}}, [{"id_entrada": 19}]
+        )
         self.assertFalse(resultado["correo_enviado"])
         self.assertIn("no se pudo enviar el correo", resultado["mensaje_correo"])
 
