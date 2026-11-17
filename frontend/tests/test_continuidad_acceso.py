@@ -116,7 +116,7 @@ class ContinuidadAcceso(unittest.TestCase):
         respuesta=self.client.get('/compra?id_funcion=15&butacas=A1%2CA2')
         self.assertEqual(respuesta.status_code,200)
         self.assertIn('A1',respuesta.text)
-        self.assertIn('La compra todavía no se realizó.', respuesta.text)
+        self.assertIn('La compra todavía no fue confirmada.', respuesta.text)
 
     def test_login_sin_csrf_no_llama_a_la_api(self):
         respuesta=self.client.post('/login',data={'email':'cliente@example.com','password':'ClavePrueba2026!'})
