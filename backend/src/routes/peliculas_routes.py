@@ -23,18 +23,14 @@ peliculas_bp = Blueprint("peliculas", __name__)
 
 @peliculas_bp.route("/peliculas", methods=["GET"])
 def listar_peliculas():
-
     resultado = listar_peliculas_service()
 
     return jsonify(resultado["data"]), resultado["status"]
 
-
 @peliculas_bp.route("/peliculas", methods=["POST"])
 @admin_required
 def crear_pelicula_manual(id_usuario):
-
     datos = request.get_json(silent=True)
-
     datos_validados, error = validar_pelicula(datos)
 
     if error:
@@ -46,11 +42,8 @@ def crear_pelicula_manual(id_usuario):
 @peliculas_bp.route("/peliculas/<int:id_pelicula>", methods=["PUT"])
 @admin_required
 def editar_pelicula_manual(id_usuario, id_pelicula):
-
     datos = request.get_json(silent=True)
-
     datos_validados, error = validar_pelicula(datos)
-
     if error:
         return jsonify({"error": error}), 400
 
@@ -60,9 +53,7 @@ def editar_pelicula_manual(id_usuario, id_pelicula):
     )
 
     return jsonify(resultado["data"]), resultado["status"]
-
-
-
+    
 @peliculas_bp.route("/peliculas/omdb/buscar", methods=["GET"])
 @admin_required
 def buscar_peliculas_omdb(id_usuario):
