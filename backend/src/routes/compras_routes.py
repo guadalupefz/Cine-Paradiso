@@ -328,15 +328,59 @@ def confirmar_compra_route(id_usuario, id_compra):
 @compras_bp.post("/compras/<int:id_compra>/cancelar")
 @cliente_required
 def cancelar_compra_route(id_usuario, id_compra):
-    try:
-        resultado, codigo = cancelar_compra(id_usuario, id_compra)
+    conexion = None
 
-        return jsonify(resultado), codigo
+    mensajes_error = {
+        "COMPRA_NO_ENCONTRADA": ("Compra no encontrada", 404),
+        "ESTADO_NO_CANCELABLE": (
+            "La compra no se puede cancelar en su estado actual", 409
+        ),
+        "COMPRA_SIN_ENTRADAS": ("La compra no tiene entradas", 409),
+        "ENTRADAS_UTILIZADAS": (
+            "La compra tiene entradas utilizadas", 409
+        ),
+        "FUERA_DE_PLAZO": (
+            "No se puede cancelar dentro de las dos horas previas a la función",
+            409
+        )
+    }
+
+    try:
+        conexion = get_connection()
+        conexion.start_transaction()
+
+        with conexion.cursor(dictionary=True) as cursor:
+            resultado, error = cancelar_compra(
+                cursor, id_usuario, id_compra
+            )
+
+        if error is not None:
+            conexion.rollback()
+            mensaje, codigo = mensajes_error[error]
+            return jsonify({"error": mensaje}), codigo
+
+        conexion.commit()
+        return jsonify(resultado), 200
 
     except mysql.connector.Error:
+        if conexion is not None:
+            conexion.rollback()
+
         return jsonify({
             "error": "No se pudo cancelar la compra"
         }), 500
+
+    except Exception:
+        if conexion is not None:
+            conexion.rollback()
+
+        return jsonify({
+            "error": "No se pudo cancelar la compra"
+        }), 500
+
+    finally:
+        if conexion is not None:
+            conexion.close()
 
 
 #@compras_bp.route("/mis-entradas", methods=["GET"])

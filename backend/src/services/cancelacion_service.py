@@ -1,6 +1,3 @@
-import mysql.connector
-
-from backend.db.db import get_connection
 from backend.src.constants import (
     ESTADO_COMPRA_CANCELADA,
     ESTADO_COMPRA_CONFIRMADA,
@@ -14,78 +11,51 @@ ESTADOS_CANCELABLES = (
 )
 
 
-def cancelar_compra(id_usuario, id_compra):
-    conexion = None
+def cancelar_compra(cursor, id_usuario, id_compra):
+    compra = repo.obtener_compra_para_cancelar(
+        cursor, id_compra, id_usuario
+    )
 
-    try:
-        conexion = get_connection()
-        conexion.start_transaction()
+    if compra is None:
+        return None, "COMPRA_NO_ENCONTRADA"
 
-        with conexion.cursor(dictionary=True) as cursor:
-            compra = repo.obtener_compra_para_cancelar(
-                cursor, id_compra, id_usuario
-            )
+    if compra["estado"] not in ESTADOS_CANCELABLES:
+        return None, "ESTADO_NO_CANCELABLE"
 
-            if compra is None:
-                conexion.rollback()
-                return {"error": "Compra no encontrada"}, 404
+    entradas = repo.obtener_entradas_para_cancelar(
+        cursor, id_compra
+    )
 
-            if compra["estado"] not in ESTADOS_CANCELABLES:
-                conexion.rollback()
-                return {
-                    "error": "La compra no se puede cancelar en su estado actual"
-                }, 409
+    if not entradas:
+        return None, "COMPRA_SIN_ENTRADAS"
 
-            entradas = repo.obtener_entradas_para_cancelar(
-                cursor, id_compra
-            )
+    entradas_utilizadas = any(
+        entrada["fecha_hora_validacion"] is not None
+        for entrada in entradas
+    )
 
-            if not entradas:
-                conexion.rollback()
-                return {"error": "La compra no tiene entradas"}, 409
+    if entradas_utilizadas:
+        return None, "ENTRADAS_UTILIZADAS"
 
-            entradas_utilizadas = any(
-                entrada["fecha_hora_validacion"] is not None
-                for entrada in entradas
-            )
+    fuera_de_plazo = any(
+        entrada["fuera_de_plazo"]
+        for entrada in entradas
+    )
 
-            if entradas_utilizadas:
-                conexion.rollback()
-                return {"error": "La compra tiene entradas utilizadas"}, 409
+    if fuera_de_plazo:
+        return None, "FUERA_DE_PLAZO"
 
-            fuera_de_plazo = any(
-                entrada["fuera_de_plazo"]
-                for entrada in entradas
-            )
+    repo.actualizar_estado_compra(
+        cursor,
+        id_compra,
+        ESTADO_COMPRA_CANCELADA,
+        compra["estado"]
+    )
 
-            if fuera_de_plazo:
-                conexion.rollback()
-                return {
-                    "error": "No se puede cancelar dentro de las dos horas previas a la función"
-                }, 409
+    repo.liberar_entradas_compra(cursor, id_compra)
 
-            repo.actualizar_estado_compra(
-                cursor,
-                id_compra,
-                ESTADO_COMPRA_CANCELADA,
-                compra["estado"]
-            )
-
-            repo.liberar_entradas_compra(cursor, id_compra)
-
-        conexion.commit()
-
-        return {
-            "id_compra": id_compra,
-            "estado": ESTADO_COMPRA_CANCELADA,
-            "mensaje": "Compra cancelada correctamente"
-        }, 200
-
-    except Exception:
-        if conexion is not None:
-            conexion.rollback()
-        raise
-
-    finally:
-        if conexion is not None:
-            conexion.close()
+    return {
+        "id_compra": id_compra,
+        "estado": ESTADO_COMPRA_CANCELADA,
+        "mensaje": "Compra cancelada correctamente"
+    }, None
