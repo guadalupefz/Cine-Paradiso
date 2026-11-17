@@ -43,4 +43,64 @@ def crear_pelicula_manual(id_usuario):
     resultado = crear_pelicula_service(datos_validados)
 
     return jsonify(resultado["data"]), resultado["status"]
+@peliculas_bp.route("/peliculas/<int:id_pelicula>", methods=["PUT"])
+@admin_required
+def editar_pelicula_manual(id_usuario, id_pelicula):
 
+    datos = request.get_json(silent=True)
+
+    datos_validados, error = validar_pelicula(datos)
+
+    if error:
+        return jsonify({"error": error}), 400
+
+    resultado = editar_pelicula_service(
+        id_pelicula,
+        datos_validados
+    )
+
+    return jsonify(resultado["data"]), resultado["status"]
+
+
+
+@peliculas_bp.route("/peliculas/omdb/buscar", methods=["GET"])
+@admin_required
+def buscar_peliculas_omdb(id_usuario):
+    titulo = request.args.get("titulo")
+    error = validar_busqueda_omdb(titulo)
+
+    if error:
+        return jsonify({"error": error}), 400
+
+    resultado = buscar_peliculas_omdb_service(titulo)
+    return jsonify(resultado["data"]), resultado["status"]
+
+
+@peliculas_bp.route("/peliculas/omdb/detalle", methods=["GET"])
+@admin_required
+def obtener_detalle_omdb(id_usuario):
+    imdb_id = request.args.get("imdb_id")
+    error = validar_detalle_omdb(imdb_id)
+
+    if error:
+        return jsonify({"error": error}), 400
+
+    resultado = obtener_detalle_omdb_service(imdb_id)
+    return jsonify(resultado["data"]), resultado["status"]
+
+
+@peliculas_bp.route("/peliculas/omdb/importar", methods=["POST"])
+@admin_required
+def importar_pelicula_omdb(id_usuario):
+    datos = request.get_json(silent=True)
+    error = validar_importacion_omdb(datos)
+
+    if error:
+        return jsonify({"error": error}), 400
+
+    resultado = importar_pelicula_omdb_service(
+        datos["imdb_id"],
+        id_usuario
+    )
+
+    return jsonify(resultado["data"]), resultado["status"]
