@@ -11,6 +11,7 @@ from backend.src.services.salas_service import (
 from backend.src.validators.salas_validator import (
     validar_datos_sala,
     validar_id_local,
+    validar_id_sala,
 )
 
 salas_bp = Blueprint("salas", __name__)
@@ -19,8 +20,62 @@ salas_bp = Blueprint("salas", __name__)
 @salas_bp.delete("/salas/<int:id_sala>")
 @admin_required
 def eliminar_sala(id_usuario, id_sala):
-    resultado, estado = eliminar_estructura("sala", id_sala)
-    return jsonify(resultado), estado
+    error = validar_id_sala(id_sala)
+    if error:
+        return jsonify({"error": error}), 400
+
+    conn = None
+
+    try:
+        conn = get_connection()
+
+        with conn.cursor(dictionary=True) as cursor:
+            resultado = eliminar_estructura(cursor, "sala", id_sala)
+
+        if resultado == "eliminado":
+            conn.commit()
+            return jsonify({
+                "mensaje": "Sala eliminada junto con sus butacas."
+            }), 200
+
+        conn.rollback()
+
+        if resultado == "no_existe":
+            return jsonify({
+                "error": "La sala indicada no existe."
+            }), 404
+
+        if resultado == "en_uso":
+            return jsonify({
+                "error": "No se puede eliminar: hay funciones o entradas asociadas."
+            }), 409
+
+        return jsonify({
+            "error": "No se pudo completar la eliminación. Volvé a cargar la página."
+        }), 409
+
+    except mysql.connector.IntegrityError:
+        if conn is not None:
+            conn.rollback()
+
+        return jsonify({
+            "error": "No se puede eliminar: existen registros asociados que deben conservarse."
+        }), 409
+
+    except mysql.connector.Error as error:
+        if conn is not None:
+            conn.rollback()
+
+        if error.errno in (1205, 1213):
+            return jsonify({
+                "error": "El registro está siendo utilizado. Intentá nuevamente."
+            }), 409
+
+        return jsonify({"error": "No se pudo eliminar la sala."}), 500
+
+    finally:
+        if conn is not None:
+            conn.close()
 
 
 @salas_bp.route("/locales/<int:id_local>/salas", methods=["GET"])
@@ -63,6 +118,9 @@ def crear_sala(id_usuario, id_local):
     if error:
         return jsonify({"error": error}), 400
 
+    nombre = data["nombre"].strip()
+    capacidad = data["capacidad"]
+
     conn = None
 
     try:
@@ -72,11 +130,12 @@ def crear_sala(id_usuario, id_local):
             id_sala = crear_sala_servicio(
                 cursor,
                 id_local,
-                data["nombre"].strip(),
-                data["capacidad"],
+                nombre,
+                capacidad,
             )
 
         if id_sala is None:
+            conn.rollback()
             return jsonify({"error": "No existe el local indicado."}), 404
 
         conn.commit()
