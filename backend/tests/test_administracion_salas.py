@@ -10,6 +10,7 @@ from backend.autenticacion import jwt
 from backend.src.routes import salas_routes as salas
 from backend.src.routes import configuracion_butacas as butacas
 from backend.src.services import eliminacion_estructura_service as eliminacion
+from backend.src.services import butacas_service
 
 
 class TestAdministracionSalas(unittest.TestCase):
@@ -122,7 +123,7 @@ class TestAdministracionSalas(unittest.TestCase):
         self.assertEqual(respuesta.status_code, 400)
 
     def test_configurar_butacas_correctamente(self):
-        conn, cursor = self.base(butacas)
+        conn, cursor = self.base(butacas_service)
         cursor.fetchone.side_effect = [
             {"capacidad": 2},
             {"cantidad": 0}
@@ -147,7 +148,7 @@ class TestAdministracionSalas(unittest.TestCase):
         conn.commit.assert_called_once()
 
     def test_rechazar_cantidad_de_butacas_incorrecta(self):
-        conn, cursor = self.base(butacas)
+        conn, cursor = self.base(butacas_service)
         cursor.fetchone.return_value = {"capacidad": 3}
 
         respuesta = self.client.post(
@@ -173,7 +174,7 @@ class TestAdministracionSalas(unittest.TestCase):
         self.assertEqual(respuesta.status_code, 400)
 
     def test_rechazar_sala_ya_configurada(self):
-        conn, cursor = self.base(butacas)
+        conn, cursor = self.base(butacas_service)
         cursor.fetchone.side_effect = [
             {"capacidad": 2},
             {"cantidad": 2}
