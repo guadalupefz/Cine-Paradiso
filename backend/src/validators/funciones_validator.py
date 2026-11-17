@@ -39,3 +39,17 @@ def validar_datos_funcion(data):
         return "El precio_base admite como máximo dos decimales."
 
     return None
+
+
+def obtener_campos_faltantes_funcion(data):
+    campos = [
+        "id_pelicula",
+        "id_sala",
+        "fecha_hora_inicio",
+        "precio_base",
+    ]
+
+    if not isinstance(data, dict):
+        return campos
+
+    return [campo for campo in campos if campo not in data]
