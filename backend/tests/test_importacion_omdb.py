@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 os.environ.setdefault("SECRET_KEY", "clave-ficticia")
 
 from backend.src.repositories import peliculas as repo
+from backend.src.services import omdb_service
 
 
 class RespuestaOMDb:
@@ -153,6 +154,67 @@ class ImportacionOMDbTest(unittest.TestCase):
         self.assertFalse(resultado["exito"])
         self.assertEqual(resultado["error"], "OMDb no devolvió imdbID")
         self.assertEqual(len(conexion.filas), 0)
+
+    @patch.dict(os.environ, {"OMDB_API_KEY": ""}, clear=False)
+    def test_consulta_sin_api_key_devuelve_503(self):
+        datos, error, estado = omdb_service.consultar_omdb({"s": "Matrix"})
+
+        self.assertIsNone(datos)
+        self.assertEqual(estado, 503)
+        self.assertIn("no está configurada", error["error"])
+
+    @patch.dict(os.environ, {"OMDB_API_KEY": "clave-ficticia"}, clear=False)
+    @patch.object(omdb_service.requests, "get")
+    def test_busqueda_normaliza_resultados(self, get):
+        get.return_value.raise_for_status.return_value = None
+        get.return_value.json.return_value = {
+            "Response": "True",
+            "Search": [{
+                "imdbID": "tt0133093",
+                "Title": "The Matrix",
+                "Year": "1999",
+                "Poster": "N/A",
+            }],
+        }
+
+        resultado = omdb_service.buscar_peliculas_omdb_service("Matrix")
+
+        self.assertEqual(resultado["status"], 200)
+        self.assertEqual(
+            resultado["data"]["peliculas"][0]["id_externo_api"],
+            "tt0133093",
+        )
+        self.assertIsNone(resultado["data"]["peliculas"][0]["poster"])
+
+    @patch.dict(os.environ, {"OMDB_API_KEY": "clave-ficticia"}, clear=False)
+    @patch.object(omdb_service.requests, "get")
+    def test_respuesta_omdb_no_encontrada_devuelve_404(self, get):
+        get.return_value.raise_for_status.return_value = None
+        get.return_value.json.return_value = {
+            "Response": "False",
+            "Error": "Movie not found!",
+        }
+
+        datos, error, estado = omdb_service.consultar_omdb({
+            "i": "tt9999999",
+        })
+
+        self.assertIsNone(datos)
+        self.assertEqual(estado, 404)
+        self.assertEqual(error["error"], "Movie not found!")
+
+    @patch.dict(os.environ, {"OMDB_API_KEY": "clave-ficticia"}, clear=False)
+    @patch.object(omdb_service.requests, "get")
+    def test_timeout_devuelve_504(self, get):
+        get.side_effect = omdb_service.requests.exceptions.Timeout()
+
+        datos, error, estado = omdb_service.consultar_omdb({
+            "s": "Matrix",
+        })
+
+        self.assertIsNone(datos)
+        self.assertEqual(estado, 504)
+        self.assertIn("tardó", error["error"])
 
 
 if __name__ == "__main__":

@@ -1,5 +1,7 @@
 from flask import Blueprint, jsonify, request
 from backend.seguridad import admin_required
+from backend.db.db import get_connection
+from backend.src.repositories.peliculas_repository import obtener_peliculas
 from backend.src.services.peliculas_service import (
     listar_peliculas_service,
     crear_pelicula_service,
@@ -23,7 +25,10 @@ peliculas_bp = Blueprint("peliculas", __name__)
 
 @peliculas_bp.route("/peliculas", methods=["GET"])
 def listar_peliculas():
-    resultado = listar_peliculas_service()
+    resultado = listar_peliculas_service(
+        get_connection=get_connection,
+        obtener_peliculas=obtener_peliculas,
+    )
 
     return jsonify(resultado["data"]), resultado["status"]
 
@@ -36,7 +41,10 @@ def crear_pelicula_manual(id_usuario):
     if error:
         return jsonify({"error": error}), 400
 
-    resultado = crear_pelicula_service(datos_validados)
+    resultado = crear_pelicula_service(
+        datos_validados,
+        get_connection=get_connection,
+    )
 
     return jsonify(resultado["data"]), resultado["status"]
 @peliculas_bp.route("/peliculas/<int:id_pelicula>", methods=["PUT"])
@@ -49,7 +57,8 @@ def editar_pelicula_manual(id_usuario, id_pelicula):
 
     resultado = editar_pelicula_service(
         id_pelicula,
-        datos_validados
+        datos_validados,
+        get_connection=get_connection,
     )
 
     return jsonify(resultado["data"]), resultado["status"]
