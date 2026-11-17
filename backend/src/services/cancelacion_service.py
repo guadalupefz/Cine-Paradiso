@@ -1,32 +1,30 @@
+import mysql.connector
+
 from backend.db.db import get_connection
 from backend.src.constants import (
     ESTADO_COMPRA_CANCELADA,
     ESTADO_COMPRA_CONFIRMADA,
 )
+from backend.src.repositories import compra_repository as repo
+
 
 ESTADOS_CANCELABLES = (
     ESTADO_COMPRA_CONFIRMADA,
     "aprobada",
 )
 
+
 def cancelar_compra(id_usuario, id_compra):
-    conexion = get_connection()
+    conexion = None
 
     try:
+        conexion = get_connection()
         conexion.start_transaction()
 
         with conexion.cursor(dictionary=True) as cursor:
-            cursor.execute(
-                """
-                SELECT estado
-                FROM compra
-                WHERE id_compra = %s AND id_usuario = %s
-                FOR UPDATE
-                """,
-                (id_compra, id_usuario)
+            compra = repo.obtener_compra_para_cancelar(
+                cursor, id_compra, id_usuario
             )
-
-            compra = cursor.fetchone()
 
             if compra is None:
                 conexion.rollback()
@@ -38,22 +36,9 @@ def cancelar_compra(id_usuario, id_compra):
                     "error": "La compra no se puede cancelar en su estado actual"
                 }, 409
 
-            cursor.execute(
-                """
-                SELECT
-                    entrada.fecha_hora_validacion,
-                    funcion.fecha_hora_inicio <= DATE_ADD(
-                        NOW(), INTERVAL 2 HOUR
-                    ) AS fuera_de_plazo
-                FROM entrada
-                JOIN funcion ON entrada.id_funcion = funcion.id_funcion
-                WHERE entrada.id_compra = %s
-                FOR UPDATE
-                """,
-                (id_compra,)
+            entradas = repo.obtener_entradas_para_cancelar(
+                cursor, id_compra
             )
-
-            entradas = cursor.fetchall()
 
             if not entradas:
                 conexion.rollback()
@@ -79,23 +64,14 @@ def cancelar_compra(id_usuario, id_compra):
                     "error": "No se puede cancelar dentro de las dos horas previas a la función"
                 }, 409
 
-            cursor.execute(
-                """
-                UPDATE compra
-                SET estado = %s
-                WHERE id_compra = %s
-                """,
-                (ESTADO_COMPRA_CANCELADA, id_compra)
+            repo.actualizar_estado_compra(
+                cursor,
+                id_compra,
+                ESTADO_COMPRA_CANCELADA,
+                compra["estado"]
             )
 
-            cursor.execute(
-                """
-                UPDATE entrada
-                SET ocupacion_activa = NULL
-                WHERE id_compra = %s
-                """,
-                (id_compra,)
-            )
+            repo.liberar_entradas_compra(cursor, id_compra)
 
         conexion.commit()
 
@@ -106,8 +82,10 @@ def cancelar_compra(id_usuario, id_compra):
         }, 200
 
     except Exception:
-        conexion.rollback()
+        if conexion is not None:
+            conexion.rollback()
         raise
 
     finally:
-        conexion.close()
+        if conexion is not None:
+            conexion.close()
