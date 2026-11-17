@@ -36,3 +36,10 @@ def eliminar_local_salas_y_butacas(cursor, id_local):
     cursor.execute("DELETE FROM sala WHERE id_local = %s", (id_local,))
     cursor.execute("DELETE FROM local WHERE id_local = %s", (id_local,))
     return cursor.rowcount
+
+def crear_local(cursor, nombre, direccion):
+    cursor.execute(
+        "INSERT INTO local (nombre, direccion) VALUES (%s, %s)",
+        (nombre, direccion)
+    )
+    return cursor.lastrowid
