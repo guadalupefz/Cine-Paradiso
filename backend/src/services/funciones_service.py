@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from backend.src.validators.duracion_validator import minutos_de_duracion
 from backend.src.repositories.funciones_repository import (
     obtener_funciones,
+    obtener_cartelera,
     obtener_funciones_por_sala,
     obtener_funcion_por_id,
     obtener_pelicula_por_id,
@@ -15,6 +16,10 @@ from backend.src.repositories.funciones_repository import (
 
 def listar_funciones_servicio(cursor, solo_vigentes=False):
     return obtener_funciones(cursor, solo_vigentes=solo_vigentes)
+
+
+def consultar_cartelera_servicio(cursor):
+    return obtener_cartelera(cursor)
 
 
 def validar_duracion_pelicula(pelicula):
