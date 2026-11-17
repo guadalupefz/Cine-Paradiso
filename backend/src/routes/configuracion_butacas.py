@@ -1,13 +1,8 @@
-import mysql.connector
 from flask import Blueprint, jsonify, request
 
-from backend.db.db import get_connection
 from backend.seguridad import admin_required
-from backend.src.repositories.butacas_repository import (
-    contar_butacas_de_sala,
-    crear_butacas,
-)
-from backend.src.repositories.salas_repository import bloquear_sala
+from backend.src.services.butacas_service import configurar_butacas_servicio
+from backend.src.validators.butacas_validator import validar_butacas
 
 configuracion_butacas_bp = Blueprint("configuracion_butacas", __name__)
 
@@ -19,79 +14,11 @@ def configurar_butacas(id_usuario, id_sala):
         return jsonify({"error": "El ID de la sala debe ser positivo."}), 400
 
     data = request.get_json(silent=True)
+    butacas, error = validar_butacas(data)
 
-    if not isinstance(data, dict) or not isinstance(data.get("butacas"), list):
-        return jsonify({"error": "Se requiere una lista de butacas."}), 400
+    if error:
+        return jsonify({"error": error}), 400
 
-    butacas = data["butacas"]
+    respuesta, codigo = configurar_butacas_servicio(id_sala, butacas)
 
-    if not butacas:
-        return jsonify({"error": "La sala debe tener al menos una butaca."}), 400
-
-    for butaca in butacas:
-        if not isinstance(butaca, dict):
-            return jsonify({"error": "Cada butaca debe tener fila y número."}), 400
-
-        fila = butaca.get("fila")
-        numero = butaca.get("numero")
-
-        if (
-            not isinstance(fila, str)
-            or not fila.strip()
-            or len(fila.strip()) > 5
-            or not fila.strip().isalpha()
-        ):
-            return jsonify({
-                "error": "La fila debe contener entre 1 y 5 letras."
-            }), 400
-
-        if type(numero) is not int or numero <= 0:
-            return jsonify({"error": "El número de butaca debe ser positivo."}), 400
-
-    claves = [(b["fila"].strip().upper(), b["numero"]) for b in butacas]
-
-    if len(claves) != len(set(claves)):
-        return jsonify({"error": "No puede haber butacas repetidas."}), 400
-
-    conn = None
-    try:
-        conn = get_connection()
-        conn.start_transaction()
-
-        with conn.cursor(dictionary=True) as cursor:
-            sala = bloquear_sala(cursor, id_sala)
-
-            if sala is None:
-                conn.rollback()
-                return jsonify({"error": "No existe la sala indicada."}), 404
-
-            capacidad = sala["capacidad"]
-
-            if len(butacas) != capacidad:
-                conn.rollback()
-                return jsonify({
-                    "error": "La cantidad de butacas debe coincidir con la capacidad de la sala.",
-                    "capacidad": capacidad,
-                    "cantidad_butacas": len(butacas)
-                }), 400
-
-            if contar_butacas_de_sala(cursor, id_sala) > 0:
-                conn.rollback()
-                return jsonify({"error": "La sala ya tiene butacas configuradas."}), 409
-
-            crear_butacas(cursor, id_sala, claves)
-
-        conn.commit()
-        return jsonify({
-            "mensaje": "Butacas configuradas correctamente.",
-            "id_sala": id_sala,
-            "cantidad": len(butacas)
-        }), 201
-
-    except mysql.connector.Error:
-        if conn is not None:
-            conn.rollback()
-        return jsonify({"error": "No se pudieron configurar las butacas."}), 500
-    finally:
-        if conn is not None:
-            conn.close()
+    return jsonify(respuesta), codigo
