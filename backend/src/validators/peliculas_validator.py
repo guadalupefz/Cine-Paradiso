@@ -24,3 +24,9 @@ def validar_pelicula(datos):
         "genero": datos["genero"].strip(),
         "duracion_minutos": duracion,
     }, None
+
+
+def validar_id_pelicula(id_pelicula):
+    if type(id_pelicula) is not int or id_pelicula <= 0:
+        return "El ID de la película debe ser un entero positivo."
+    return None
