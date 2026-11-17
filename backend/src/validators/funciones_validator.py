@@ -2,7 +2,7 @@ from datetime import datetime
 from decimal import Decimal, InvalidOperation
 
 
-def validar_crear_funcion(data):
+def validar_datos_funcion(data):
     if not isinstance(data, dict) or not data:
         return "No se proporcionaron datos en formato JSON."
 
@@ -31,8 +31,10 @@ def validar_crear_funcion(data):
 
     if not precio_decimal.is_finite():
         return "El precio_base debe ser un valor numérico finito."
+
     if precio_decimal < 0:
         return "El precio_base no puede ser negativo."
+
     if precio_decimal.as_tuple().exponent < -2:
         return "El precio_base admite como máximo dos decimales."
 
