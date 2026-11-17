@@ -14,6 +14,7 @@ from backend.src.services.omdb_service import (
 )
 from backend.src.validators.peliculas_validator import (
     validar_pelicula,
+    validar_id_pelicula
 )
 from backend.src.validators.omdb_validator import (
     validar_busqueda_omdb,
