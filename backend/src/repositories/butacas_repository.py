@@ -47,3 +47,18 @@ def obtener_butacas_por_funcion(cursor, id_funcion):
         ),
     )
     return cursor.fetchall()
+
+
+def contar_butacas_de_sala(cursor, id_sala):
+    cursor.execute(
+        "SELECT COUNT(*) AS cantidad FROM butaca WHERE id_sala = %s",
+        (id_sala,)
+    )
+    return cursor.fetchone()["cantidad"]
+
+
+def crear_butacas(cursor, id_sala, butacas):
+    cursor.executemany(
+        "INSERT INTO butaca (id_sala, fila, numero) VALUES (%s, %s, %s)",
+        [(id_sala, fila, numero) for fila, numero in butacas]
+    )

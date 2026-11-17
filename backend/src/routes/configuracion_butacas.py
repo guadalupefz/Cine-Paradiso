@@ -3,6 +3,11 @@ from flask import Blueprint, jsonify, request
 
 from backend.db.db import get_connection
 from backend.seguridad import admin_required
+from backend.src.repositories.butacas_repository import (
+    contar_butacas_de_sala,
+    crear_butacas,
+)
+from backend.src.repositories.salas_repository import bloquear_sala
 
 configuracion_butacas_bp = Blueprint("configuracion_butacas", __name__)
 
@@ -51,34 +56,30 @@ def configurar_butacas(id_usuario, id_sala):
     conn = None
     try:
         conn = get_connection()
+        conn.start_transaction()
+
         with conn.cursor(dictionary=True) as cursor:
-            cursor.execute(
-                "SELECT capacidad FROM sala WHERE id_sala = %s",
-                (id_sala,)
-            )
-            sala = cursor.fetchone()
+            sala = bloquear_sala(cursor, id_sala)
 
             if sala is None:
+                conn.rollback()
                 return jsonify({"error": "No existe la sala indicada."}), 404
 
-            if len(butacas) != sala["capacidad"]:
+            capacidad = sala["capacidad"]
+
+            if len(butacas) != capacidad:
+                conn.rollback()
                 return jsonify({
                     "error": "La cantidad de butacas debe coincidir con la capacidad de la sala.",
-                    "capacidad": sala["capacidad"],
+                    "capacidad": capacidad,
                     "cantidad_butacas": len(butacas)
                 }), 400
 
-            cursor.execute(
-                "SELECT COUNT(*) AS cantidad FROM butaca WHERE id_sala = %s",
-                (id_sala,)
-            )
-            if cursor.fetchone()["cantidad"] > 0:
+            if contar_butacas_de_sala(cursor, id_sala) > 0:
+                conn.rollback()
                 return jsonify({"error": "La sala ya tiene butacas configuradas."}), 409
 
-            cursor.executemany(
-                "INSERT INTO butaca (id_sala, fila, numero) VALUES (%s, %s, %s)",
-                [(id_sala, fila, numero) for fila, numero in claves]
-            )
+            crear_butacas(cursor, id_sala, claves)
 
         conn.commit()
         return jsonify({

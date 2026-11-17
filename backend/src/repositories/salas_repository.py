@@ -5,7 +5,10 @@ def obtener_salas_por_local(cursor, local_id):
 
 
 def bloquear_sala(cursor, id_sala):
-    cursor.execute("SELECT id_sala FROM sala WHERE id_sala = %s FOR UPDATE", (id_sala,))
+    cursor.execute(
+        "SELECT id_sala, capacidad FROM sala WHERE id_sala = %s FOR UPDATE",
+        (id_sala,)
+    )
     return cursor.fetchone()
 
 
