@@ -1,70 +1,115 @@
-
-from backend.seguridad import admin_required
-from backend.src.validators.duracion_validator import minutos_de_duracion
-from datetime import datetime
-from decimal import Decimal, InvalidOperation
-
+from flask import Blueprint, jsonify, request
 import mysql.connector
 from mysql.connector import Error as MySQLError
-from flask import Blueprint, jsonify, request
 
+from backend.seguridad import admin_required
 from backend.db.db import get_connection
+
 from backend.src.services.funciones_service import (
     listar_funciones_servicio,
     crear_funcion_servicio,
+    modificar_funcion_servicio,
 )
-from backend.src.repositories.funciones_repository import (
-    modificar_funcion,
-    obtener_cartelera,
-    contar_entradas_por_funcion,
-    verificar_solapamiento_sala,
-)
-from backend.src.validators.funciones_validator import validar_crear_funcion
+
+from backend.src.repositories.funciones_repository import obtener_cartelera
+
+from backend.src.validators.funciones_validator import  validar_datos_funcion
+
 
 funciones_bp = Blueprint("funciones", __name__)
 
 
 @funciones_bp.route("/funciones", methods=["GET"])
 def listar_funciones_route():
+    conn = None
+    cursor = None
+
     try:
-        funciones = listar_funciones_servicio(solo_vigentes=request.args.get("vigentes") == "1")
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        funciones = listar_funciones_servicio(
+            cursor,
+            solo_vigentes=request.args.get("vigentes") == "1"
+        )
+
         return jsonify(funciones), 200
+
+    except MySQLError:
+        return jsonify({
+            "error": "Error al consultar las funciones."
+        }), 500
+
     except Exception:
-        return jsonify({"error": "Error interno del servidor"}), 500
+        return jsonify({
+            "error": "Error interno del servidor."
+        }), 500
+
+    finally:
+        if cursor is not None:
+            cursor.close()
+        if conn is not None:
+            conn.close()
 
 
 @funciones_bp.route("/funciones", methods=["POST"])
 @admin_required
 def crear_funcion_route(id_usuario):
-    data = request.get_json()
-    error = validar_crear_funcion(data)
+    data = request.get_json(silent=True)
+    error = validar_datos_funcion(data)
 
     if error:
         return jsonify({"error": error}), 400
 
+    conn = None
+    cursor = None
+
     try:
-        id_funcion = crear_funcion_servicio(data)
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        id_funcion = crear_funcion_servicio(cursor, data)
+
+        conn.commit()
+
         return jsonify({
             "mensaje": "Función creada exitosamente",
             "id_funcion": id_funcion,
         }), 201
 
     except MySQLError as err:
+        if conn is not None:
+            conn.rollback()
+
         if err.errno == 1452:
             return jsonify({
                 "error": "Error de integridad referencial",
                 "detalle": "La película o la sala especificada no existe en la base de datos.",
             }), 400
 
-        return jsonify({"error": "No se pudo crear la función"}), 500
+        return jsonify({
+            "error": "No se pudo crear la función."
+        }), 500
 
     except ValueError as err:
+        if conn is not None:
+            conn.rollback()
+
         return jsonify({"error": str(err)}), 400
 
     except Exception:
+        if conn is not None:
+            conn.rollback()
+
         return jsonify({
             "error": "Ocurrió un error al crear la función en la base de datos."
         }), 500
+
+    finally:
+        if cursor is not None:
+            cursor.close()
+        if conn is not None:
+            conn.close()
 
 
 @funciones_bp.route("/cartelera", methods=["GET"])
@@ -128,157 +173,22 @@ def actualizar_funcion(id_usuario, id_funcion):
             "campos_faltantes": faltantes,
         }), 400
 
-    try:
-        if type(data["id_pelicula"]) is not int:
-            raise ValueError
+    error = validar_datos_funcion(data)
 
-        if type(data["id_sala"]) is not int:
-            raise ValueError
-
-        id_pelicula = data["id_pelicula"]
-        id_sala = data["id_sala"]
-
-        if id_pelicula <= 0 or id_sala <= 0:
-            raise ValueError
-
-        fecha_hora = datetime.fromisoformat(
-            str(data["fecha_hora_inicio"])
-        )
-
-        precio = Decimal(str(data["precio_base"]))
-
-        if not precio.is_finite() or precio < 0:
-            raise ValueError
-
-        if precio.as_tuple().exponent < -2:
-            raise ValueError
-
-    except (ValueError, TypeError, InvalidOperation):
+    if error:
         return jsonify({
             "error": "DATOS_INVALIDOS",
-            "mensaje": (
-                "Verificá los IDs, la fecha y el precio. "
-                "El precio debe ser no negativo y tener "
-                "como máximo dos decimales."
-            ),
+            "mensaje": error,
         }), 400
 
     conn = None
+    cursor = None
 
     try:
         conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
 
-        # Se usa cursor de diccionario para acceder a las columnas por nombre.
-        with conn.cursor(dictionary=True) as cursor:
-            cursor.execute(
-                """
-                SELECT id_funcion, id_pelicula, id_sala, fecha_hora_inicio
-                FROM funcion
-                WHERE id_funcion = %s
-                """,
-                (id_funcion,),
-            )
-
-            funcion_actual = cursor.fetchone()
-
-            if funcion_actual is None:
-                return jsonify({
-                    "error": "FUNCION_NO_ENCONTRADA",
-                    "mensaje": "No existe una función con ese ID.",
-                }), 404
-
-            cursor.execute(
-                "SELECT id_pelicula FROM pelicula WHERE id_pelicula = %s",
-                (id_pelicula,),
-            )
-
-            if cursor.fetchone() is None:
-                return jsonify({
-                    "error": "PELICULA_NO_ENCONTRADA",
-                    "mensaje": "No existe la película indicada.",
-                }), 400
-
-            cursor.execute(
-                "SELECT id_sala FROM sala WHERE id_sala = %s",
-                (id_sala,),
-            )
-
-            if cursor.fetchone() is None:
-                return jsonify({
-                    "error": "SALA_NO_ENCONTRADA",
-                    "mensaje": "No existe la sala indicada.",
-                }), 400
-
-            entradas_vendidas = contar_entradas_por_funcion(
-                cursor, id_funcion
-            )
-
-            horario_actual = funcion_actual["fecha_hora_inicio"]
-            horario_nuevo = fecha_hora.strftime("%Y-%m-%d %H:%M:%S")
-
-            if entradas_vendidas > 0:
-                if (
-                    id_pelicula != funcion_actual["id_pelicula"]
-                    or id_sala != funcion_actual["id_sala"]
-                    or horario_nuevo != horario_actual.strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    )
-                ):
-                    return jsonify({
-                        "error": "RESTRICCION_VENTAS",
-                        "mensaje": (
-                            "No se puede modificar la película, la sala ni el horario "
-                            "porque ya existen entradas vendidas para esta función."
-                        ),
-                    }), 400
-
-            cursor.execute(
-                """
-                SELECT duracion_minutos
-                FROM pelicula
-                WHERE id_pelicula = %s
-                """,
-                (id_pelicula,),
-            )
-
-            peli = cursor.fetchone()
-            try:
-                duracion_minutos = minutos_de_duracion(peli["duracion_minutos"])
-            except (TypeError, ValueError):
-                return jsonify({
-                    "error": "DURACION_INVALIDA",
-                    "mensaje": "La duración de la película no es válida.",
-                }), 400
-
-            if duracion_minutos <= 0:
-                return jsonify({
-                    "error": "DURACION_INVALIDA",
-                    "mensaje": "La duración debe ser positiva.",
-                }), 400
-
-            if verificar_solapamiento_sala(
-                cursor,
-                id_sala,
-                fecha_hora,
-                duracion_minutos,
-                id_funcion_excluir=id_funcion,
-            ):
-                return jsonify({
-                    "error": "SOLAPAMIENTO_HORARIO",
-                    "mensaje": (
-                        "La sala ya se encuentra ocupada en ese rango "
-                        "horario por otra función."
-                    ),
-                }), 400
-
-            modificar_funcion(
-                cursor,
-                id_funcion,
-                id_pelicula,
-                id_sala,
-                horario_nuevo,
-                precio,
-            )
+        modificar_funcion_servicio(cursor, id_funcion, data)
 
         conn.commit()
 
@@ -286,6 +196,24 @@ def actualizar_funcion(id_usuario, id_funcion):
             "mensaje": "Función modificada correctamente.",
             "id_funcion": id_funcion,
         }), 200
+
+    except LookupError as err:
+        if conn is not None:
+            conn.rollback()
+
+        return jsonify({
+            "error": "FUNCION_NO_ENCONTRADA",
+            "mensaje": str(err),
+        }), 404
+
+    except ValueError as err:
+        if conn is not None:
+            conn.rollback()
+
+        return jsonify({
+            "error": "ERROR_VALIDACION",
+            "mensaje": str(err),
+        }), 400
 
     except mysql.connector.IntegrityError:
         if conn is not None:
@@ -296,7 +224,7 @@ def actualizar_funcion(id_usuario, id_funcion):
             "mensaje": "Los datos incumplen una restricción de la base de datos.",
         }), 400
 
-    except mysql.connector.Error:
+    except MySQLError:
         if conn is not None:
             conn.rollback()
 
@@ -315,5 +243,7 @@ def actualizar_funcion(id_usuario, id_funcion):
         }), 500
 
     finally:
+        if cursor is not None:
+            cursor.close()
         if conn is not None:
             conn.close()
