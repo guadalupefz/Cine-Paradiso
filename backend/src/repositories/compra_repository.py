@@ -282,3 +282,30 @@ def obtener_inicio_funciones_compra(cursor, id_compra):
     """
     cursor.execute(query, (id_compra,))
     return cursor.fetchone()["primer_inicio"]
+
+
+def obtener_compra_para_cancelar(cursor, id_compra, id_usuario):
+    query = """
+        SELECT id_compra, estado
+        FROM compra
+        WHERE id_compra = %s AND id_usuario = %s
+        FOR UPDATE
+    """
+    cursor.execute(query, (id_compra, id_usuario))
+    return cursor.fetchone()
+
+
+def obtener_entradas_para_cancelar(cursor, id_compra):
+    query = """
+        SELECT
+            entrada.fecha_hora_validacion,
+            funcion.fecha_hora_inicio <= DATE_ADD(
+                NOW(), INTERVAL 2 HOUR
+            ) AS fuera_de_plazo
+        FROM entrada
+        JOIN funcion ON entrada.id_funcion = funcion.id_funcion
+        WHERE entrada.id_compra = %s
+        FOR UPDATE
+    """
+    cursor.execute(query, (id_compra,))
+    return cursor.fetchall()
