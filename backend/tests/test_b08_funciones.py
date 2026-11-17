@@ -1,5 +1,5 @@
 import unittest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, ANY
 
 from backend.app import app
 from backend import seguridad
@@ -7,6 +7,7 @@ from backend.autenticacion import jwt
 from flask_jwt_extended import create_access_token
 from backend.src.routes import funciones_routes as funciones
 from backend.src.routes import peliculas_routes as peliculas
+from backend.src.services import funciones_service as servicio_funciones
 
 
 class TestB08(unittest.TestCase):
@@ -156,7 +157,7 @@ class TestB08(unittest.TestCase):
 
         self.assertEqual(respuesta.status_code, 201)
         self.assertEqual(respuesta.json["id_funcion"], 37)
-        crear.assert_called_once_with(self.funcion_valida())
+        crear.assert_called_once_with(ANY, self.funcion_valida())
 
     def test_crear_funcion_con_datos_invalidos(self):
         datos = self.funcion_valida()
@@ -297,13 +298,30 @@ class TestB08(unittest.TestCase):
         ]
 
         with patch.object(
-            funciones, "contar_entradas_por_funcion", return_value=0
+            servicio_funciones, "contar_entradas_por_funcion", return_value=0
         ), patch.object(
-            funciones, "verificar_solapamiento_sala", return_value=False
-        ), patch.object(funciones, "modificar_funcion") as modificar:
+            servicio_funciones, "obtener_funcion_por_id",
+            return_value={
+                "id_funcion": 1,
+                "id_pelicula": 1,
+                "id_sala": 1,
+                "fecha_hora_inicio": datetime(2030, 5, 10, 18, 0),
+            }
+            ), patch.object(
+            servicio_funciones, "obtener_pelicula_por_id",
+            return_value={"id_pelicula": 1, "duracion_minutos": "120"}
+            ), patch.object(
+            servicio_funciones, "obtener_sala_por_id",
+            return_value={"id_sala": 1}
+            ), patch.object(
+            servicio_funciones, "obtener_funciones_por_sala",
+            return_value=[]
+            ), patch.object(
+            servicio_funciones, "modificar_funcion"
+            ) as modificar:
             respuesta = self.client.put(
                 "/api/funciones/1", json=self.funcion_valida()
-            )
+            )       
 
         self.assertEqual(respuesta.status_code, 200, respuesta.json)
         self.assertEqual(respuesta.json["id_funcion"], 1)
@@ -328,26 +346,45 @@ class TestB08(unittest.TestCase):
         ]
 
         with patch.object(
-            funciones, "contar_entradas_por_funcion", return_value=0
+            servicio_funciones, "contar_entradas_por_funcion", return_value=0
         ), patch.object(
-            funciones, "verificar_solapamiento_sala", return_value=True
-        ), patch.object(funciones, "modificar_funcion") as modificar:
+            servicio_funciones, "obtener_funcion_por_id",
+            return_value={
+                "id_funcion": 1,
+                "id_pelicula": 1,
+                "id_sala": 1,
+                "fecha_hora_inicio": datetime(2030, 5, 10, 18, 0),
+            }
+        ), patch.object(
+            servicio_funciones, "obtener_pelicula_por_id",
+            return_value={"id_pelicula": 1, "duracion_minutos": "120"}
+        ), patch.object(
+            servicio_funciones, "obtener_sala_por_id",
+            return_value={"id_sala": 1}
+        ), patch.object(
+            servicio_funciones, "obtener_funciones_por_sala",
+            return_value=[{
+                "id_funcion": 2,
+                "fecha_hora_inicio": datetime(2030, 5, 10, 19, 0),
+                "duracion_minutos": "120",
+            }]
+        ), patch.object(
+            servicio_funciones, "modificar_funcion"
+        ) as modificar:
             respuesta = self.client.put(
                 "/api/funciones/1", json=self.funcion_valida()
             )
 
-        self.assertEqual(respuesta.status_code, 400)
-        self.assertEqual(
-            respuesta.json["error"], "SOLAPAMIENTO_HORARIO"
-        )
+        self.assertEqual(respuesta.json["error"], "ERROR_VALIDACION")
+        self.assertIn("sala", respuesta.json["mensaje"].lower())
         modificar.assert_not_called()
         cn.commit.assert_not_called()
         cn.close.assert_called_once()
 
     def test_calcular_solapamiento_real_de_horarios(self):
         from datetime import datetime
-        from backend.src.repositories.funciones_repository import (
-            verificar_solapamiento_sala,
+        from backend.src.services.funciones_service import (
+        verificar_solapamiento_servicio,
         )
 
         cur = MagicMock()
@@ -357,7 +394,7 @@ class TestB08(unittest.TestCase):
             "duracion_minutos": "120",
         }]
 
-        se_solapan = verificar_solapamiento_sala(
+        se_solapan = verificar_solapamiento_servicio(
             cur, 1, datetime(2030, 5, 10, 19, 0), 90
         )
 
@@ -365,8 +402,8 @@ class TestB08(unittest.TestCase):
 
     def test_funciones_consecutivas_no_se_solapan(self):
         from datetime import datetime
-        from backend.src.repositories.funciones_repository import (
-            verificar_solapamiento_sala,
+        from backend.src.services.funciones_service import (
+        verificar_solapamiento_servicio,
         )
 
         cur = MagicMock()
@@ -376,7 +413,7 @@ class TestB08(unittest.TestCase):
             "duracion_minutos": "120",
         }]
 
-        se_solapan = verificar_solapamiento_sala(
+        se_solapan = verificar_solapamiento_servicio(
             cur, 1, datetime(2030, 5, 10, 20, 0), 90
         )
 
@@ -402,12 +439,28 @@ class TestB08(unittest.TestCase):
         datos["fecha_hora_inicio"] = "2030-05-10T20:00:00"
 
         with patch.object(
-            funciones, "contar_entradas_por_funcion", return_value=5
-        ), patch.object(funciones, "modificar_funcion") as modificar:
+            servicio_funciones, "contar_entradas_por_funcion", return_value=5
+        ), patch.object(
+            servicio_funciones, "obtener_funcion_por_id",
+            return_value={
+                "id_funcion": 1,
+                "id_pelicula": 1,
+                "id_sala": 1,
+                "fecha_hora_inicio": datetime(2030, 5, 10, 18, 0),
+            }
+        ), patch.object(
+            servicio_funciones, "obtener_pelicula_por_id",
+            return_value={"id_pelicula": 1, "duracion_minutos": "120"}
+        ), patch.object(
+            servicio_funciones, "obtener_sala_por_id",
+            return_value={"id_sala": 1}
+        ), patch.object(
+            servicio_funciones, "modificar_funcion"
+        ) as modificar:
             respuesta = self.client.put("/api/funciones/1", json=datos)
 
         self.assertEqual(respuesta.status_code, 400)
-        self.assertEqual(respuesta.json["error"], "RESTRICCION_VENTAS")
+        self.assertEqual(respuesta.json["error"], "ERROR_VALIDACION")
         modificar.assert_not_called()
         cn.commit.assert_not_called()
         cn.close.assert_called_once()
