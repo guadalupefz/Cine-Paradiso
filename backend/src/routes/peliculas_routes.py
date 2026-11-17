@@ -1,7 +1,9 @@
 from flask import Blueprint, jsonify, request
+import mysql.connector
 from backend.seguridad import admin_required
 from backend.db.db import get_connection
 from backend.src.repositories.peliculas_repository import obtener_peliculas
+from backend.src.validators.duracion_validator import minutos_de_duracion
 from backend.src.services.peliculas_service import (
     listar_peliculas_service,
     crear_pelicula_service,
@@ -63,6 +65,94 @@ def editar_pelicula_manual(id_usuario, id_pelicula):
     )
 
     return jsonify(resultado["data"]), resultado["status"]
+
+
+def escribir_pelicula_manual(id_pelicula=None):
+    datos, error = validar_pelicula(request.get_json(silent=True))
+    if error:
+        return jsonify({"error": error}), 400
+
+    conexion = None
+    try:
+        conexion = get_connection()
+        with conexion.cursor() as cursor:
+            valores = tuple(
+                datos[campo]
+                for campo in (
+                    "titulo",
+                    "sinopsis",
+                    "poster",
+                    "duracion_minutos",
+                    "clasificacion",
+                    "genero",
+                )
+            )
+
+            if id_pelicula is None:
+                cursor.execute(
+                    "SELECT id_pelicula FROM pelicula WHERE titulo = %s",
+                    (datos["titulo"],),
+                )
+                if cursor.fetchone() is not None:
+                    return jsonify({
+                        "error": "Ya existe una película con ese título"
+                    }), 409
+
+                cursor.execute(
+                    "INSERT INTO pelicula "
+                    "(titulo, sinopsis, poster, duracion_minutos, "
+                    "clasificacion, genero) VALUES (%s,%s,%s,%s,%s,%s)",
+                    valores,
+                )
+                id_pelicula = cursor.lastrowid
+                estado = 201
+            else:
+                cursor.execute(
+                    "SELECT id_pelicula, duracion_minutos FROM pelicula "
+                    "WHERE id_pelicula = %s FOR UPDATE",
+                    (id_pelicula,),
+                )
+                pelicula_actual = cursor.fetchone()
+                if pelicula_actual is None:
+                    return jsonify({"error": "Película inexistente"}), 404
+
+                try:
+                    duracion_actual = minutos_de_duracion(pelicula_actual[1])
+                except ValueError:
+                    duracion_actual = None
+
+                if duracion_actual != datos["duracion_minutos"]:
+                    cursor.execute(
+                        "SELECT id_funcion FROM funcion "
+                        "WHERE id_pelicula = %s LIMIT 1",
+                        (id_pelicula,),
+                    )
+                    if cursor.fetchone() is not None:
+                        return jsonify({
+                            "error": "La película tiene funciones programadas. "
+                                     "Revisá su programación antes de cambiar la duración."
+                        }), 409
+
+                cursor.execute(
+                    "UPDATE pelicula SET "
+                    "titulo=%s, sinopsis=%s, poster=%s, duracion_minutos=%s, "
+                    "clasificacion=%s, genero=%s WHERE id_pelicula=%s",
+                    valores + (id_pelicula,),
+                )
+                estado = 200
+
+        conexion.commit()
+        return jsonify({
+            "mensaje": "Película guardada",
+            "id_pelicula": id_pelicula,
+        }), estado
+    except mysql.connector.Error:
+        if conexion is not None:
+            conexion.rollback()
+        return jsonify({"error": "No se pudo guardar la película"}), 500
+    finally:
+        if conexion is not None:
+            conexion.close()
     
 @peliculas_bp.route("/peliculas/omdb/buscar", methods=["GET"])
 @admin_required

@@ -137,6 +137,7 @@ class TestB08(unittest.TestCase):
     # FUNCIONES
 
     def test_listar_funciones(self):
+        self.base(funciones)
         with patch.object(
             funciones,
             "listar_funciones_servicio",
@@ -148,6 +149,7 @@ class TestB08(unittest.TestCase):
         self.assertEqual(respuesta.json, [])
 
     def test_crear_funcion_correctamente(self):
+        self.base(funciones)
         with patch.object(
             funciones, "crear_funcion_servicio", return_value=37
         ) as crear:
@@ -172,6 +174,7 @@ class TestB08(unittest.TestCase):
         crear.assert_not_called()
 
     def test_crear_funcion_con_pelicula_inexistente(self):
+        self.base(funciones)
         with patch.object(
             funciones,
             "crear_funcion_servicio",
