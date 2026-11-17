@@ -1,19 +1,19 @@
-from flask import Blueprint, jsonify, request
 import mysql.connector
 from mysql.connector import Error as MySQLError
+from flask import Blueprint, jsonify, request
 
 from backend.seguridad import admin_required
 from backend.db.db import get_connection
-
 from backend.src.services.funciones_service import (
     listar_funciones_servicio,
+    consultar_cartelera_servicio,
     crear_funcion_servicio,
     modificar_funcion_servicio,
 )
-
-from backend.src.repositories.funciones_repository import obtener_cartelera
-
-from backend.src.validators.funciones_validator import  validar_datos_funcion
+from backend.src.validators.funciones_validator import (
+    validar_datos_funcion,
+    obtener_campos_faltantes_funcion,
+)
 
 
 funciones_bp = Blueprint("funciones", __name__)
@@ -120,7 +120,7 @@ def consultar_cartelera():
         conn = get_connection()
 
         with conn.cursor(dictionary=True) as cursor:
-            cartelera = obtener_cartelera(cursor)
+            cartelera = consultar_cartelera_servicio(cursor)
 
         return jsonify({"cartelera": cartelera}), 200
 
@@ -151,21 +151,7 @@ def actualizar_funcion(id_usuario, id_funcion):
         }), 400
 
     data = request.get_json(silent=True)
-
-    if not isinstance(data, dict):
-        return jsonify({
-            "error": "JSON_INVALIDO",
-            "mensaje": "Se requiere un cuerpo JSON válido.",
-        }), 400
-
-    campos = [
-        "id_pelicula",
-        "id_sala",
-        "fecha_hora_inicio",
-        "precio_base",
-    ]
-
-    faltantes = [campo for campo in campos if campo not in data]
+    faltantes = obtener_campos_faltantes_funcion(data)
 
     if faltantes:
         return jsonify({
