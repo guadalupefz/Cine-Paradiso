@@ -4,6 +4,7 @@ from flask import Blueprint, jsonify
 
 from backend.db.db import get_connection
 from backend.src.repositories.butacas_repository import obtener_butacas_por_funcion
+from backend.src.repositories.funciones_repository import existe_funcion
 
 mis_rutas = Blueprint('butacas', __name__)
 
@@ -23,12 +24,7 @@ def consultar_butacas(id_usuario, id_funcion):
         conn = get_connection()
 
         with conn.cursor(dictionary=True) as cursor:
-            cursor.execute(
-                "SELECT id_funcion FROM funcion WHERE id_funcion = %s",
-                (id_funcion,)
-            )
-
-            if cursor.fetchone() is None:
+            if not existe_funcion(cursor, id_funcion):
                 return jsonify({
                     "error": "FUNCION_NO_ENCONTRADA",
                     "mensaje": "No existe una función con ese ID."

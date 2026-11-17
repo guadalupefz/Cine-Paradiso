@@ -87,4 +87,10 @@ def verificar_solapamiento_sala(cursor, id_sala, fecha_hora_inicio, duracion_nue
         if inicio_nueva < fin_existente and fin_nueva > inicio_existente:
             return True
             
-    return False 
+    return False
+
+def existe_funcion(cursor, id_funcion):
+    query = "SELECT id_funcion FROM funcion WHERE id_funcion = %s"
+    cursor.execute(query, (id_funcion,))
+    return cursor.fetchone() is not None
+
