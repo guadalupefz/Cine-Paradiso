@@ -1,60 +1,160 @@
-from backend.db.db import get_connection
+from datetime import datetime, timedelta
+
 from backend.src.validators.duracion_validator import minutos_de_duracion
-from backend.src.repositories.funciones_repository import (obtener_funciones, 
-                                                           crear_funcion, 
-                                                           contar_entradas_por_funcion, 
-                                                           verificar_solapamiento_sala)
+from backend.src.repositories.funciones_repository import (
+    obtener_funciones,
+    obtener_funciones_por_sala,
+    obtener_funcion_por_id,
+    obtener_pelicula_por_id,
+    obtener_sala_por_id,
+    crear_funcion,
+    modificar_funcion,
+    contar_entradas_por_funcion,
+)
 
-#Devuelve lista de diccionarios
-def listar_funciones_servicio(solo_vigentes=False):
 
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
+def listar_funciones_servicio(cursor, solo_vigentes=False):
+    return obtener_funciones(cursor, solo_vigentes=solo_vigentes)
+
+
+def validar_duracion_pelicula(pelicula):
+    if not pelicula:
+        raise ValueError("La película especificada no existe.")
 
     try:
-        funciones = obtener_funciones(cursor, solo_vigentes=solo_vigentes)
-        return funciones
+        duracion = minutos_de_duracion(pelicula["duracion_minutos"])
+    except (TypeError, ValueError) as error:
+        raise ValueError("La duración de la película no es válida.") from error
 
-    finally:
-        cursor.close()
-        conn.close()
+    if duracion <= 0:
+        raise ValueError("La duración de la película debe ser positiva.")
 
-#Devuelve nuevo ID
-def crear_funcion_servicio(data):
-    conn = get_connection()
-    cursor = conn.cursor(dictionary=True)
-    
-    try:
-        id_pelicula = data.get('id_pelicula')
-        id_sala = data.get('id_sala')
-        fecha_hora_inicio = data.get('fecha_hora_inicio')
-        precio_base = data.get('precio_base')
-        cursor.execute("SELECT duracion_minutos FROM pelicula WHERE id_pelicula = %s", (id_pelicula,))
-        peli = cursor.fetchone()
+    return duracion
 
-        if not peli:
-            raise ValueError("La película especificada no existe.")
-            
+
+def verificar_solapamiento_servicio(
+    cursor, id_sala, fecha_hora_inicio, duracion_minutos,
+    id_funcion_excluir=None
+):
+    if isinstance(fecha_hora_inicio, str):
+        inicio_nueva = datetime.fromisoformat(
+            fecha_hora_inicio.replace(" ", "T")
+        )
+    else:
+        inicio_nueva = fecha_hora_inicio
+
+    fin_nueva = inicio_nueva + timedelta(minutes=duracion_minutos)
+
+    funciones_existentes = obtener_funciones_por_sala(
+        cursor, id_sala, id_funcion_excluir
+    )
+
+    for funcion in funciones_existentes:
+        inicio_existente = funcion["fecha_hora_inicio"]
+
         try:
-            duracion_minutos = minutos_de_duracion(peli["duracion_minutos"])
-        except (TypeError, ValueError):
-            raise ValueError("La duración de la película no es válida.")
+            duracion_existente = minutos_de_duracion(
+                funcion["duracion_minutos"]
+            )
+        except (TypeError, ValueError) as error:
+            raise ValueError(
+                "La duración de una película existente no es válida."
+            ) from error
 
-        if duracion_minutos <= 0:
-            raise ValueError("La duración de la película debe ser positiva.")
+        if duracion_existente <= 0:
+            raise ValueError(
+                "La duración de una película existente debe ser positiva."
+            )
 
-        if verificar_solapamiento_sala(cursor, id_sala, fecha_hora_inicio, duracion_minutos):
-            raise ValueError("La sala ya se encuentra ocupada en ese rango horario por otra función.")
+        fin_existente = inicio_existente + timedelta(
+            minutes=duracion_existente
+        )
 
-        nuevo_id = crear_funcion(cursor, id_pelicula, id_sala, fecha_hora_inicio, precio_base)
-        conn.commit()
+        if inicio_nueva < fin_existente and fin_nueva > inicio_existente:
+            return True
 
-        return nuevo_id
-        
-    except Exception as e:
-        conn.rollback()
-        raise e
-        
-    finally:
-        cursor.close()
-        conn.close()
+    return False
+
+
+def crear_funcion_servicio(cursor, data):
+    id_pelicula = data["id_pelicula"]
+    id_sala = data["id_sala"]
+    fecha_hora_inicio = data["fecha_hora_inicio"]
+    precio_base = data["precio_base"]
+
+    pelicula = obtener_pelicula_por_id(cursor, id_pelicula)
+    duracion = validar_duracion_pelicula(pelicula)
+
+    if not obtener_sala_por_id(cursor, id_sala):
+        raise ValueError("La sala especificada no existe.")
+
+    if verificar_solapamiento_servicio(
+        cursor, id_sala, fecha_hora_inicio, duracion
+    ):
+        raise ValueError(
+            "La sala ya se encuentra ocupada en ese rango horario por otra función."
+        )
+
+    return crear_funcion(
+        cursor, id_pelicula, id_sala, fecha_hora_inicio, precio_base
+    )
+
+
+def modificar_funcion_servicio(cursor, id_funcion, data):
+    id_pelicula = data["id_pelicula"]
+    id_sala = data["id_sala"]
+    fecha_hora_inicio = data["fecha_hora_inicio"]
+    precio_base = data["precio_base"]
+
+    funcion_actual = obtener_funcion_por_id(cursor, id_funcion)
+
+    if not funcion_actual:
+        raise LookupError("No existe una función con ese ID.")
+
+    pelicula = obtener_pelicula_por_id(cursor, id_pelicula)
+
+    if not pelicula:
+        raise ValueError("No existe la película indicada.")
+
+    if not obtener_sala_por_id(cursor, id_sala):
+        raise ValueError("No existe la sala indicada.")
+
+    entradas_vendidas = contar_entradas_por_funcion(cursor, id_funcion)
+
+    horario_actual = funcion_actual["fecha_hora_inicio"]
+    horario_nuevo = datetime.fromisoformat(
+        str(fecha_hora_inicio).replace(" ", "T")
+    )
+
+    if entradas_vendidas > 0:
+        if (
+            id_pelicula != funcion_actual["id_pelicula"]
+            or id_sala != funcion_actual["id_sala"]
+            or horario_nuevo != horario_actual
+        ):
+            raise ValueError(
+                "No se puede modificar la película, la sala ni el horario "
+                "porque ya existen entradas vendidas para esta función."
+            )
+
+    duracion = validar_duracion_pelicula(pelicula)
+
+    if verificar_solapamiento_servicio(
+        cursor,
+        id_sala,
+        horario_nuevo,
+        duracion,
+        id_funcion_excluir=id_funcion,
+    ):
+        raise ValueError(
+            "La sala ya se encuentra ocupada en ese rango horario por otra función."
+        )
+
+    return modificar_funcion(
+        cursor,
+        id_funcion,
+        id_pelicula,
+        id_sala,
+        horario_nuevo,
+        precio_base,
+    )
