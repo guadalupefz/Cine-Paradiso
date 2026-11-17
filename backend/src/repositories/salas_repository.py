@@ -27,3 +27,19 @@ def eliminar_sala_y_butacas(cursor, id_sala):
     cursor.execute("DELETE FROM butaca WHERE id_sala = %s", (id_sala,))
     cursor.execute("DELETE FROM sala WHERE id_sala = %s", (id_sala,))
     return cursor.rowcount
+
+
+def existe_local(cursor, id_local):
+    cursor.execute(
+        "SELECT id_local FROM local WHERE id_local = %s",
+        (id_local,)
+    )
+    return cursor.fetchone() is not None
+
+
+def crear_sala(cursor, id_local, nombre, capacidad):
+    cursor.execute(
+        "INSERT INTO sala (id_local, nombre, capacidad) VALUES (%s, %s, %s)",
+        (id_local, nombre, capacidad)
+    )
+    return cursor.lastrowid
