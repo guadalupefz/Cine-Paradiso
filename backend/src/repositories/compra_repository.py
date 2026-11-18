@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from backend.src.constants import (
     ESTADO_COMPRA_CONFIRMADA,
     ESTADO_COMPRA_PENDIENTE,
@@ -148,7 +150,9 @@ def actualizar_qr_entrada(cursor, id_entrada, qr_token):
     cursor.execute(query, (qr_token,))
 
 
-def obtener_entradas_por_compra(cursor, id_compra, solo_activas=False):
+def obtener_entradas_por_compra(
+    cursor, id_compra, solo_activas=False
+) -> list[dict[str, int | str | datetime | None]]:
     filtro_activas = ""
 
     if solo_activas:

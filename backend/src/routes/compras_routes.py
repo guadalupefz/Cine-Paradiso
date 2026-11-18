@@ -43,11 +43,10 @@ def obtener_comprobante_para_envio(id_compra, id_usuario):
         if conexion is not None:
             conexion.close()
 
-
 @compras_bp.route("/compras", methods=["POST"])
 @cliente_required
 def registrar_compra(id_usuario):
-    data = request.get_json(silent=True)
+    data = request.get_json(silent=True) or {}
 
     valido, errores = validar_datos_compra(data)
 
@@ -72,6 +71,13 @@ def registrar_compra(id_usuario):
             if errores:
                 conexion.rollback()
                 return jsonify(errores), 400
+
+            if resultado is None:
+                conexion.rollback()
+                return jsonify({
+                    "error": "ERROR_COMPRA",
+                    "mensaje": "No se pudo procesar la compra."
+                }), 500
 
         conexion.commit()
 
@@ -277,6 +283,13 @@ def confirmar_compra_route(id_usuario, id_compra):
 
                 return jsonify(errores), estado_http
 
+            if resultado is None:
+                conexion.rollback()
+                return jsonify({
+                    "error": "ERROR_CONFIRMAR_COMPRA",
+                    "mensaje": "No se pudo confirmar la compra."
+                }), 500
+
             if resultado.get("reserva_vencida"):
                 conexion.commit()
 
@@ -381,4 +394,3 @@ def cancelar_compra_route(id_usuario, id_compra):
     finally:
         if conexion is not None:
             conexion.close()
-

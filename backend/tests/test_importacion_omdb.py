@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 os.environ.setdefault("SECRET_KEY", "clave-ficticia")
 
-from backend.src.repositories import peliculas as repo
+from backend.src.repositories import peliculas_repository as repo
 from backend.src.services import omdb_service
 
 
