@@ -140,3 +140,28 @@ Ejecutar también `python -m unittest discover -s frontend/tests -v`. Las prueba
 - El historial frontend permite consultar compras; cancelación y entradas completas siguen dependiendo de sus endpoints.
 
 No borrar ni reordenar módulos ajenos sin revisar imports y rutas. El arranque incluye todos los Blueprints existentes, en lugar de dejarlos comentados.
+
+
+## Configurar OMDb e importar películas
+
+Cada instalación debe tener su propia configuración privada en `.env`:
+
+```dotenv
+OMDB_API_KEY=clave_recibida_de_omdb
+```
+
+No publicar la clave ni el archivo `.env`. Reiniciar el backend al modificar esa configuración.
+
+Si la base ya existe, seleccionar la base del proyecto y ejecutar una sola vez la ampliación del campo del póster:
+
+```sql
+SOURCE backend/db/migraciones/2026_11_18_ampliar_poster.sql;
+```
+
+La ruta del archivo es relativa al directorio desde el que se inició el cliente MySQL. La migración amplía `pelicula.poster` a 2048 caracteres y conserva sus datos. No volver a ejecutar `init_db.sql` sobre la base existente. Las bases nuevas ya incluyen el campo ampliado.
+
+Desde Administración → Películas se consulta un título y se elige Importar al catálogo. El formulario utiliza GET/POST `/api/pelicula`; búsqueda, detalle e importación por IMDb ID también están disponibles en `/api/peliculas/omdb/...`. Todas estas operaciones requieren administrador.
+
+La importación devuelve 201 al crear y 200 al actualizar el mismo IMDb ID. Si la película ya tiene funciones programadas, no permite cambiar su duración al reimportar. Una respuesta incompleta o demasiado larga para el esquema se rechaza antes de guardar; sin póster se usa la imagen predeterminada existente. La duración de la ficha externa se muestra como la devuelve OMDb y se guarda como minutos enteros.
+
+La clave se utiliza en el backend. El navegador no la necesita ni debe recibirla.

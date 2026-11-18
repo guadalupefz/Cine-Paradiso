@@ -54,7 +54,7 @@
     {% if resultado_api %}
     <article class="resultado-pelicula" aria-labelledby="titulo-resultado">
         <img src="{{ poster_para_vista(resultado_api.poster) }}" alt="Póster de {{ resultado_api.titulo }}" data-poster-fallback="{{ url_for('static', filename='img/poster_sin_imagen.svg') }}" referrerpolicy="no-referrer">
-        <div><p class="seccion-peliculas">RESULTADO DE LA BÚSQUEDA</p><h4 id="titulo-resultado">{{ resultado_api.titulo }}</h4><p class="datos-ficha">{{ resultado_api.duracion_minutos or 'Duración no disponible' }}{% if resultado_api.duracion_minutos %} min{% endif %} · {{ resultado_api.clasificacion or 'Sin clasificación' }} · {{ resultado_api.genero or 'Sin género' }}</p><p class="sinopsis-resultado">{{ resultado_api.sinopsis or 'Sin sinopsis disponible.' }}</p>
+        <div><p class="seccion-peliculas">RESULTADO DE LA BÚSQUEDA</p><h4 id="titulo-resultado">{{ resultado_api.titulo }}</h4><p class="datos-ficha">{{ resultado_api.duracion_minutos or resultado_api.duracion or 'Duración no disponible' }}{% if resultado_api.duracion_minutos %} min{% endif %} · {{ resultado_api.clasificacion or 'Sin clasificación' }} · {{ resultado_api.genero or 'Sin género' }}</p><p class="sinopsis-resultado">{{ resultado_api.sinopsis or 'Sin sinopsis disponible.' }}</p>
             <form method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><input type="hidden" name="accion" value="importar"><input type="hidden" name="titulo" value="{{ busqueda_api }}"><button class="accion-principal" type="submit">Importar al catálogo</button></form>
         </div>
     </article>

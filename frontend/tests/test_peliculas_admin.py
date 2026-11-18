@@ -100,6 +100,15 @@ class PeliculasAdmin(unittest.TestCase):
         self.assertEqual(respuesta.status_code, 302)
         self.assertIn(("POST", "/pelicula", {"params": {"titulo": "Cinema Paradiso"}}), self.llamadas)
 
+    def test_busqueda_muestra_duracion_textual_recibida_de_omdb(self):
+        datos = {**self.ficha, "duracion": "136 min"}
+        datos.pop("duracion_minutos")
+        self.resultado_externo = (datos, 200)
+        respuesta = self.post(accion="buscar", titulo="The Matrix")
+        self.assertEqual(respuesta.status_code, 200)
+        self.assertIn("136 min", respuesta.text)
+        self.assertNotIn("Duración no disponible", respuesta.text)
+
     def test_importacion_duplicada_legacy_no_anuncia_exito(self):
         self.resultado_externo = ({" Error": "La película ya se encuentra cargada"}, 200)
         respuesta = self.post(accion="importar", titulo="Cinema Paradiso")
