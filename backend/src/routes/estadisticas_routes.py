@@ -1,6 +1,7 @@
 import mysql.connector
 from flask import Blueprint, jsonify, request
 
+from backend.db.db import get_connection
 from backend.seguridad import admin_required
 from backend.src.validators.estadisticas_validator import validar_filtros_estadisticas
 from backend.src.services.estadisticas_service import (
@@ -22,8 +23,16 @@ def consultar_estadisticas_ventas(id_usuario):
             "mensaje": error
         }), 400
 
+    conexion = None
+
     try:
-        estadisticas = consultar_ventas_service(desde, hasta, id_local)
+        conexion = get_connection()
+
+        with conexion.cursor(dictionary=True) as cursor:
+            estadisticas = consultar_ventas_service(
+                cursor, desde, hasta, id_local
+            )
+
         return jsonify(estadisticas), 200
 
     except mysql.connector.Error:
@@ -38,6 +47,10 @@ def consultar_estadisticas_ventas(id_usuario):
             "mensaje": "Ocurrió un error interno al consultar las estadísticas."
         }), 500
 
+    finally:
+        if conexion is not None:
+            conexion.close()
+
 
 @estadisticas_bp.route("/estadisticas/ocupacion", methods=["GET"])
 @admin_required
@@ -50,8 +63,16 @@ def consultar_estadisticas_ocupacion(id_usuario):
             "mensaje": error
         }), 400
 
+    conexion = None
+
     try:
-        estadisticas = consultar_ocupacion_service(desde, hasta, id_local)
+        conexion = get_connection()
+
+        with conexion.cursor(dictionary=True) as cursor:
+            estadisticas = consultar_ocupacion_service(
+                cursor, desde, hasta, id_local
+            )
+
         return jsonify(estadisticas), 200
 
     except mysql.connector.Error:
@@ -65,3 +86,7 @@ def consultar_estadisticas_ocupacion(id_usuario):
             "error": "ERROR_SERVIDOR",
             "mensaje": "Ocurrió un error interno al consultar las estadísticas."
         }), 500
+
+    finally:
+        if conexion is not None:
+            conexion.close()
