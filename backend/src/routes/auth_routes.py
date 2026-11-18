@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, session
 from flask_jwt_extended import create_access_token, get_jwt, jwt_required
 from backend.autenticacion import revocar_token
 import mysql.connector
-from backend.seguridad import cualquier_logueado
+from backend.seguridad import cualquier_logueado, limitar
 from backend.db.db import get_connection
 from backend.src.validators.auth_validator import validar_datos_registro, validar_datos_login
 from backend.src.services.auth_service import (registrar_usuario, autenticar_usuario,
@@ -12,6 +12,7 @@ auth_bp = Blueprint('auth', __name__)
 
 
 @auth_bp.route('/auth/registro', methods=['POST'])
+@limitar()
 def registro():
     conn = None
     cursor = None
@@ -75,6 +76,7 @@ def registro():
 
 
 @auth_bp.post("/auth/login")
+@limitar()
 def login():
     conn = None
     cursor = None

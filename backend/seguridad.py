@@ -1,46 +1,40 @@
 """Autenticacion JWT y permisos consultados en la base de datos."""
 import time
 from functools import wraps
+from math import ceil
+from threading import Lock
 import mysql.connector
-from flask import jsonify, request
+from flask import current_app, jsonify, request
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 from backend.db.db import get_connection
 
 def crear_limitador():
-    """
-    Función constructora que encapsula las estructuras de datos.
-    """
-    historial_dia = {}
-    historial_hora = {}
+    """Limita intentos por ruta e IP dentro de cada instancia de la aplicación."""
+    bloqueo = Lock()
 
     def configurar_limite(max_dia=200, max_hora=50):
-        """
-        Esta capa recibe los parámetros específicos para cada endpoint.
-        Si no le pasas nada, usa los valores por defecto (200 al día, 50 por hora).
-        """
         def decorador(f):
             @wraps(f)
             def funcion_decorada(*args, **kwargs):
-                ip = request.remote_addr
-                ahora = time.time()
-
-                # --- VALIDACIÓN LÍMITE DIARIO ---
-                if ip not in historial_dia:
-                    historial_dia[ip] = []
-                historial_dia[ip] = [t for t in historial_dia[ip] if ahora - t < 86400]
-                if len(historial_dia[ip]) >= max_dia:
-                    return jsonify({"error": f"Límite diario superado (Máx {max_dia})"}), 429
-
-                # --- VALIDACIÓN LÍMITE POR HORA ---
-                if ip not in historial_hora:
-                    historial_hora[ip] = []
-                historial_hora[ip] = [t for t in historial_hora[ip] if ahora - t < 3600]
-                if len(historial_hora[ip]) >= max_hora:
-                    return jsonify({"error": f"Límite por hora superado (Máx {max_hora})"}), 429
-
-                # Registrar accesos
-                historial_dia[ip].append(ahora)
-                historial_hora[ip].append(ahora)
+                clave = (request.endpoint, request.remote_addr)
+                with bloqueo:
+                    ahora = time.monotonic()
+                    historiales = current_app.extensions.setdefault("limites_solicitudes", {})
+                    accesos = [t for t in historiales.get(clave, []) if ahora - t < 86400]
+                    historiales[clave] = accesos
+                    accesos_hora = [t for t in accesos if ahora - t < 3600]
+                    espera = 0
+                    if len(accesos) >= max_dia:
+                        espera = max(espera, ceil(86400 - (ahora - accesos[0])))
+                    if len(accesos_hora) >= max_hora:
+                        espera = max(espera, ceil(3600 - (ahora - accesos_hora[0])))
+                    if espera:
+                        return (
+                            jsonify({"error": "Demasiados intentos. Intentá nuevamente más tarde."}),
+                            429,
+                            {"Retry-After": str(espera)},
+                        )
+                    accesos.append(ahora)
 
                 return f(*args, **kwargs)
             return funcion_decorada
@@ -48,15 +42,7 @@ def crear_limitador():
 
     return configurar_limite
 
-# Inicializamos la fábrica de límites
 limitar = crear_limitador()
-
-
-# @limitar()
-
-# @limitar(max_dia=1000, max_hora=300)
-
-
 
 
 def roles_required(allowed_roles):

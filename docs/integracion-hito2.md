@@ -77,6 +77,8 @@ Ver [propuesta JWT y correcciones](propuesta-jwt-y-correcciones.md) para prepara
 
 401 significa falta de autenticación;403, rol insuficiente;404 también oculta compras ajenas. Los formularios del frontend incluyen un token CSRF. Con HTTPS habilitar `COOKIE_SECURE=1`; no activar debug en una entrega desplegada.
 
+Login y registro limitan los intentos por IP y endpoint: hasta 50 por hora y 200 en las últimas 24 horas. El exceso devuelve 429 con la cabecera Retry-After en segundos. También cuentan los intentos inválidos. Los contadores de ambas operaciones son independientes y las consultas de cartelera o compras no consumen ese cupo. Se guardan en memoria por instancia de aplicación y se reinician con el proceso; no son un límite compartido entre varios procesos. Se utiliza la IP que recibe directamente el backend: si el frontend funciona como intermediario, sus usuarios pueden compartir ese cupo. No se confía en cabeceras de IP suministradas por el cliente.
+
 ## Funcionalidad integrada
 
 - Login, logout, perfil y consulta de compras propias con detalle de servicios.
