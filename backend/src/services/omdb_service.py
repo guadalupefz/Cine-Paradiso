@@ -5,7 +5,7 @@ from pathlib import Path
 import requests
 from deep_translator import MyMemoryTranslator
 
-from backend.src.repositories.peliculas import guardar_pelicula
+from backend.src.repositories.peliculas_repository import guardar_pelicula
 from backend.src.validators.duracion_validator import minutos_de_duracion
 
 
