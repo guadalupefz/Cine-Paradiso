@@ -382,27 +382,3 @@ def cancelar_compra_route(id_usuario, id_compra):
         if conexion is not None:
             conexion.close()
 
-
-#@compras_bp.route("/mis-entradas", methods=["GET"])
-#@jwt_required()
-#def mis_compras():
-    #id_usuario = int(get_jwt_identity())
-    #conexion = None
-    #try:
-        #conexion = get_connection()
-        #with conexion.cursor(dictionary=True) as cursor:
-            # Obtener datos del usuario para la cabecera
-            #cursor.execute("SELECT id_usuario, nombre, email FROM usuario WHERE id_usuario = %s", (id_usuario,))
-            #usuario = cursor.fetchone()
-
-            # Obtener las compras/entradas del usuario
-            #compras = obtener_compras_por_usuario(cursor, id_usuario)
-
-        #return render_template("mis_entradas.html", usuario=usuario, compras=compras)
-
-    #except mysql.connector.Error as e:
-        #print("Error de base de datos:", e)
-        #return "Error al cargar la página", 500
-    #finally:
-        #if conexion:
-            #conexion.close()
