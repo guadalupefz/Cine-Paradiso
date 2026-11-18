@@ -147,7 +147,7 @@ def actualizar_qr_entrada(cursor, id_entrada, qr_token):
         SET qr_token = %s
         WHERE id_entrada = %s
     """
-    cursor.execute(query, (qr_token,))
+    cursor.execute(query, (qr_token, id_entrada))
 
 
 def obtener_entradas_por_compra(
