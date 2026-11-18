@@ -1,5 +1,6 @@
 
 from flask import Blueprint, jsonify, request
+from backend.db.db import get_connection
 
 from backend.seguridad import admin_required
 
@@ -29,8 +30,16 @@ peliculas_bp = Blueprint("peliculas", __name__)
 
 @peliculas_bp.route("/peliculas", methods=["GET"])
 def listar_peliculas():
-    resultado = listar_peliculas_service()
-    return jsonify(resultado["data"]), resultado["status"]
+    conn = None
+   
+    try:
+        conn = get_connection()
+        with conn.cursor() as cursor:
+            resultado = listar_peliculas_service(cursor)
+            return jsonify(resultado["data"]), resultado["status"]
+    finally:
+        if conn is not None:
+            conn.close()
 
 @peliculas_bp.route("/peliculas", methods=["POST"])
 @admin_required
