@@ -3,15 +3,9 @@ from typing import cast
 
 from backend.db.db import get_connection
 
-def obtener_peliculas():
-    conexion = None
-
-    try:
-        conexion = get_connection()
-
-        with conexion.cursor(dictionary=True, buffered=True) as cursor:
-            cursor.execute("""
-                SELECT
+def obtener_peliculas(cursor):
+    cursor.execute("""
+                    SELECT
                     id_pelicula,
                     id_externo_api,
                     titulo,
@@ -20,16 +14,11 @@ def obtener_peliculas():
                     duracion_minutos,
                     clasificacion,
                     genero
-                FROM pelicula
-                ORDER BY titulo ASC
-            """)
+                    FROM pelicula
+                    ORDER BY titulo ASC
+                    """)
 
-            return cursor.fetchall()
-
-    finally:
-        if conexion is not None:
-            conexion.close()
-
+    return cursor.fetchall()
 
 def buscar_pelicula_por_titulo(titulo):
     conexion = None
