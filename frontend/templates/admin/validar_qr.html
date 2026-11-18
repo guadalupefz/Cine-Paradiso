@@ -4,25 +4,30 @@
 
 {% block content %}
 
-<h2>Validar QR</h2>
+<h2>Validación de entradas QR</h2>
+
 <button type="button" id="btn-escanear">
     Escanear QR con cámara
 </button>
 
 <div id="reader" style="width:300px; margin-top:15px;"></div>
 
-<form method="POST"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+<form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
     <div class="campo_formulario">
-        <label for="qr_token">Codigo de entrada</label>
-        <input type="text" id="qr_token" name="qr_token">
+        <label for="id_funcion">ID de función</label>
+        <input type="number" id="id_funcion" name="id_funcion" value="{{ request.form.get('id_funcion', '') }}"
+        placeholder="Ej: 15" required min="1" step="1">
     </div>
 
     <div class="campo_formulario">
-        <label for="id_funcion">ID de funcion</label>
-        <input type="number" id="id_funcion" name="id_funcion">
+        <label for="qr_token">Código de entrada</label>
+        <input type="text" id="qr_token" name="qr_token" value="{{ request.form.get('qr_token', '') }}"
+        placeholder="Token QR">
     </div>
 
-    <button type="submit">Validar QR</button>
+    <button type="submit">Validar ingreso</button>
 </form>
 
 {% if resultado %}
@@ -32,9 +37,12 @@
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <script>
-document.getElementById("btn-escanear").addEventListener("click", function () {
+let scanner = null;
 
-    const scanner = new Html5Qrcode("reader");
+document.getElementById("btn-escanear").addEventListener("click", function () {
+    if (!scanner) {
+        scanner = new Html5Qrcode("reader");
+    }
 
     scanner.start(
         { facingMode: "environment" },
@@ -43,18 +51,14 @@ document.getElementById("btn-escanear").addEventListener("click", function () {
             qrbox: 250
         },
         function(decodedText) {
-
             document.getElementById("qr_token").value = decodedText;
-
             scanner.stop();
-
             alert("QR leído correctamente");
         }
     ).catch(function(error) {
         console.error(error);
         alert("No se pudo abrir la cámara");
     });
-
 });
 </script>
 {% endblock %}
