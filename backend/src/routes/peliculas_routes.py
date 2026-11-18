@@ -1,4 +1,3 @@
-
 from flask import Blueprint, jsonify, request
 
 from backend.seguridad import admin_required
