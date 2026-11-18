@@ -24,7 +24,7 @@ def validar_servicio(datos):
         raise ValueError("Nombre inválido")
 
     if not isinstance(descripcion, str) or not descripcion.strip() or len(descripcion.strip()) > 250:
-        raise ValueError("La descripción es inválida o supera los 250 caracteres")
+        raise ValueError("La descripción is inválida o supera los 250 caracteres")
 
     if not isinstance(valor, str):
         raise ValueError("Precio inválido")
