@@ -2,7 +2,7 @@ import os
 import sys
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 os.environ.setdefault("SECRET_KEY", "clave-ficticia")
@@ -26,21 +26,9 @@ class ConexionOMDbFicticia:
     def __init__(self):
         self.filas = {}
         self.siguiente_id = 1
-        self.commit_count = 0
-        self.rollback_count = 0
-        self.cerrada = False
 
     def cursor(self, **kwargs):
         return CursorOMDbFicticio(self)
-
-    def commit(self):
-        self.commit_count += 1
-
-    def rollback(self):
-        self.rollback_count += 1
-
-    def close(self):
-        self.cerrada = True
 
 
 class CursorOMDbFicticio:
@@ -48,17 +36,13 @@ class CursorOMDbFicticio:
         self.conexion = conexion
         self.lastrowid = None
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, exc_type, exc, tb):
-        return False
-
     def execute(self, query, valores=None):
         query_normalizada = " ".join(query.split())
         valores = valores or ()
 
-        if query_normalizada.startswith("SELECT id_pelicula FROM pelicula WHERE id_externo_api"):
+        if query_normalizada.startswith(
+            "SELECT id_pelicula FROM pelicula WHERE id_externo_api"
+        ):
             fila = self.conexion.filas.get(valores[0])
             self._fila = {"id_pelicula": fila["id_pelicula"]} if fila else None
             return
@@ -97,124 +81,120 @@ class CursorOMDbFicticio:
 
 
 class ImportacionOMDbTest(unittest.TestCase):
-    def datos_api(self, titulo, sinopsis):
+    def datos_locales(self, titulo, sinopsis):
         return {
-            "Response": "True",
-            "imdbID": "tt0068646",
-            "Title": titulo,
-            "Plot": sinopsis,
-            "Poster": "static/img/godfather.jpg",
-            "Runtime": "175 min",
-            "Rated": "R",
-            "Genre": "Crime, Drama",
-        }
-
-    def datos_local(self, datos):
-        return {
-            "id_externo_api": datos["imdbID"],
-            "titulo": datos["Title"],
-            "sinopsis": datos["Plot"],
-            "poster": datos["Poster"],
+            "id_externo_api": "tt0068646",
+            "titulo": titulo,
+            "sinopsis": sinopsis,
+            "poster": "poster.jpg",
             "duracion_minutos": 175,
-            "clasificacion": datos["Rated"],
-            "genero": datos["Genre"],
+            "clasificacion": "R",
+            "genero": "Crime, Drama",
         }
 
-    def test_misma_pelicula_en_dos_busquedas_actualiza_un_registro(self):
+    def test_busqueda_normaliza_resultados(self):
+        with patch.dict(os.environ, {"OMDB_API_KEY": "clave-ficticia"}), patch.object(
+            omdb_service.requests,
+            "get",
+            return_value=RespuestaOMDb({
+                "Response": "True",
+                "Search": [{
+                    "imdbID": "tt0133093",
+                    "Title": "The Matrix",
+                    "Year": "1999",
+                    "Poster": "N/A",
+                }],
+                "totalResults": "1",
+            }),
+        ):
+            resultado = omdb_service.buscar_peliculas("Matrix")
+
+        self.assertEqual(resultado["pagina"], 1)
+        self.assertEqual(resultado["peliculas"][0]["id_imdb"], "tt0133093")
+        self.assertIsNone(resultado["peliculas"][0]["poster"])
+
+    def test_detalle_normaliza_pelicula(self):
+        with patch.dict(os.environ, {"OMDB_API_KEY": "clave-ficticia"}), patch.object(
+            omdb_service.requests,
+            "get",
+            return_value=RespuestaOMDb({
+                "Response": "True",
+                "imdbID": "tt0068646",
+                "Title": "The Godfather",
+                "Year": "1972",
+                "Genre": "Crime, Drama",
+                "Plot": "A crime drama.",
+                "Runtime": "175 min",
+                "Rated": "R",
+                "Poster": "poster.jpg",
+            }),
+        ):
+            pelicula = omdb_service.obtener_pelicula_por_id("tt0068646")
+
+        self.assertEqual(pelicula["id_imdb"], "tt0068646")
+        self.assertEqual(pelicula["clasificacion"], "R")
+        self.assertEqual(
+            omdb_service.preparar_pelicula_para_guardar(pelicula),
+            self.datos_locales("The Godfather", "A crime drama."),
+        )
+
+    def test_error_de_omdb_se_propaga_como_valor_invalido(self):
+        with patch.dict(os.environ, {"OMDB_API_KEY": "clave-ficticia"}), patch.object(
+            omdb_service.requests,
+            "get",
+            return_value=RespuestaOMDb({
+                "Response": "False",
+                "Error": "Movie not found!",
+            }),
+        ), self.assertRaisesRegex(ValueError, "Movie not found"):
+            omdb_service.obtener_pelicula_por_id("tt9999999")
+
+    def test_sin_api_key_devuelve_error_explicito(self):
+        with patch.dict(os.environ, {"OMDB_API_KEY": ""}), self.assertRaisesRegex(
+            ValueError, "API Key"
+        ):
+            omdb_service.buscar_peliculas("Matrix")
+
+    def test_timeout_se_propaga_como_timeout_error(self):
+        with patch.dict(os.environ, {"OMDB_API_KEY": "clave-ficticia"}), patch.object(
+            omdb_service.requests,
+            "get",
+            side_effect=omdb_service.requests.exceptions.Timeout(),
+        ), self.assertRaises(TimeoutError):
+            omdb_service.buscar_peliculas("Matrix")
+
+    def test_importar_actualiza_un_registro_por_imdb_id(self):
         conexion = ConexionOMDbFicticia()
+        primera = repo.guardar_pelicula(
+            conexion.cursor(dictionary=True),
+            self.datos_locales("The Godfather", "Aging patriarch."),
+        )
+        segunda = repo.guardar_pelicula(
+            conexion.cursor(dictionary=True),
+            self.datos_locales("El padrino", "Drama actualizado."),
+        )
 
-        with patch.object(repo, "get_connection", return_value=conexion):
-            primera = repo.guardar_pelicula(
-                self.datos_local(self.datos_api("The Godfather", "The aging patriarch"))
-            )
-            segunda = repo.guardar_pelicula(
-                self.datos_local(self.datos_api("El padrino", "Drama de mafia actualizado"))
-            )
-
-        self.assertTrue(primera["exito"])
         self.assertEqual(primera["accion"], "insertada")
-        self.assertTrue(segunda["exito"])
         self.assertEqual(segunda["accion"], "actualizada")
         self.assertEqual(len(conexion.filas), 1)
-        guardada = conexion.filas["tt0068646"]
-        self.assertEqual(guardada["id_pelicula"], primera["id"])
-        self.assertEqual(guardada["titulo"], "El padrino")
-        self.assertEqual(guardada["sinopsis"], "Drama de mafia actualizado")
-        self.assertEqual(conexion.commit_count, 2)
-        self.assertTrue(conexion.cerrada)
+        self.assertEqual(
+            conexion.filas["tt0068646"]["sinopsis"],
+            "Drama actualizado.",
+        )
 
     def test_imdb_id_faltante_no_intenta_insertar(self):
         conexion = ConexionOMDbFicticia()
-        datos = self.datos_local(self.datos_api("The Godfather", "Sinopsis"))
+        datos = self.datos_locales("The Godfather", "Sinopsis")
         datos["id_externo_api"] = None
 
-        with patch.object(repo, "get_connection", return_value=conexion):
-            resultado = repo.guardar_pelicula(datos)
+        resultado = repo.guardar_pelicula(
+            conexion.cursor(dictionary=True),
+            datos,
+        )
 
         self.assertFalse(resultado["exito"])
         self.assertEqual(resultado["error"], "OMDb no devolvió imdbID")
         self.assertEqual(len(conexion.filas), 0)
-
-    @patch.dict(os.environ, {"OMDB_API_KEY": ""}, clear=False)
-    def test_consulta_sin_api_key_devuelve_503(self):
-        datos, error, estado = omdb_service.consultar_omdb({"s": "Matrix"})
-
-        self.assertIsNone(datos)
-        self.assertEqual(estado, 503)
-        self.assertIn("no está configurada", error["error"])
-
-    @patch.dict(os.environ, {"OMDB_API_KEY": "clave-ficticia"}, clear=False)
-    @patch.object(omdb_service.requests, "get")
-    def test_busqueda_normaliza_resultados(self, get):
-        get.return_value.raise_for_status.return_value = None
-        get.return_value.json.return_value = {
-            "Response": "True",
-            "Search": [{
-                "imdbID": "tt0133093",
-                "Title": "The Matrix",
-                "Year": "1999",
-                "Poster": "N/A",
-            }],
-        }
-
-        resultado = omdb_service.buscar_peliculas_omdb_service("Matrix")
-
-        self.assertEqual(resultado["status"], 200)
-        self.assertEqual(
-            resultado["data"]["peliculas"][0]["id_externo_api"],
-            "tt0133093",
-        )
-        self.assertIsNone(resultado["data"]["peliculas"][0]["poster"])
-
-    @patch.dict(os.environ, {"OMDB_API_KEY": "clave-ficticia"}, clear=False)
-    @patch.object(omdb_service.requests, "get")
-    def test_respuesta_omdb_no_encontrada_devuelve_404(self, get):
-        get.return_value.raise_for_status.return_value = None
-        get.return_value.json.return_value = {
-            "Response": "False",
-            "Error": "Movie not found!",
-        }
-
-        datos, error, estado = omdb_service.consultar_omdb({
-            "i": "tt9999999",
-        })
-
-        self.assertIsNone(datos)
-        self.assertEqual(estado, 404)
-        self.assertEqual(error["error"], "Movie not found!")
-
-    @patch.dict(os.environ, {"OMDB_API_KEY": "clave-ficticia"}, clear=False)
-    @patch.object(omdb_service.requests, "get")
-    def test_timeout_devuelve_504(self, get):
-        get.side_effect = omdb_service.requests.exceptions.Timeout()
-
-        datos, error, estado = omdb_service.consultar_omdb({
-            "s": "Matrix",
-        })
-
-        self.assertIsNone(datos)
-        self.assertEqual(estado, 504)
-        self.assertIn("tardó", error["error"])
 
 
 if __name__ == "__main__":

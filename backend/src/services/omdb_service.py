@@ -1,6 +1,8 @@
 import os
 import requests
 
+from backend.src.validators.duracion_validator import minutos_de_duracion
+
 OMDB_URL = "https://www.omdbapi.com/"
 TIMEOUT = 10
 
@@ -60,7 +62,24 @@ def _normalizar_pelicula(datos):
         "director": datos.get("Director"),
         "reparto": datos.get("Actors"),
         "calificacion_imdb": datos.get("imdbRating"),
+        "clasificacion": datos.get("Rated"),
         "poster": poster if poster != "N/A" else None
+    }
+
+
+def preparar_pelicula_para_guardar(pelicula):
+    id_imdb = pelicula.get("id_imdb")
+    if not isinstance(id_imdb, str) or not id_imdb:
+        raise ValueError("OMDb no devolvió un identificador IMDb válido.")
+
+    return {
+        "id_externo_api": id_imdb,
+        "titulo": pelicula["titulo"],
+        "sinopsis": pelicula["sinopsis"],
+        "poster": pelicula["poster"],
+        "duracion_minutos": minutos_de_duracion(pelicula["duracion"]),
+        "clasificacion": pelicula["clasificacion"],
+        "genero": pelicula["genero"],
     }
 
 def buscar_peliculas(titulo, pagina=1):

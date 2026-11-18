@@ -8,10 +8,10 @@ from flask_jwt_extended import create_access_token
 from backend.app import app
 from backend.autenticacion import jwt
 from backend import seguridad
-from backend.src.routes import servicios_routes, peliculas_routes
+from backend.src.routes import servicios_routes
 from backend.src.validators.duracion_validator import minutos_de_duracion
 from backend.src.validators.reservas_validator import validar_datos_reserva
-from backend.src.services import reservas_service
+from backend.src.services import peliculas_service, reservas_service
 from mysql.connector import Error
 
 
@@ -92,26 +92,43 @@ class Correcciones(unittest.TestCase):
             reservas_service.crear_reserva(cursor, 8, 1, [1])
 
     def test_editar_duracion_con_funciones_rechaza_y_no_confirma(self):
-        conexion = MagicMock()
-        cursor = conexion.cursor.return_value.__enter__.return_value
-        cursor.fetchone.side_effect = [(1, "108 min"), (15,)]
         datos = {"titulo": "Prueba", "sinopsis": "Prueba", "poster": "/static/img/default.svg", "duracion_minutos": 360, "clasificacion": "ATP", "genero": "Drama"}
-        # Se prueba la escritura compartida; los permisos se prueban aparte.
-        with app.test_request_context(json=datos), patch.object(peliculas_routes, "get_connection", return_value=conexion):
-            respuesta, estado = peliculas_routes.escribir_pelicula_manual(1)
-        self.assertEqual(estado, 409)
-        conexion.commit.assert_not_called()
-        self.assertFalse(any("UPDATE pelicula" in llamada.args[0] for llamada in cursor.execute.call_args_list))
+        cursor = MagicMock()
+
+        with patch.object(
+            peliculas_service, "buscar_pelicula_por_id",
+            return_value={"id_pelicula": 1, "duracion_minutos": "108 min"},
+        ), patch.object(
+            peliculas_service, "buscar_pelicula_por_titulo", return_value=None
+        ), patch.object(
+            peliculas_service, "obtener_funcion_de_pelicula",
+            return_value={"id_funcion": 15},
+        ), patch.object(
+            peliculas_service, "editar_pelicula"
+        ) as editar:
+            resultado = peliculas_service.editar_pelicula_service(cursor, 1, datos)
+
+        self.assertEqual(resultado["status"], 409)
+        editar.assert_not_called()
 
     def test_reparar_duracion_antigua_invalida_sin_funciones(self):
-        conexion = MagicMock()
-        cursor = conexion.cursor.return_value.__enter__.return_value
-        cursor.fetchone.side_effect = [(1, "N/A"), None]
         datos = {"titulo": "Prueba", "sinopsis": "Prueba", "poster": "/static/img/default.svg", "duracion_minutos": 108, "clasificacion": "ATP", "genero": "Drama"}
-        with app.test_request_context(json=datos), patch.object(peliculas_routes, "get_connection", return_value=conexion):
-            respuesta, estado = peliculas_routes.escribir_pelicula_manual(1)
-        self.assertEqual(estado, 200)
-        conexion.commit.assert_called_once()
+        cursor = MagicMock()
+
+        with patch.object(
+            peliculas_service, "buscar_pelicula_por_id",
+            return_value={"id_pelicula": 1, "duracion_minutos": "N/A"},
+        ), patch.object(
+            peliculas_service, "buscar_pelicula_por_titulo", return_value=None
+        ), patch.object(
+            peliculas_service, "obtener_funcion_de_pelicula", return_value=None
+        ), patch.object(
+            peliculas_service, "editar_pelicula"
+        ) as editar:
+            resultado = peliculas_service.editar_pelicula_service(cursor, 1, datos)
+
+        self.assertEqual(resultado["status"], 200)
+        editar.assert_called_once_with(cursor, 1, datos)
 
 
 if __name__ == "__main__":

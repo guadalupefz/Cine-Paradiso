@@ -5,8 +5,10 @@ from backend.app import app
 from backend import seguridad
 from backend.autenticacion import jwt
 from flask_jwt_extended import create_access_token
+from mysql.connector import Error as MySQLError
 from backend.src.routes import funciones_routes as funciones
 from backend.src.routes import peliculas_routes as peliculas
+from backend.src.services import peliculas_service
 from backend.src.services import funciones_service as servicio_funciones
 
 
@@ -74,7 +76,7 @@ class TestB08(unittest.TestCase):
 
     def test_listar_peliculas(self):
         with patch.object(
-            peliculas, "obtener_peliculas", return_value=[]
+            peliculas_service, "obtener_peliculas", return_value=[]
         ):
             cn, _ = self.base(peliculas)
             respuesta = self.client.get("/api/peliculas")
@@ -120,6 +122,64 @@ class TestB08(unittest.TestCase):
 
         self.assertEqual(respuesta.status_code, 409)
         cn.commit.assert_not_called()
+        cn.rollback.assert_called_once()
+        cn.close.assert_called_once()
+
+    def test_error_de_base_de_datos_revierte_y_no_expone_detalles(self):
+        cn, cur = self.base(peliculas)
+        cur.execute.side_effect = MySQLError("detalle interno")
+
+        respuesta = self.client.post(
+            "/api/peliculas", json=self.pelicula_valida()
+        )
+
+        self.assertEqual(respuesta.status_code, 500)
+        self.assertEqual(
+            respuesta.json,
+            {"error": "No se pudo guardar la película."},
+        )
+        cn.rollback.assert_called_once()
+        cn.close.assert_called_once()
+
+    def test_importar_pelicula_omdb_guarda_en_transaccion_de_la_ruta(self):
+        cn, cur = self.base(peliculas)
+        datos_omdb = {
+            "id_imdb": "tt0068646",
+            "titulo": "El padrino",
+            "sinopsis": "Sinopsis",
+            "poster": "poster.jpg",
+            "duracion": "175 min",
+            "clasificacion": "R",
+            "genero": "Drama",
+        }
+
+        with patch.object(
+            peliculas, "obtener_pelicula_por_id", return_value=datos_omdb
+        ), patch.object(
+            peliculas,
+            "guardar_pelicula",
+            return_value={"exito": True, "id": 37, "accion": "insertada"},
+        ) as guardar:
+            respuesta = self.client.post(
+                "/api/peliculas/omdb/importar",
+                json={"imdb_id": "tt0068646"},
+            )
+
+        self.assertEqual(respuesta.status_code, 201)
+        self.assertEqual(respuesta.json["id_pelicula"], 37)
+        guardar.assert_called_once_with(
+            cur,
+            {
+                "id_externo_api": "tt0068646",
+                "titulo": "El padrino",
+                "sinopsis": "Sinopsis",
+                "poster": "poster.jpg",
+                "duracion_minutos": 175,
+                "clasificacion": "R",
+                "genero": "Drama",
+            },
+        )
+        cn.commit.assert_called_once()
         cn.close.assert_called_once()
 
     def test_modificar_pelicula_inexistente_devuelve_404(self):
@@ -132,6 +192,7 @@ class TestB08(unittest.TestCase):
 
         self.assertEqual(respuesta.status_code, 404)
         cn.commit.assert_not_called()
+        cn.rollback.assert_called_once()
         cn.close.assert_called_once()
 
     # FUNCIONES
@@ -272,7 +333,11 @@ class TestB08(unittest.TestCase):
 
     def test_modificar_pelicula_correctamente(self):
         cn, cur = self.base(peliculas)
-        cur.fetchone.return_value = (1, "120")
+        cur.fetchone.side_effect = [
+            {"id_pelicula": 1, "duracion_minutos": "120"},
+            None,
+            None,
+        ]
 
         respuesta = self.client.put(
             "/api/peliculas/1", json=self.pelicula_valida()

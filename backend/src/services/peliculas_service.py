@@ -1,109 +1,66 @@
-import mysql.connector
-
-from backend.db.db import get_connection
-from backend.src.repositories.peliculas_repository import obtener_peliculas
+from backend.src.repositories.peliculas_repository import (
+    buscar_pelicula_por_id,
+    buscar_pelicula_por_titulo,
+    crear_pelicula,
+    editar_pelicula,
+    obtener_funcion_de_pelicula,
+    obtener_peliculas,
+)
 from backend.src.validators.duracion_validator import minutos_de_duracion
 
 
-def listar_peliculas_service(get_connection=None, obtener_peliculas=None):
-    conexion = None
-    get_connection = get_connection or globals()["get_connection"]
-    obtener_peliculas = obtener_peliculas or globals()["obtener_peliculas"]
-    try:
-        conexion = get_connection()
-        with conexion.cursor(dictionary=True, buffered=True) as cursor:
-            peliculas = obtener_peliculas(cursor)
-        return {"data": {"peliculas": peliculas}, "status": 200}
-    except mysql.connector.Error:
-        return {"data": {"error": "No se pudieron cargar las películas."}, "status": 500}
-    finally:
-        if conexion is not None:
-            conexion.close()
+def listar_peliculas_service(cursor):
+    return {"data": {"peliculas": obtener_peliculas(cursor)}, "status": 200}
 
 
-def crear_pelicula_service(datos, get_connection=None):
-    conexion = None
-    get_connection = get_connection or globals()["get_connection"]
-    try:
-        conexion = get_connection()
-        with conexion.cursor(dictionary=True, buffered=True) as cursor:
-            cursor.execute(
-                "SELECT id_pelicula FROM pelicula WHERE titulo = %s",
-                (datos["titulo"],),
-            )
-            if cursor.fetchone():
-                return {
-                    "data": {"error": "Ya existe una película con ese título"},
-                    "status": 409,
-                }
-            cursor.execute(
-                """
-                INSERT INTO pelicula
-                (titulo, sinopsis, poster, duracion_minutos, clasificacion, genero)
-                VALUES (%s, %s, %s, %s, %s, %s)
-                """,
-                (
-                    datos["titulo"],
-                    datos["sinopsis"],
-                    datos["poster"],
-                    datos["duracion_minutos"],
-                    datos["clasificacion"],
-                    datos["genero"],
-                ),
-            )
-            id_pelicula = cursor.lastrowid
-        conexion.commit()
+def crear_pelicula_service(cursor, datos):
+    if buscar_pelicula_por_titulo(cursor, datos["titulo"]):
         return {
-            "data": {"mensaje": "Película creada", "id_pelicula": id_pelicula},
-            "status": 201,
+            "data": {"error": "Ya existe una película con ese título"},
+            "status": 409,
         }
-    except mysql.connector.Error:
-        if conexion is not None:
-            conexion.rollback()
-        return {"data": {"error": "No se pudo guardar la película"}, "status": 500}
-    finally:
-        if conexion is not None:
-            conexion.close()
+
+    id_pelicula = crear_pelicula(cursor, datos)
+    return {
+        "data": {"mensaje": "Película creada", "id_pelicula": id_pelicula},
+        "status": 201,
+    }
 
 
-def editar_pelicula_service(id_pelicula, datos, get_connection=None):
-    conexion = None
-    get_connection = get_connection or globals()["get_connection"]
-    try:
-        conexion = get_connection()
-        with conexion.cursor(dictionary=True, buffered=True) as cursor:
-            cursor.execute(
-                "SELECT id_pelicula FROM pelicula WHERE id_pelicula = %s",
-                (id_pelicula,),
-            )
-            if not cursor.fetchone():
-                return {"data": {"error": "Película no encontrada"}, "status": 404}
-            cursor.execute(
-                """
-                UPDATE pelicula
-                SET titulo=%s, sinopsis=%s, poster=%s, duracion_minutos=%s,
-                    clasificacion=%s, genero=%s
-                WHERE id_pelicula=%s
-                """,
-                (
-                    datos["titulo"],
-                    datos["sinopsis"],
-                    datos["poster"],
-                    datos["duracion_minutos"],
-                    datos["clasificacion"],
-                    datos["genero"],
-                    id_pelicula,
-                ),
-            )
-        conexion.commit()
+def editar_pelicula_service(cursor, id_pelicula, datos):
+    pelicula = buscar_pelicula_por_id(cursor, id_pelicula)
+    if not pelicula:
+        return {"data": {"error": "Película no encontrada"}, "status": 404}
+
+    duplicada = buscar_pelicula_por_titulo(cursor, datos["titulo"])
+    if duplicada and duplicada["id_pelicula"] != id_pelicula:
         return {
-            "data": {"mensaje": "Película actualizada", "id_pelicula": id_pelicula},
-            "status": 200,
+            "data": {"error": "Ya existe una película con ese título"},
+            "status": 409,
         }
-    except mysql.connector.Error:
-        if conexion is not None:
-            conexion.rollback()
-        return {"data": {"error": "No se pudo actualizar la película"}, "status": 500}
-    finally:
-        if conexion is not None:
-            conexion.close()
+
+    try:
+        duracion_actual = minutos_de_duracion(pelicula["duracion_minutos"])
+    except ValueError:
+        duracion_actual = None
+
+    if duracion_actual != datos["duracion_minutos"]:
+        if obtener_funcion_de_pelicula(cursor, id_pelicula):
+            return {
+                "data": {
+                    "error": (
+                        "No se puede cambiar la duración de una película "
+                        "con funciones programadas."
+                    )
+                },
+                "status": 409,
+            }
+
+    editar_pelicula(cursor, id_pelicula, datos)
+    return {
+        "data": {
+            "mensaje": "Película actualizada",
+            "id_pelicula": id_pelicula,
+        },
+        "status": 200,
+    }
