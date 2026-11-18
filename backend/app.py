@@ -16,7 +16,7 @@ from backend.autenticacion import jwt
 
 from backend.src.routes.auth_routes import auth_bp
 from backend.src.routes.butacas import mis_rutas
-from backend.src.routes.peliculas_routes import peliculas_bp
+from backend.src.routes.peliculas_routes import peliculas_bp as peliculas_externas_bp
 from backend.src.routes.funciones_routes import funciones_bp
 from backend.src.routes.locales_routes import locales_bp
 from backend.src.routes.salas_routes import salas_bp
