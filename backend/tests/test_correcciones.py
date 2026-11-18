@@ -75,25 +75,21 @@ class Correcciones(unittest.TestCase):
                 self.assertTrue(validar_datos_reserva(1, {"butacas": butacas}))
 
     def test_reserva_butaca_ajena_no_escribe(self):
-        conexion = MagicMock()
-        cursor = conexion.cursor.return_value.__enter__.return_value
-        with patch.object(reservas_service, "get_connection", return_value=conexion), patch.object(reservas_service, "obtener_funcion", return_value={"precio_base": 8000, "fecha_hora_inicio": datetime(2032, 1, 1)}), patch.object(reservas_service, "obtener_hora_actual", return_value=datetime(2026, 11, 3)), patch.object(reservas_service, "obtener_butacas_de_funcion", return_value=[{"id_butaca": 1}]), patch.object(reservas_service, "crear_compra_pendiente") as crear:
-            reserva, error = reservas_service.crear_reserva(8, 1, [99])
+        cursor = MagicMock()
+        with patch.object(reservas_service, "obtener_funcion", return_value={"precio_base": 8000, "fecha_hora_inicio": datetime(2032, 1, 1)}), patch.object(reservas_service, "obtener_hora_actual", return_value=datetime(2026, 11, 3)), patch.object(reservas_service, "obtener_butacas_de_funcion", return_value=[{"id_butaca": 1}]), patch.object(reservas_service, "crear_compra_pendiente") as crear:
+            reserva, error = reservas_service.crear_reserva(cursor, 8, 1, [99])
         self.assertIsNone(reserva)
         self.assertEqual(error["status_code"], 400)
         crear.assert_not_called()
-        conexion.commit.assert_not_called()
-        conexion.rollback.assert_called_once()
-        conexion.close.assert_called_once()
 
-    def test_interbloqueo_devuelve_conflicto(self):
-        conexion = MagicMock()
-        with patch.object(reservas_service, "get_connection", return_value=conexion), patch.object(reservas_service, "obtener_funcion", side_effect=Error("interbloqueo simulado", errno=1213)):
-            reserva, error = reservas_service.crear_reserva(8, 1, [1])
-        self.assertIsNone(reserva)
-        self.assertEqual(error["status_code"], 409)
-        conexion.rollback.assert_called_once()
-        conexion.close.assert_called_once()
+    def test_error_de_base_de_datos_se_propaga_al_limite_de_ruta(self):
+        cursor = MagicMock()
+        with patch.object(
+            reservas_service,
+            "obtener_funcion",
+            side_effect=Error("interbloqueo simulado", errno=1213),
+        ), self.assertRaises(Error):
+            reservas_service.crear_reserva(cursor, 8, 1, [1])
 
     def test_editar_duracion_con_funciones_rechaza_y_no_confirma(self):
         conexion = MagicMock()

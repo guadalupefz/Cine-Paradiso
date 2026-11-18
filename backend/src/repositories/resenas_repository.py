@@ -1,28 +1,3 @@
-from datetime import datetime
-from decimal import Decimal
-from typing import TypedDict, cast
-
-
-class ResumenResenas(TypedDict):
-    id_pelicula: int
-    titulo: str
-    cantidad: int
-    promedio: Decimal | float | int
-
-
-class ResenaPublica(TypedDict):
-    puntuacion: int
-    comentario: str
-    fecha_actualizacion: datetime
-
-
-class ResenaPropia(TypedDict):
-    puede_resenar: bool | int
-    puntuacion: int | None
-    comentario: str | None
-    fecha_actualizacion: datetime | None
-
-
 def obtener_resumen_resenas(cursor, id_pelicula):
     cursor.execute(
         """
@@ -36,7 +11,7 @@ def obtener_resumen_resenas(cursor, id_pelicula):
         """,
         (id_pelicula,),
     )
-    return cast(ResumenResenas | None, cursor.fetchone())
+    return cursor.fetchone()
 
 
 def listar_resenas(cursor, id_pelicula):
@@ -49,7 +24,7 @@ def listar_resenas(cursor, id_pelicula):
         """,
         (id_pelicula,),
     )
-    return cast(list[ResenaPublica] | None, cursor.fetchall()) or []
+    return cursor.fetchall() or []
 
 
 def obtener_resena_y_elegibilidad(cursor, id_usuario, id_pelicula):
@@ -74,7 +49,7 @@ def obtener_resena_y_elegibilidad(cursor, id_usuario, id_pelicula):
         """,
         (id_usuario, id_pelicula, id_usuario, id_pelicula),
     )
-    return cast(ResenaPropia | None, cursor.fetchone())
+    return cursor.fetchone()
 
 
 def tiene_asistencia_validada(cursor, id_usuario, id_pelicula):

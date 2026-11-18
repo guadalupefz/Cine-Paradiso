@@ -1,4 +1,4 @@
-def validar_datos_reserva(id_funcion: int, data: dict):
+def validar_datos_reserva(id_funcion: int | None, data: object):
 
     errores = []
 

@@ -21,8 +21,8 @@ class ContratoNovB09Test(unittest.TestCase):
     def setUp(self):
         self.creacion = datetime(2026, 11, 9, 18, 30, 0)
         self.conexion = MagicMock()
+        self.cursor = self.conexion.cursor.return_value.__enter__.return_value
         self.parches = [
-            patch.object(reservas_service, "get_connection", return_value=self.conexion),
             patch.object(
                 reservas_service,
                 "obtener_funcion",
@@ -51,11 +51,11 @@ class ContratoNovB09Test(unittest.TestCase):
             parche.stop()
 
     def test_reserva_expira_exactamente_quince_minutos_desde_su_creacion(self):
-        reserva, error = reservas_service.crear_reserva(8, 12, [4])
+        reserva, error = reservas_service.crear_reserva(self.cursor, 8, 12, [4])
 
         self.assertIsNone(error)
         self.assertEqual(
-            self.mocks[6].call_args.args[3],
+            self.mocks[5].call_args.args[3],
             self.creacion,
             "La fecha de creación usada al insertar debe ser la base del vencimiento.",
         )
@@ -85,21 +85,31 @@ class ContratoNovB09Test(unittest.TestCase):
         self.assertNotIn("aprobada", ESTADOS_COMPRA_VALIDOS)
 
     def test_edicion_parametriza_estado_y_compra_en_el_orden_del_sql(self):
-        cursor = self.conexion.cursor.return_value.__enter__.return_value
-        cursor.fetchone.side_effect = [
-            {"id_compra": 31, "estado": ESTADO_COMPRA_PENDIENTE},
-            {"vencida": False},
-            {"id_funcion": 12},
-        ]
-        cursor.fetchall.return_value = []
+        self.parches.extend([
+            patch.object(
+                reservas_service,
+                "obtener_compra_reserva_para_actualizar",
+                return_value={"id_compra": 31, "estado": ESTADO_COMPRA_PENDIENTE},
+            ),
+            patch.object(reservas_service, "reserva_vencida", return_value=False),
+            patch.object(
+                reservas_service,
+                "obtener_funcion_de_reserva",
+                return_value={"id_funcion": 12},
+            ),
+        ])
+        self.mocks.extend(parche.start() for parche in self.parches[-3:])
+        self.cursor.fetchall.return_value = []
 
-        reserva, error = reservas_service.editar_reserva_pendiente(31, 8, [4])
+        reserva, error = reservas_service.editar_reserva_pendiente(
+            self.cursor, 31, 8, [4]
+        )
 
         self.assertIsNone(error)
         self.assertEqual(reserva["estado"], ESTADO_COMPRA_PENDIENTE)
         consulta_butacas = next(
             llamada
-            for llamada in cursor.execute.call_args_list
+            for llamada in self.cursor.execute.call_args_list
             if "entrada.id_compra <> %s" in llamada.args[0]
         )
         self.assertEqual(
