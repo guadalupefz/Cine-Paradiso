@@ -4,7 +4,7 @@ from backend.autenticacion import revocar_token
 import mysql.connector
 from backend.seguridad import cualquier_logueado
 from backend.db.db import get_connection
-from backend.src.validators.auth_validator import validar_datos_registro
+from backend.src.validators.auth_validator import validar_datos_registro, validar_datos_login
 from backend.src.services.auth_service import (registrar_usuario, autenticar_usuario,
 obtener_perfil_usuario)
 
@@ -79,20 +79,17 @@ def login():
     conn = None
     cursor = None
 
-    datos = request.get_json(silent=True)
-
-    if not isinstance(datos, dict):
-        return jsonify({"error": "Se esperaba un objeto JSON"}), 400
-
-    email = datos.get("email")
-    password = datos.get("password")
-
-    if (not isinstance(email, str) or not email.strip()
-            or not isinstance(password, str) or not password
-            or len(password) > 256):
-        return jsonify({"error": "Datos inválidos"}), 400
-
     try:
+        datos = request.get_json(silent=True)
+
+        errores_val = validar_datos_login(datos)
+
+        if errores_val:
+            return jsonify({'errors': errores_val}), 400
+        
+        email = datos.get("email")
+        password = datos.get("password")
+        
         conn = get_connection()
         cursor = conn.cursor(dictionary=True)
 
