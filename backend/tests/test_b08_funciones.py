@@ -157,7 +157,7 @@ class TestB08(unittest.TestCase):
             peliculas, "obtener_pelicula_por_id", return_value=datos_omdb
         ), patch.object(
             peliculas,
-            "guardar_pelicula",
+            "importar_pelicula_service",
             return_value={"exito": True, "id": 37, "accion": "insertada"},
         ) as guardar:
             respuesta = self.client.post(

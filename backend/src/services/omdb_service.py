@@ -2,12 +2,13 @@ import os
 import requests
 
 from backend.src.validators.duracion_validator import minutos_de_duracion
+from backend.src.validators.peliculas_validator import validar_pelicula
 
 OMDB_URL = "https://www.omdbapi.com/"
 TIMEOUT = 10
 
 def _obtener_api_key():
-    api_key = os.getenv("OMDB_API_KEY")
+    api_key = os.getenv("OMDB_API_KEY", "").strip()
 
     if not api_key:
         raise ValueError("No está configurada la API Key de OMDb.")
@@ -15,7 +16,7 @@ def _obtener_api_key():
     return api_key
 
 def _consultar_omdb(parametros):
-    parametros["apikey"] = _obtener_api_key()
+    parametros = {**parametros, "apikey": _obtener_api_key()}
 
     try:
         respuesta = requests.get(
@@ -41,6 +42,9 @@ def _consultar_omdb(parametros):
 
     except ValueError:
         raise ValueError("OMDb devolvió una respuesta JSON inválida.")
+
+    if not isinstance(datos, dict):
+        raise RuntimeError("OMDb devolvió un formato de respuesta inválido.")
 
     if datos.get("Response") == "False":
         raise ValueError(
@@ -68,19 +72,24 @@ def _normalizar_pelicula(datos):
 
 
 def preparar_pelicula_para_guardar(pelicula):
+    if not isinstance(pelicula, dict):
+        raise ValueError("Se requieren los datos completos de la película de OMDb.")
     id_imdb = pelicula.get("id_imdb")
     if not isinstance(id_imdb, str) or not id_imdb:
         raise ValueError("OMDb no devolvió un identificador IMDb válido.")
 
-    return {
-        "id_externo_api": id_imdb,
-        "titulo": pelicula["titulo"],
-        "sinopsis": pelicula["sinopsis"],
-        "poster": pelicula["poster"],
-        "duracion_minutos": minutos_de_duracion(pelicula["duracion"]),
-        "clasificacion": pelicula["clasificacion"],
-        "genero": pelicula["genero"],
+    datos = {
+        "titulo": pelicula.get("titulo"),
+        "sinopsis": pelicula.get("sinopsis") or "Sin información",
+        "poster": pelicula.get("poster") or "/static/img/default.svg",
+        "duracion_minutos": minutos_de_duracion(pelicula.get("duracion")),
+        "clasificacion": pelicula.get("clasificacion") or "Sin información",
+        "genero": pelicula.get("genero") or "Sin información",
     }
+    datos, error = validar_pelicula(datos)
+    if error:
+        raise ValueError(error)
+    return {"id_externo_api": id_imdb, **datos}
 
 def buscar_peliculas(titulo, pagina=1):
     if not titulo or not titulo.strip():
