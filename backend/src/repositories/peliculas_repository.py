@@ -22,8 +22,7 @@ def buscar_pelicula_por_titulo(cursor, titulo):
         """
         SELECT id_pelicula, titulo
         FROM pelicula
-        WHERE titulo = %s
-        """,
+        WHERE LOWER(titulo) = LOWER(%s)        """,
         (titulo,),
     )
     return cursor.fetchone()
