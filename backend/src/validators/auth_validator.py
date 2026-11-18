@@ -43,3 +43,32 @@ def validar_datos_registro(data):
         })
 
     return errores
+
+def validar_datos_login(datos):
+    errores = []
+
+    if not isinstance(datos, dict):
+        return [{
+            "code": "JSON_INVALIDO",
+            "message": "El cuerpo de la petición debe ser un JSON válido.",
+            "level": "error"
+        }]
+
+    email = datos.get("email")
+    password = datos.get("password")
+
+    if not isinstance(email, str) or not email.strip():
+        errores.append({
+            "code": "DATOS_INVALIDOS",
+            "message": "El campo email es obligatorio y debe ser un texto.",
+            "level": "error"
+        })
+
+    if not isinstance(password, str) or not password or len(password) > 256:
+        errores.append({
+            "code": "DATOS_INVALIDOS",
+            "message": "La contraseña debe tener entre 1 y 256 caracteres.",
+            "level": "error"
+        })
+
+    return errores
