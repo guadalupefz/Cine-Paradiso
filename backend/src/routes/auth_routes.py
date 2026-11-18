@@ -19,15 +19,6 @@ def registro():
     try:
         data = request.get_json(silent=True)
 
-        if not isinstance(data, dict):
-            return jsonify({
-                'errors': [{
-                    'code': 'JSON_INVALIDO',
-                    'message': 'El cuerpo de la petición debe ser un JSON válido.',
-                    'level': 'error'
-                }]
-            }), 400
-
         errores_val = validar_datos_registro(data)
 
         if errores_val:
