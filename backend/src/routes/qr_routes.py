@@ -1,5 +1,8 @@
+import mysql.connector
+
 from flask import Blueprint, request, jsonify, send_file
 
+from backend.db.db import get_connection
 from backend.seguridad import admin_required, cualquier_logueado
 from backend.src.validators.qr_validator import validar_datos_qr
 from backend.src.services.qr_service import (
@@ -15,6 +18,7 @@ qr_bp = Blueprint("qr", __name__)
 def validar_qr(id_usuario):
     datos = request.get_json(silent=True)
     valido, mensaje = validar_datos_qr(datos)
+
     if not valido:
         return jsonify({
             "error": "QR_INVALIDO",
@@ -23,23 +27,69 @@ def validar_qr(id_usuario):
 
     qr_token = datos.get("qr_token").strip()
     id_funcion = datos.get("id_funcion")
+    conexion = None
 
-    resultado, error = validar_qr_service(qr_token, id_funcion)
+    try:
+        conexion = get_connection()
+        conexion.autocommit = False
 
-    if error:
-        status = error.pop("status_code", 500)
-        return jsonify(error), status
+        with conexion.cursor(dictionary=True) as cursor:
+            resultado, error = validar_qr_service(
+                cursor, qr_token, id_funcion
+            )
 
-    return jsonify(resultado), 200
+        if error:
+            conexion.rollback()
+            estados = {
+                "QR_NO_ENCONTRADO": 404,
+                "QR_YA_UTILIZADO": 409,
+                "COMPRA_NO_CONFIRMADA": 409,
+                "FUNCION_INCORRECTA": 409,
+                "HORARIO_INCORRECTO": 409,
+                "QR_NO_ACTUALIZADO": 409,
+            }
+            return jsonify(error), estados.get(error["error"], 500)
+
+        conexion.commit()
+        return jsonify(resultado), 200
+
+    except mysql.connector.Error:
+        if conexion is not None:
+            conexion.rollback()
+        return jsonify({
+            "error": "ERROR_BASE_DATOS",
+            "mensaje": "No se pudo validar la entrada."
+        }), 500
+
+    finally:
+        if conexion is not None:
+            conexion.close()
 
 
 @qr_bp.route("/qr/<int:id_entrada>", methods=["GET"])
 @cualquier_logueado
 def ver_qr(id_usuario, id_entrada):
-    archivo_imagen, error = obtener_qr_imagen_service(id_entrada, id_usuario)
+    conexion = None
 
-    if error:
-        status = error.pop("status_code", 404)
-        return jsonify(error), status
+    try:
+        conexion = get_connection()
 
-    return send_file(archivo_imagen, mimetype="image/png")
+        with conexion.cursor(dictionary=True) as cursor:
+            archivo_imagen, error = obtener_qr_imagen_service(
+                cursor, id_entrada, id_usuario
+            )
+
+        if error:
+            return jsonify(error), 404
+
+        return send_file(archivo_imagen, mimetype="image/png")
+
+    except mysql.connector.Error:
+        return jsonify({
+            "error": "ERROR_BASE_DATOS",
+            "mensaje": "Error de base de datos al generar la imagen del QR."
+        }), 500
+
+    finally:
+        if conexion is not None:
+            conexion.close()
