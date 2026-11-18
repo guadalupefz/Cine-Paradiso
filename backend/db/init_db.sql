@@ -45,7 +45,7 @@ CREATE TABLE pelicula (
     id_externo_api VARCHAR(20) UNIQUE,
     titulo VARCHAR(150) NOT NULL,
     sinopsis TEXT NOT NULL,
-    poster VARCHAR (100) NOT NULL,
+    poster VARCHAR(2048) NOT NULL,
     duracion_minutos INT NOT NULL,
     clasificacion VARCHAR(20) NOT NULL,
     genero VARCHAR(50) NOT NULL

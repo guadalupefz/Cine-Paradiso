@@ -11,6 +11,11 @@ def validar_pelicula(datos):
         if not isinstance(valor, str) or not valor.strip():
             return None, f"El campo {campo} es obligatorio."
 
+    limites = {"titulo": 150, "poster": 2048, "clasificacion": 20, "genero": 50}
+    for campo, limite in limites.items():
+        if len(datos[campo].strip()) > limite:
+            return None, f"El campo {campo} no puede superar los {limite} caracteres."
+
     try:
         duracion = minutos_de_duracion(datos.get("duracion_minutos"))
     except ValueError as error:
