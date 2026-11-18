@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify, request
 from backend.seguridad import admin_required
-from backend.src.services.peliculas_services import (
+from backend.src.services.peliculas_service import (
     listar_peliculas_service,
     crear_pelicula_service,
     editar_pelicula_service,
