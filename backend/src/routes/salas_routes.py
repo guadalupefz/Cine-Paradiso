@@ -1,8 +1,9 @@
+from flask_jwt_extended import jwt_required
 import mysql.connector
 from flask import Blueprint, jsonify, request
 
 from backend.db.db import get_connection
-from backend.seguridad import admin_required
+from backend.seguridad import verificar_acceso
 from backend.src.services.eliminacion_estructura_service import eliminar_estructura
 from backend.src.services.salas_service import (
     obtener_salas_por_local,
@@ -18,8 +19,12 @@ salas_bp = Blueprint("salas", __name__)
 
 
 @salas_bp.delete("/salas/<int:id_sala>")
-@admin_required
-def eliminar_sala(id_usuario, id_sala):
+@jwt_required()
+def eliminar_sala(id_sala):
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     error = validar_id_sala(id_sala)
     if error:
         return jsonify({"error": error}), 400
@@ -106,8 +111,12 @@ def listar_salas(id_local):
 
 
 @salas_bp.route("/locales/<int:id_local>/salas", methods=["POST"])
-@admin_required
-def crear_sala(id_usuario, id_local):
+@jwt_required()
+def crear_sala(id_local):
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     error = validar_id_local(id_local)
     if error:
         return jsonify({"error": error}), 400

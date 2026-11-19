@@ -1,8 +1,9 @@
+from flask_jwt_extended import jwt_required
 import mysql.connector
 from mysql.connector import Error as MySQLError
 from flask import Blueprint, jsonify, request
 
-from backend.seguridad import admin_required
+from backend.seguridad import verificar_acceso
 from backend.db.db import get_connection
 from backend.src.services.funciones_service import (
     listar_funciones_servicio,
@@ -53,8 +54,12 @@ def listar_funciones_route():
 
 
 @funciones_bp.route("/funciones", methods=["POST"])
-@admin_required
-def crear_funcion_route(id_usuario):
+@jwt_required()
+def crear_funcion_route():
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     data = request.get_json(silent=True)
     error = validar_datos_funcion(data)
 
@@ -142,8 +147,12 @@ def consultar_cartelera():
 
 
 @funciones_bp.route("/funciones/<int:id_funcion>", methods=["PUT"])
-@admin_required
-def actualizar_funcion(id_usuario, id_funcion):
+@jwt_required()
+def actualizar_funcion(id_funcion):
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     if id_funcion <= 0:
         return jsonify({
             "error": "ID_FUNCION_INVALIDO",

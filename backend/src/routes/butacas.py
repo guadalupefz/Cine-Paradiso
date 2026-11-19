@@ -1,4 +1,5 @@
-from backend.seguridad import cualquier_logueado
+from flask_jwt_extended import jwt_required
+from backend.seguridad import verificar_acceso
 import mysql.connector
 from flask import Blueprint, jsonify
 
@@ -10,8 +11,12 @@ mis_rutas = Blueprint('butacas', __name__)
 
 
 @mis_rutas.route('/funciones/<int:id_funcion>/butacas', methods=['GET'])
-@cualquier_logueado
-def consultar_butacas(id_usuario, id_funcion):
+@jwt_required()
+def consultar_butacas(id_funcion):
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador', 'cliente'))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     if id_funcion <= 0:
         return jsonify({
             "error": "ID_FUNCION_INVALIDO",

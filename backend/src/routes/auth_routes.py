@@ -1,8 +1,9 @@
+from backend.limites import controlar_intentos
 from flask import Blueprint, request, jsonify, session
 from flask_jwt_extended import create_access_token, get_jwt, jwt_required
 from backend.autenticacion import revocar_token
 import mysql.connector
-from backend.seguridad import cualquier_logueado, limitar
+from backend.seguridad import verificar_acceso
 from backend.db.db import get_connection
 from backend.src.validators.auth_validator import validar_datos_registro, validar_datos_login
 from backend.src.services.auth_service import (registrar_usuario, autenticar_usuario,
@@ -12,8 +13,11 @@ auth_bp = Blueprint('auth', __name__)
 
 
 @auth_bp.route('/auth/registro', methods=['POST'])
-@limitar()
 def registro():
+    respuesta_limite = controlar_intentos()
+    if respuesta_limite is not None:
+        return respuesta_limite
+
     conn = None
     cursor = None
 
@@ -76,8 +80,11 @@ def registro():
 
 
 @auth_bp.post("/auth/login")
-@limitar()
 def login():
+    respuesta_limite = controlar_intentos()
+    if respuesta_limite is not None:
+        return respuesta_limite
+
     conn = None
     cursor = None
 
@@ -137,8 +144,12 @@ def login():
     return respuesta, 200
 
 @auth_bp.get("/usuarios/me")
-@cualquier_logueado
-def perfil(id_usuario):
+@jwt_required()
+def perfil():
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador', 'cliente'))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     conn = None
     cursor = None
 

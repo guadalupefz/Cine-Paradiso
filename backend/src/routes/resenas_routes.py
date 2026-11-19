@@ -1,8 +1,9 @@
+from flask_jwt_extended import jwt_required
 import mysql.connector
 from flask import Blueprint, jsonify, request
 
 from backend.db.db import get_connection
-from backend.seguridad import cliente_required
+from backend.seguridad import verificar_acceso
 from backend.src.services import resenas_service
 from backend.src.validators.resenas_validator import validar_datos_resena
 
@@ -34,8 +35,12 @@ def listar_resenas(id_pelicula):
 
 
 @resenas_bp.get("/peliculas/<int:id_pelicula>/resenas/propia")
-@cliente_required
-def consultar_resena_propia(id_usuario, id_pelicula):
+@jwt_required()
+def consultar_resena_propia(id_pelicula):
+    id_usuario, respuesta_acceso = verificar_acceso(('cliente',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     conn = None
 
     try:
@@ -70,8 +75,12 @@ def consultar_resena_propia(id_usuario, id_pelicula):
 
 
 @resenas_bp.post("/peliculas/<int:id_pelicula>/resenas")
-@cliente_required
-def guardar_resena(id_usuario, id_pelicula):
+@jwt_required()
+def guardar_resena(id_pelicula):
+    id_usuario, respuesta_acceso = verificar_acceso(('cliente',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     datos = request.get_json(silent=True)
     error = validar_datos_resena(datos)
 

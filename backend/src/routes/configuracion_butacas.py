@@ -1,9 +1,10 @@
+from flask_jwt_extended import jwt_required
 import mysql.connector
 
 from flask import Blueprint, jsonify, request
 
 from backend.db.db import get_connection
-from backend.seguridad import admin_required
+from backend.seguridad import verificar_acceso
 from backend.src.services.butacas_service import configurar_butacas_servicio
 from backend.src.validators.butacas_validator import validar_butacas
 
@@ -11,8 +12,12 @@ configuracion_butacas_bp = Blueprint("configuracion_butacas", __name__)
 
 
 @configuracion_butacas_bp.route("/salas/<int:id_sala>/butacas", methods=["POST"])
-@admin_required
-def configurar_butacas(id_usuario, id_sala):
+@jwt_required()
+def configurar_butacas(id_sala):
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     if id_sala <= 0:
         return jsonify({"error": "El ID de la sala debe ser positivo."}), 400
 

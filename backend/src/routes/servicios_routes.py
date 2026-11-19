@@ -1,8 +1,9 @@
+from flask_jwt_extended import jwt_required
 import mysql.connector
 from flask import Blueprint, jsonify, request
 
 from backend.db.db import get_connection
-from backend.seguridad import admin_required
+from backend.seguridad import verificar_acceso
 from backend.src.services import servicios_service
 
 servicios_bp = Blueprint("servicios", __name__)
@@ -22,8 +23,12 @@ def listar_servicios():
 
 
 @servicios_bp.post("/servicios")
-@admin_required
-def registrar_servicio(id_usuario):
+@jwt_required()
+def registrar_servicio():
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     conexion = get_connection()
     try:
         with conexion.cursor(dictionary=True) as cursor:
@@ -44,8 +49,12 @@ def registrar_servicio(id_usuario):
 
 
 @servicios_bp.put("/servicios/<int:id_servicio>")
-@admin_required
-def actualizar_servicio(id_usuario, id_servicio):
+@jwt_required()
+def actualizar_servicio(id_servicio):
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     conexion = get_connection()
     try:
         with conexion.cursor(dictionary=True) as cursor:
@@ -69,8 +78,12 @@ def actualizar_servicio(id_usuario, id_servicio):
 
 
 @servicios_bp.delete("/servicios/<int:id_servicio>")
-@admin_required
-def borrar_servicio(id_usuario, id_servicio):
+@jwt_required()
+def borrar_servicio(id_servicio):
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     conexion = get_connection()
     try:
         with conexion.cursor() as cursor:

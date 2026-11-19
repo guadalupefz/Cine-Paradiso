@@ -1,8 +1,9 @@
+from flask_jwt_extended import jwt_required
 import mysql.connector
 from flask import Blueprint, jsonify, request
 
 from backend.db.db import get_connection
-from backend.seguridad import admin_required
+from backend.seguridad import verificar_acceso
 from backend.src.repositories.locales_repository import (
     obtener_locales,
     crear_local,
@@ -15,8 +16,12 @@ locales_bp = Blueprint("locales", __name__)
 
 
 @locales_bp.delete("/locales/<int:id_local>")
-@admin_required
-def eliminar_local(id_usuario, id_local):
+@jwt_required()
+def eliminar_local(id_local):
+
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
 
     error = validar_id_local(id_local)
     if error:
@@ -95,8 +100,12 @@ def listar_locales():
 
 
 @locales_bp.route("/locales", methods=["POST"])
-@admin_required
-def crear_local_route(id_usuario):
+@jwt_required()
+def crear_local_route():
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     data = request.get_json(silent=True)
 
     error = validar_datos_local(data)

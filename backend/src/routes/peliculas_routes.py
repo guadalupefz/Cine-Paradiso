@@ -1,3 +1,4 @@
+from flask_jwt_extended import jwt_required
 import logging
 import os
 
@@ -5,7 +6,7 @@ from flask import Blueprint, jsonify, request
 from mysql.connector import Error as MySQLError, IntegrityError
 
 from backend.db.db import get_connection
-from backend.seguridad import admin_required
+from backend.seguridad import verificar_acceso
 from backend.src.services.omdb_service import (
     buscar_peliculas,
     obtener_pelicula_por_id,
@@ -110,8 +111,12 @@ def listar_peliculas():
 
 
 @peliculas_bp.route("/pelicula", methods=["GET", "POST"])
-@admin_required
-def consultar_pelicula(id_usuario):
+@jwt_required()
+def consultar_pelicula():
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     titulo = request.args.get("titulo")
     error = validar_busqueda_omdb(titulo)
     if error:
@@ -129,8 +134,12 @@ def consultar_pelicula(id_usuario):
 
 
 @peliculas_bp.route("/peliculas", methods=["POST"])
-@admin_required
-def crear_pelicula_manual(id_usuario):
+@jwt_required()
+def crear_pelicula_manual():
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     datos_validados, error = validar_pelicula(request.get_json(silent=True))
     if error:
         return jsonify({"error": error}), 400
@@ -159,8 +168,12 @@ def crear_pelicula_manual(id_usuario):
 
 
 @peliculas_bp.route("/peliculas/<int:id_pelicula>", methods=["PUT"])
-@admin_required
-def editar_pelicula_manual(id_usuario, id_pelicula):
+@jwt_required()
+def editar_pelicula_manual(id_pelicula):
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     error_id = validar_id_pelicula(id_pelicula)
     if error_id:
         return jsonify({"error": error_id}), 400
@@ -197,8 +210,12 @@ def editar_pelicula_manual(id_usuario, id_pelicula):
 
 
 @peliculas_bp.route("/peliculas/omdb/buscar", methods=["GET"])
-@admin_required
-def buscar_peliculas_omdb(id_usuario):
+@jwt_required()
+def buscar_peliculas_omdb():
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     titulo = request.args.get("titulo")
     if not isinstance(titulo, str):
         return jsonify({"error": "El título de búsqueda es obligatorio."}), 400
@@ -214,8 +231,12 @@ def buscar_peliculas_omdb(id_usuario):
 
 
 @peliculas_bp.route("/peliculas/omdb/detalle", methods=["GET"])
-@admin_required
-def obtener_detalle_omdb(id_usuario):
+@jwt_required()
+def obtener_detalle_omdb():
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     imdb_id = request.args.get("imdb_id")
     if not isinstance(imdb_id, str):
         return jsonify({"error": "El IMDb ID es obligatorio."}), 400
@@ -231,8 +252,12 @@ def obtener_detalle_omdb(id_usuario):
 
 
 @peliculas_bp.route("/peliculas/omdb/importar", methods=["POST"])
-@admin_required
-def importar_pelicula_omdb(id_usuario):
+@jwt_required()
+def importar_pelicula_omdb():
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     datos = request.get_json(silent=True)
     if not isinstance(datos, dict):
         return jsonify({"error": "Se esperaba un objeto JSON."}), 400

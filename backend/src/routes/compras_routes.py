@@ -1,8 +1,9 @@
+from flask_jwt_extended import jwt_required
 from flask import Blueprint, request, jsonify
 import mysql.connector
 
 from backend.db.db import get_connection
-from backend.seguridad import cualquier_logueado, cliente_required
+from backend.seguridad import verificar_acceso
 
 from backend.src.repositories.compra_repository import (
     obtener_compras_por_usuario,
@@ -26,8 +27,12 @@ from backend.src.services.cancelacion_service import cancelar_compra
 compras_bp = Blueprint("compras", __name__)
 
 @compras_bp.route("/compras", methods=["POST"])
-@cliente_required
-def registrar_compra(id_usuario):
+@jwt_required()
+def registrar_compra():
+    id_usuario, respuesta_acceso = verificar_acceso(('cliente',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     data = request.get_json(silent=True) or {}
 
     valido, errores = validar_datos_compra(data)
@@ -106,8 +111,12 @@ def registrar_compra(id_usuario):
 
 
 @compras_bp.get("/compras")
-@cualquier_logueado
-def listar_compras_por_usuario(id_usuario):
+@jwt_required()
+def listar_compras_por_usuario():
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador', 'cliente'))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     try:
         conexion = get_connection()
 
@@ -131,8 +140,12 @@ def listar_compras_por_usuario(id_usuario):
 
 
 @compras_bp.get("/compras/<int:id_compra>/servicios")
-@cualquier_logueado
-def listar_servicios_de_compra(id_usuario, id_compra):
+@jwt_required()
+def listar_servicios_de_compra(id_compra):
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador', 'cliente'))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     try:
         conexion = get_connection()
 
@@ -168,8 +181,12 @@ def listar_servicios_de_compra(id_usuario, id_compra):
 
 
 @compras_bp.get("/compras/<int:id_compra>/entradas")
-@cualquier_logueado
-def listar_entradas(id_usuario, id_compra):
+@jwt_required()
+def listar_entradas(id_compra):
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador', 'cliente'))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     conn = get_connection()
 
     try:
@@ -204,8 +221,12 @@ def listar_entradas(id_usuario, id_compra):
 
 
 @compras_bp.get("/compras/<int:id_compra>/comprobante")
-@cualquier_logueado
-def consultar_comprobante(id_usuario, id_compra):
+@jwt_required()
+def consultar_comprobante(id_compra):
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador', 'cliente'))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     conexion = None
 
     try:
@@ -234,8 +255,12 @@ def consultar_comprobante(id_usuario, id_compra):
 
 
 @compras_bp.post("/compras/<int:id_compra>/confirmar")
-@cliente_required
-def confirmar_compra_route(id_usuario, id_compra):
+@jwt_required()
+def confirmar_compra_route(id_compra):
+    id_usuario, respuesta_acceso = verificar_acceso(('cliente',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     conexion = None
 
     try:
@@ -323,8 +348,12 @@ def confirmar_compra_route(id_usuario, id_compra):
 
 
 @compras_bp.post("/compras/<int:id_compra>/cancelar")
-@cliente_required
-def cancelar_compra_route(id_usuario, id_compra):
+@jwt_required()
+def cancelar_compra_route(id_compra):
+    id_usuario, respuesta_acceso = verificar_acceso(('cliente',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     conexion = None
 
     mensajes_error = {

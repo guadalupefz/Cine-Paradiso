@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 
 from flask import Flask
 
-from backend.seguridad import crear_limitador
+from backend.limites import controlar_intentos
 from backend.src.routes.auth_routes import auth_bp
 
 
@@ -13,17 +13,18 @@ class LimitadorSolicitudes(unittest.TestCase):
     def setUp(self):
         self.app = Flask(__name__)
         self.app.config.update(TESTING=True, SECRET_KEY='clave-de-prueba')
-        self.reloj = patch('backend.seguridad.time.monotonic', return_value=0)
+        self.reloj = patch('backend.limites.time.monotonic', return_value=0)
         self.ahora = self.reloj.start()
         self.addCleanup(self.reloj.stop)
 
     def ruta(self, nombre='/prueba', max_hora=2, max_dia=4):
         ejecutar = Mock(return_value=('Operación realizada', 200))
-        limitar = crear_limitador()
 
         @self.app.post(nombre, endpoint=nombre)
-        @limitar(max_hora=max_hora, max_dia=max_dia)
         def operacion():
+            respuesta = controlar_intentos(max_hora=max_hora, max_dia=max_dia)
+            if respuesta is not None:
+                return respuesta
             return ejecutar()
 
         return ejecutar

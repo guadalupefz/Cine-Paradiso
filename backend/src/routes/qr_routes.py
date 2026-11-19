@@ -1,9 +1,10 @@
+from flask_jwt_extended import jwt_required
 import mysql.connector
 
 from flask import Blueprint, request, jsonify, send_file
 
 from backend.db.db import get_connection
-from backend.seguridad import admin_required, cualquier_logueado
+from backend.seguridad import verificar_acceso
 from backend.src.validators.qr_validator import validar_datos_qr
 from backend.src.services.qr_service import (
     validar_qr_service,
@@ -14,8 +15,12 @@ qr_bp = Blueprint("qr", __name__)
 
 
 @qr_bp.route("/qr/validar", methods=["POST"])
-@admin_required
-def validar_qr(id_usuario):
+@jwt_required()
+def validar_qr():
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     datos = request.get_json(silent=True)
     valido, mensaje = validar_datos_qr(datos)
 
@@ -67,8 +72,12 @@ def validar_qr(id_usuario):
 
 
 @qr_bp.route("/qr/<int:id_entrada>", methods=["GET"])
-@cualquier_logueado
-def ver_qr(id_usuario, id_entrada):
+@jwt_required()
+def ver_qr(id_entrada):
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador', 'cliente'))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     conexion = None
 
     try:

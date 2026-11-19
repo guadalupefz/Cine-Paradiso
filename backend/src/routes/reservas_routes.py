@@ -1,8 +1,9 @@
+from flask_jwt_extended import jwt_required
 import mysql.connector
 from flask import Blueprint, jsonify, request
 
 from backend.db.db import get_connection
-from backend.seguridad import cliente_required
+from backend.seguridad import verificar_acceso
 from backend.src.services.reservas_service import (
     abandonar_reserva_pendiente,
     crear_reserva,
@@ -75,8 +76,12 @@ def _respuesta_error(error):
 
 
 @reservas_bp.route("/funciones/<int:id_funcion>/reservas", methods=["POST"])
-@cliente_required
-def registrar_reserva(id_usuario, id_funcion):
+@jwt_required()
+def registrar_reserva(id_funcion):
+    id_usuario, respuesta_acceso = verificar_acceso(('cliente',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     data = request.get_json(silent=True) or {}
     errores_val = validar_datos_reserva(id_funcion, data)
     if errores_val:
@@ -102,8 +107,12 @@ def registrar_reserva(id_usuario, id_funcion):
 
 
 @reservas_bp.route("/reservas/<int:id_compra>/rechazar", methods=["POST"])
-@cliente_required
-def rechazar_reserva(id_usuario, id_compra):
+@jwt_required()
+def rechazar_reserva(id_compra):
+    id_usuario, respuesta_acceso = verificar_acceso(('cliente',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     reserva, error = _procesar_transaccion_reserva(
         lambda cursor: rechazar_reserva_pendiente(
             cursor, id_compra, id_usuario
@@ -120,8 +129,12 @@ def rechazar_reserva(id_usuario, id_compra):
 
 
 @reservas_bp.route("/reservas/<int:id_compra>/abandonar", methods=["POST"])
-@cliente_required
-def abandonar_reserva(id_usuario, id_compra):
+@jwt_required()
+def abandonar_reserva(id_compra):
+    id_usuario, respuesta_acceso = verificar_acceso(('cliente',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     reserva, error = _procesar_transaccion_reserva(
         lambda cursor: abandonar_reserva_pendiente(
             cursor, id_compra, id_usuario
@@ -138,8 +151,12 @@ def abandonar_reserva(id_usuario, id_compra):
 
 
 @reservas_bp.route("/reservas/<int:id_compra>", methods=["PUT"])
-@cliente_required
-def modificar_reserva(id_usuario, id_compra):
+@jwt_required()
+def modificar_reserva(id_compra):
+    id_usuario, respuesta_acceso = verificar_acceso(('cliente',))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
     data = request.get_json(silent=True) or {}
     errores_val = validar_datos_reserva(None, data)
     if errores_val:
