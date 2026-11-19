@@ -32,7 +32,7 @@ bash init.sh
 
 Completar `.env` desde `.env.example`, crear/cargar MySQL y activar `.venv`.
 El backend se inicia con `python -m backend.app` y el frontend con `python frontend/app.py`.
-La autenticación de la API utiliza Flask-JWT-Extended. El frontend envía el token desde Python. Ver [preparación y migración JWT](docs/propuesta-jwt-y-correcciones.md) antes de iniciar con una base existente.
+La autenticación de la API utiliza Flask-JWT-Extended. El frontend envía el token desde Python. La configuración y la migración para bases existentes están en [Autenticación](docs/autenticacion.md).
 
 ## Ejecución con Docker Compose
 

@@ -126,4 +126,4 @@
 - GET /api/pelicula?titulo=...: consulta a OMDb para administración.
 - POST /api/pelicula?titulo=...: importación externa para administración.
 
-Las rutas autenticadas reciben Authorization: Bearer <access_token>, emitido por POST /api/auth/login. Los permisos se consultan en MySQL. POST /api/auth/logout revoca ese token. Ver docs/propuesta-jwt-y-correcciones.md para configuración y migración. El listado también contiene rutas planificadas: no implica que todas estén implementadas.
+Las rutas autenticadas reciben Authorization: Bearer <access_token>, emitido por POST /api/auth/login. Los permisos se consultan en MySQL. POST /api/auth/logout revoca ese token. Ver [Autenticación](autenticacion.md) para configuración y migración. El listado también contiene rutas planificadas: no implica que todas estén implementadas.

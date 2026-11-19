@@ -10,7 +10,7 @@ cp .env.example .env
 python3 -c "import secrets; print(secrets.token_hex(32))"
 ```
 
-Completar `.env`: datos de MySQL y `SECRET_KEY` con el valor generado. Antes de usar JWT con una base existente, ejecutar la migración indicada en [propuesta-jwt-y-correcciones.md](propuesta-jwt-y-correcciones.md). `FRONTEND_SECRET_KEY` puede tener otra clave; si queda vacía se deriva una clave distinta para el frontend. No publicar `.env`. Si MySQL está en Windows y Python en WSL, usar la dirección del anfitrión y una cuenta habilitada desde WSL; no abrir el puerto a toda la red.
+Completar `.env`: datos de MySQL y `SECRET_KEY` con el valor generado. Para una base existente, seguir la migración indicada en [Autenticación](autenticacion.md). `FRONTEND_SECRET_KEY` puede tener otra clave; si queda vacía se deriva una clave distinta para el frontend. No publicar `.env`. Si MySQL está en Windows y Python en WSL, usar la dirección del anfitrión y una cuenta habilitada desde WSL; no abrir el puerto a toda la red.
 
 Con el esquema vacío, ejecutar `backend/db/init_db.sql` y después `backend/db/datos_prueba.sql` desde el cliente MySQL. La carga es de una sola ejecución: no es una migración y no debe repetirse sobre datos existentes. El script de creación selecciona `cine_paradiso`; si se usa otra base, adaptar una copia y `DB_NAME`.
 
@@ -68,12 +68,14 @@ docker compose up --build
 - `backend/src/repositories`: SQL explícito parametrizado.
 - `backend/src/services`: reglas y coordinación de operaciones del grupo.
 - `backend/src/routes`: validación HTTP, llamadas, respuestas y permisos.
-- `backend/seguridad.py`: decoradores `admin_required` y `cualquier_logueado`; verifican JWT y consultan el rol vigente en MySQL.
+- `backend/seguridad.py`: comprueba el usuario y su rol vigente después de validar el JWT con `@jwt_required()`.
+- `backend/autenticacion.py`: configuración JWT y revocación de tokens al cerrar sesión.
+- `backend/limites.py`: control de intentos de login y registro.
 - `frontend/app.py`: formularios HTML/Jinja y comunicación con backend mediante `requests`, con timeout.
 
-La API utiliza Flask-JWT-Extended. Login conserva la verificación del hash y devuelve access_token. Las rutas reciben Authorization: Bearer <access_token>; logout lo revoca en MySQL. GET /api/usuarios/me devuelve el perfil sin hash. El frontend conserva el token por usuario en su sesión Flask y lo reenvía desde Python. La cookie antigua del backend deja de autenticar: iniciar sesión nuevamente.
+La API utiliza Flask-JWT-Extended. Login comprueba el hash y devuelve access_token. Las rutas reciben Authorization: Bearer <access_token>; logout lo revoca en MySQL. GET /api/usuarios/me devuelve el perfil sin hash. El frontend conserva el token por usuario en su sesión Flask y lo reenvía desde Python.
 
-Ver [propuesta JWT y correcciones](propuesta-jwt-y-correcciones.md) para preparar la tabla de revocación y revisar el contrato antes de publicar.
+La configuración y la tabla de revocación se describen en [Autenticación](autenticacion.md).
 
 401 significa falta de autenticación;403, rol insuficiente;404 también oculta compras ajenas. Los formularios del frontend incluyen un token CSRF. Con HTTPS habilitar `COOKIE_SECURE=1`; no activar debug en una entrega desplegada.
 
@@ -129,7 +131,7 @@ La API externa requiere `OMDB_API_KEY`; si no está configurada, el panel inform
 python -m unittest discover -s backend/tests -v
 ```
 
-Ejecutar también `python -m unittest discover -s frontend/tests -v`. Las pruebas de contrato de servicios usan el validador real del backend para no aceptar campos incompletos en la simulación. Los tests con sustitutos verifican lógica, errores y formularios; no sustituyen una prueba de compra completa con MySQL, SMTP y el proveedor externo en el entorno donde se presente el proyecto. Las verificaciones históricas con una base aislada se describen en propuesta-jwt-y-correcciones.md y no acreditan el entorno actual.
+Ejecutar también `python -m unittest discover -s frontend/tests -v`. Los tests con sustitutos verifican lógica, errores y formularios; no sustituyen una prueba de compra completa con MySQL, SMTP y el proveedor externo en el entorno donde se presente el proyecto.
 
 ## Pendientes del conjunto
 
