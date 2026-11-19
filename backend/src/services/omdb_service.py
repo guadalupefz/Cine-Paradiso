@@ -60,8 +60,8 @@ def _normalizar_pelicula(datos):
         "id_imdb": datos.get("imdbID"),
         "titulo": datos.get("Title"),
         "anio": datos.get("Year"),
-        "genero": datos.get("Genre"),
-        "sinopsis": datos.get("Plot"),
+        "genero": _traducir_texto(datos.get("Genre")),
+        "sinopsis": _traducir_texto(datos.get("Plot")),
         "duracion": datos.get("Runtime"),
         "director": datos.get("Director"),
         "reparto": datos.get("Actors"),
@@ -146,3 +146,19 @@ def obtener_pelicula_por_titulo(titulo):
     })
 
     return _normalizar_pelicula(datos)
+
+
+def _traducir_texto(texto):
+    if not texto or texto == "N/A":
+        return texto
+
+    try:
+        traductor = MyMemoryTranslator(
+            source="en",
+            target="es"
+        )
+
+        traduccion = traductor.translate(texto)
+        return traduccion if traduccion else texto
+    except Exception:
+        return texto
