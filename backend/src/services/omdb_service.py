@@ -73,18 +73,59 @@ def _normalizar_pelicula(datos):
         "poster": poster if poster != "N/A" else None
     }
 
+def descargar_poster(url, id_imdb):
+    if not url or url == "N/A":
+        return None
+
+    if not isinstance(id_imdb, str) or not id_imdb.startswith("tt"):
+        return None
+
+    try:
+        respuesta = requests.get(url, timeout=TIMEOUT)
+        respuesta.raise_for_status()
+
+        tipo_imagen = respuesta.headers.get("Content-Type", "").split(";")[0]
+
+        extensiones = {
+            "image/jpeg": ".jpg",
+            "image/png": ".png",
+            "image/webp": ".webp"
+        }
+        
+        extension = extensiones.get(tipo_imagen)
+        if not extension:
+            return None
+        if len(respuesta.content) > 10 * 1024 * 1024:
+            return None
+
+        carpeta = Path(__file__).resolve().parents[2] / "static" / "img" / "posters"
+        carpeta.mkdir(parents=True, exist_ok=True)
+
+        nombre_archivo = f"{id_imdb}{extension}"
+        ruta_archivo = carpeta / nombre_archivo
+        with open(ruta_archivo, "wb") as archivo:
+            archivo.write(respuesta.content)
+
+        return f"/static/img/posters/{nombre_archivo}"
+    except requests.exceptions.RequestException:
+        logging.exception("No se pudo descargar el póster de %s", id_imdb)
+        return None
 
 def preparar_pelicula_para_guardar(pelicula):
     if not isinstance(pelicula, dict):
         raise ValueError("Se requieren los datos completos de la película de OMDb.")
+        
     id_imdb = pelicula.get("id_imdb")
+    
     if not isinstance(id_imdb, str) or not id_imdb:
         raise ValueError("OMDb no devolvió un identificador IMDb válido.")
 
+    poster = descargar_poster(pelicula.get("poster"), id_imdb)
+    
     datos = {
         "titulo": pelicula.get("titulo"),
         "sinopsis": pelicula.get("sinopsis") or "Sin información",
-        "poster": pelicula.get("poster") or "/static/img/default.svg",
+        "poster": poster, #or "/static/img/default.svg",
         "duracion_minutos": minutos_de_duracion(pelicula.get("duracion")),
         "clasificacion": pelicula.get("clasificacion") or "Sin información",
         "genero": pelicula.get("genero") or "Sin información",
