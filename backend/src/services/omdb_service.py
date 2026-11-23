@@ -1,5 +1,6 @@
 import os
 import requests
+from deep_translator import MyMemoryTranslator
 
 from backend.src.validators.duracion_validator import minutos_de_duracion
 from backend.src.validators.peliculas_validator import validar_pelicula
@@ -149,16 +150,32 @@ def obtener_pelicula_por_titulo(titulo):
 
 
 def _traducir_texto(texto):
-    if not texto or texto == "N/A":
-        return texto
+    resultado = texto
 
-    try:
-        traductor = MyMemoryTranslator(
-            source="en",
-            target="es"
-        )
+    if texto and texto != "N/A":
+        try:
+            traductor = MyMemoryTranslator(source="en-US", target="es-AR")
+            limite = 450
+            partes = []
+            inicio = 0
 
-        traduccion = traductor.translate(texto)
-        return traduccion if traduccion else texto
-    except Exception:
-        return texto
+            while inicio < len(texto):
+                fin = min(inicio + limite, len(texto))
+                if fin < len(texto):
+                    espacio = texto.rfind(" ", inicio, fin)
+                    if espacio > inicio:
+                        fin = espacio
+
+                fragmento = texto[inicio:fin].strip()
+                if fragmento:
+                    traduccion = traductor.translate(fragmento)
+                    partes.append(traduccion if traduccion else fragmento)
+
+                inicio = fin
+
+            if partes:
+                resultado = " ".join(partes)
+        except Exception as error:
+            print(error)
+
+    return resultado
