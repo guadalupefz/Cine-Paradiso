@@ -1,5 +1,7 @@
 import os
 import requests
+import logging
+from pathlib import Path
 from deep_translator import MyMemoryTranslator
 
 from backend.src.validators.duracion_validator import minutos_de_duracion
