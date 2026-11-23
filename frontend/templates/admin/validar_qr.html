@@ -17,14 +17,27 @@
 
     <div class="campo_formulario">
         <label for="id_funcion">ID de función</label>
-        <input type="number" id="id_funcion" name="id_funcion" value="{{ request.form.get('id_funcion', '') }}"
-        placeholder="Ej: 15" required min="1" step="1">
+        <input
+            type="number"
+            id="id_funcion"
+            name="id_funcion"
+            value="{{ request.form.get('id_funcion', '') }}"
+            placeholder="Ej: 15"
+            required
+            min="1"
+            step="1"
+        >
     </div>
 
     <div class="campo_formulario">
         <label for="qr_token">Código de entrada</label>
-        <input type="text" id="qr_token" name="qr_token" value="{{ request.form.get('qr_token', '') }}"
-        placeholder="Token QR">
+        <input
+            type="text"
+            id="qr_token"
+            name="qr_token"
+            value="{{ request.form.get('qr_token', '') }}"
+            placeholder="Token QR"
+        >
     </div>
 
     <button type="submit">Validar ingreso</button>
@@ -35,30 +48,6 @@
 {% endif %}
 
 <script src="https://unpkg.com/html5-qrcode"></script>
+<script src="{{ url_for('static', filename='js/validar_qr.js') }}"></script>
 
-<script>
-let scanner = null;
-
-document.getElementById("btn-escanear").addEventListener("click", function () {
-    if (!scanner) {
-        scanner = new Html5Qrcode("reader");
-    }
-
-    scanner.start(
-        { facingMode: "environment" },
-        {
-            fps: 10,
-            qrbox: 250
-        },
-        function(decodedText) {
-            document.getElementById("qr_token").value = decodedText;
-            scanner.stop();
-            alert("QR leído correctamente");
-        }
-    ).catch(function(error) {
-        console.error(error);
-        alert("No se pudo abrir la cámara");
-    });
-});
-</script>
 {% endblock %}
