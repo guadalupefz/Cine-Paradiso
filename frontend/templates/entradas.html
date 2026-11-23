@@ -7,7 +7,7 @@
 <div class="pagina">
 
     <div class="breadcrumb">
-        <a href="{{ url_for('index') }}">← Volver a Cartelera</a>
+        <a href="{{ url_for('public.index') }}">← Volver a Cartelera</a>
         <span>Tu cuenta / Mis entradas</span>
     </div>
 
@@ -35,7 +35,7 @@
     </div>
 
     {% if error %}
-        <p class="sin-resultados">No se pudieron cargar tus compras. <a href="{{ url_for('mis_compras') }}">Volvé a intentar</a>.</p>
+        <p class="sin-resultados">No se pudieron cargar tus compras. <a href="{{ url_for('usuario.mis_compras') }}">Volvé a intentar</a>.</p>
     {% else %}
 
     <section id="todas" class="contenido-tab active">
@@ -74,7 +74,7 @@
             <div class="entrada-acciones">
                 <span class="estado {% if compra.estado|lower == 'cancelada' %}cancelada{% elif compra.es_proxima %}confirmada{% else %}historial-estado{% endif %}">● {{ compra.estado|capitalize }}</span>
                 <h2 class="precio">ARS {{ '%.2f'|format(compra.total|float) }}</h2>
-                <a class="btn-dorado" href="{{ url_for('ver_comprobante', id_compra=compra.id_compra) }}">Ver comprobante / QR →</a>
+                <a class="btn-dorado" href="{{ url_for('usuario.ver_comprobante', id_compra=compra.id_compra) }}">Ver comprobante / QR →</a>
                 {% if compra.estado|lower in ['aprobada', 'confirmada'] %}
                     <button type="button" class="btn-cancelar boton-cancelar-compra" data-id-compra="{{ compra.id_compra }}" data-pelicula="{{ primera.pelicula if primera else 'Compra de entradas' }}" data-fecha="{{ primera.fecha_funcion_texto if primera else '' }}" data-hora="{{ primera.hora_funcion_texto if primera else '' }}" data-sala="{{ primera.sala if primera else '' }}" data-total="{{ compra.total }}" data-butacas="{% for e in compra.entradas %}{{ e.fila }}{{ e.numero }}{% if not loop.last %}, {% endif %}{% endfor %}">Cancelar compra</button>
                 {% endif %}
@@ -102,7 +102,7 @@
                     <p>{{ primera.fecha_funcion_texto if primera else '' }} · {{ primera.hora_funcion_texto if primera else '' }} · {{ primera.sala if primera else '' }}</p>
                     <p>{% for e in compra.entradas %}Fila {{ e.fila }}, asiento {{ e.numero }}{% if not loop.last %}; {% endif %}{% endfor %}</p>
                 </div>
-                <div class="historial-detalle"><strong>Compra #{{ compra.id_compra }} · ARS {{ compra.total }}</strong><a href="{{ url_for('ver_comprobante', id_compra=compra.id_compra) }}">Ver comprobante</a></div>
+                <div class="historial-detalle"><strong>Compra #{{ compra.id_compra }} · ARS {{ compra.total }}</strong><a href="{{ url_for('usuario.ver_comprobante', id_compra=compra.id_compra) }}">Ver comprobante</a></div>
                 <span class="estado confirmada">Confirmada</span>
             </article>
 
@@ -125,7 +125,7 @@
                     <p>{% for e in compra.entradas %}Fila {{ e.fila }}, asiento {{ e.numero }}{% if not loop.last %}; {% endif %}{% endfor %}</p>
                 
                 </div>
-                <div class="historial-detalle"><strong>Compra #{{ compra.id_compra }} · ARS {{ compra.total }}</strong><a href="{{ url_for('ver_comprobante', id_compra=compra.id_compra) }}">Ver comprobante</a></div>
+                <div class="historial-detalle"><strong>Compra #{{ compra.id_compra }} · ARS {{ compra.total }}</strong><a href="{{ url_for('usuario.ver_comprobante', id_compra=compra.id_compra) }}">Ver comprobante</a></div>
                 <span class="estado {% if compra.estado|lower == 'cancelada' %}cancelada{% else %}historial-estado{% endif %}">{{ compra.estado|capitalize }}</span>
             </article>
         {% else %}<p class="sin-resultados">Todavía no tenés historial de compras.</p>{% endfor %}
@@ -133,7 +133,7 @@
     </section>
     {% endif %}
 
-    <div class="volver-cartelera"><a href="{{ url_for('index') }}">Volver a Cartelera y elegir otra historia →</a></div>
+    <div class="volver-cartelera"><a href="{{ url_for('public.index') }}">Volver a Cartelera y elegir otra historia →</a></div>
 
 </div>
 

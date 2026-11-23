@@ -137,17 +137,17 @@
 <body class="sitio-publico {% block clase_pagina %}{% endblock %}">
     <a class="saltar-contenido" href="#contenido-principal">Saltar al contenido</a>
     <header class="cabecera-sitio">
-        <a href="{{ url_for('index') }}" class="marca-sitio" aria-label="Cine Paradiso, inicio"><span class="simbolo-marca" aria-hidden="true">✦</span><span>Cine Paradiso</span></a>
+        <a href="{{ url_for('public.index') }}" class="marca-sitio" aria-label="Cine Paradiso, inicio"><span class="simbolo-marca" aria-hidden="true">✦</span><span>Cine Paradiso</span></a>
         <nav class="navegacion-sitio" aria-label="Navegación principal">
-            <a href="{{ url_for('index') }}" {% if request.endpoint in ['index', 'ver_funciones', 'ver_butacas', 'ver_compra'] %}aria-current="page"{% endif %}>Cartelera</a>
-            <a href="{{ url_for('ver_servicios') }}" {% if request.endpoint == 'ver_servicios' %}aria-current="page"{% endif %}>Servicios</a>
+            <a href="{{ url_for('public.index') }}" {% if request.endpoint in ['index', 'ver_funciones', 'ver_butacas', 'ver_compra'] %}aria-current="page"{% endif %}>Cartelera</a>
+            <a href="{{ url_for('compras.ver_servicios') }}" {% if request.endpoint == 'ver_servicios' %}aria-current="page"{% endif %}>Servicios</a>
             {% if usuario_actual %}
-                <a href="{{ url_for('mis_compras') }}" {% if request.endpoint in ['mis_compras', 'ver_comprobante'] %}aria-current="page"{% endif %}>Mis compras</a>
-                {% if usuario_actual.rol|trim|lower == 'administrador' %}<a href="{{ url_for('admin_resumen') }}">Administración</a>{% endif %}
-                <form class="form-inline" action="{{ url_for('logout') }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="boton-cabecera" type="submit">Cerrar sesión</button></form>
+                <a href="{{ url_for('usuario.mis_compras') }}" {% if request.endpoint in ['mis_compras', 'ver_comprobante'] %}aria-current="page"{% endif %}>Mis compras</a>
+                {% if usuario_actual.rol|trim|lower == 'administrador' %}<a href="{{ url_for('admin.admin_resumen') }}">Administración</a>{% endif %}
+                <form class="form-inline" action="{{ url_for('auth.logout') }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="boton-cabecera" type="submit">Cerrar sesión</button></form>
             {% else %}
-                <a href="{{ url_for('registro') }}" {% if request.endpoint == 'registro' %}aria-current="page"{% endif %}>Crear cuenta</a>
-                <a class="enlace-acceso" href="{{ url_for('login') }}" {% if request.endpoint == 'login' %}aria-current="page"{% endif %}>Iniciar sesión</a>
+                <a href="{{ url_for('auth.registro') }}" {% if request.endpoint == 'registro' %}aria-current="page"{% endif %}>Crear cuenta</a>
+                <a class="enlace-acceso" href="{{ url_for('auth.login') }}" {% if request.endpoint == 'login' %}aria-current="page"{% endif %}>Iniciar sesión</a>
             {% endif %}
         </nav>
     </header>

@@ -14,11 +14,11 @@
             No se pudo recuperar la información de la función o de las butacas.
         </p>
 
-        <a href="{{ url_for('index') }}">Volver a la cartelera</a>
+        <a href="{{ url_for('public.index') }}">Volver a la cartelera</a>
 
     {% else %}
 
-        <form method="POST" action="{{ url_for('procesar_compra') }}">
+        <form method="POST" action="{{ url_for('compras.procesar_compra') }}">
 
             <input
                 type="hidden"
@@ -193,7 +193,7 @@
                             {% endif %}
                         </p>
 
-                        <a href="{{ url_for('ver_servicios',
+                        <a href="{{ url_for('compras.ver_servicios',
                             id_funcion=id_funcion,
                             butacas=butacas|join(',')) }}">
                             Volver a servicios y reservar

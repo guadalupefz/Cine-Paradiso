@@ -3,7 +3,7 @@
 {% block estilos_adicionales %}<link rel="stylesheet" href="{{ url_for('static', filename='css/acceso.css') }}"><script src="{{ url_for('static', filename='js/acceso.js') }}" defer></script>{% endblock %}
 {% block content %}
 <div class="envoltura-acceso {{ 'con-funcion' if contexto else '' }}">
-    <a class="volver-acceso" href="{{ url_for('index') }}">← Volver a la cartelera</a>
+    <a class="volver-acceso" href="{{ url_for('public.index') }}">← Volver a la cartelera</a>
     <div class="distribucion-acceso">
         <section class="tarjeta-acceso" aria-labelledby="titulo-acceso">
             <p class="etiqueta-acceso">TU LUGAR EN EL PARAÍSO</p>

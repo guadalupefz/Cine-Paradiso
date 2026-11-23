@@ -6,14 +6,14 @@
 <script src="{{ url_for('static', filename='js/admin_peliculas.js') }}" defer></script>
 {% endblock %}
 {% block content %}
-{% if mostrar_formulario %}<a class="volver-peliculas" href="{{ url_for('admin_peliculas') }}">← Volver a películas</a>{% endif %}
+{% if mostrar_formulario %}<a class="volver-peliculas" href="{{ url_for('admin.admin_peliculas') }}">← Volver a películas</a>{% endif %}
 <div class="encabezado-peliculas">
     <div>
         <p class="seccion-peliculas">ADMINISTRACIÓN / CATÁLOGO</p>
         <h2>{{ 'Editar película' if pelicula_editar else 'Agregar película' if mostrar_formulario else 'Películas' }}</h2>
         <p class="texto-suave">{{ 'Completá la ficha que se mostrará en el catálogo del cine.' if mostrar_formulario else 'Organizá el catálogo y sumá nuevas historias a la pantalla.' }}</p>
     </div>
-    {% if not mostrar_formulario %}<a class="accion-principal" href="{{ url_for('admin_peliculas', nuevo=1) }}">＋ Agregar película</a>{% endif %}
+    {% if not mostrar_formulario %}<a class="accion-principal" href="{{ url_for('admin.admin_peliculas', nuevo=1) }}">＋ Agregar película</a>{% endif %}
 </div>
 
 {% if mostrar_formulario %}
@@ -38,7 +38,7 @@
             <input id="poster" name="poster" maxlength="100" required value="{{ datos_formulario.poster }}" aria-describedby="ayuda-poster">
             <small id="ayuda-poster">Máximo 100 caracteres. Podés conservar la imagen predeterminada.</small>
         </aside>
-        <div class="pie-formulario"><p class="texto-suave">Las películas con funciones programadas tienen restricciones para cambiar la duración.</p><div class="acciones-pelicula"><a class="accion-secundaria" href="{{ url_for('admin_peliculas') }}">Cancelar</a><button class="accion-principal" type="submit">{{ 'Guardar cambios' if pelicula_editar else 'Guardar película' }}</button></div></div>
+        <div class="pie-formulario"><p class="texto-suave">Las películas con funciones programadas tienen restricciones para cambiar la duración.</p><div class="acciones-pelicula"><a class="accion-secundaria" href="{{ url_for('admin.admin_peliculas') }}">Cancelar</a><button class="accion-principal" type="submit">{{ 'Guardar cambios' if pelicula_editar else 'Guardar película' }}</button></div></div>
     </form>
 </section>
 {% else %}
@@ -50,7 +50,7 @@
         <div class="campo-pelicula"><label for="busqueda">Título en la API</label><input id="busqueda" name="titulo" maxlength="150" required value="{{ busqueda_api }}" placeholder="Ej.: Cinema Paradiso"></div>
         <button class="accion-secundaria" type="submit">Buscar película</button>
     </form>
-    {% if error_api %}<p class="aviso error" role="alert">{{ error_api }}</p><p class="texto-suave">También podés <a href="{{ url_for('admin_peliculas', nuevo=1) }}">cargar la película manualmente</a>.</p>{% endif %}
+    {% if error_api %}<p class="aviso error" role="alert">{{ error_api }}</p><p class="texto-suave">También podés <a href="{{ url_for('admin.admin_peliculas', nuevo=1) }}">cargar la película manualmente</a>.</p>{% endif %}
     {% if resultado_api %}
     <article class="resultado-pelicula" aria-labelledby="titulo-resultado">
         <img src="{{ poster_para_vista(resultado_api.poster) }}" alt="Póster de {{ resultado_api.titulo }}" data-poster-fallback="{{ url_for('static', filename='img/poster_sin_imagen.svg') }}" referrerpolicy="no-referrer">
@@ -64,18 +64,18 @@
 <section class="catalogo-peliculas" aria-labelledby="titulo-catalogo">
     <div class="cabecera-catalogo"><h3 id="titulo-catalogo">Catálogo local</h3>{% if not error_listado %}<span class="cantidad-peliculas">{{ peliculas|length }} {{ 'película' if peliculas|length == 1 else 'películas' }}</span>{% endif %}</div>
     {% if error_listado %}
-    <div class="panel-peliculas estado-peliculas"><h4>No pudimos cargar el catálogo</h4><p>Intentá nuevamente para ver las películas registradas.</p><a class="accion-secundaria" href="{{ url_for('admin_peliculas') }}">Volver a intentar</a></div>
+    <div class="panel-peliculas estado-peliculas"><h4>No pudimos cargar el catálogo</h4><p>Intentá nuevamente para ver las películas registradas.</p><a class="accion-secundaria" href="{{ url_for('admin.admin_peliculas') }}">Volver a intentar</a></div>
     {% elif peliculas %}
     <div class="grilla-peliculas">
         {% for pelicula in peliculas %}
         <article class="ficha-pelicula">
             <img class="poster-catalogo" src="{{ poster_para_vista(pelicula.poster) }}" alt="Póster de {{ pelicula.titulo }}" data-poster-fallback="{{ url_for('static', filename='img/poster_sin_imagen.svg') }}" loading="lazy" referrerpolicy="no-referrer">
-            <div class="detalle-pelicula"><p class="genero-pelicula">{{ pelicula.genero or 'Género no informado' }}</p><h4>{{ pelicula.titulo }}</h4><p class="datos-ficha">{{ pelicula.duracion_minutos or 'Sin duración' }}{% if pelicula.duracion_minutos and not 'min' in pelicula.duracion_minutos|string %} min{% endif %} <span class="clasificacion-pelicula">{{ pelicula.clasificacion or 'Sin clasificación' }}</span></p><a class="accion-secundaria" href="{{ url_for('admin_peliculas', editar=pelicula.id_pelicula) }}" aria-label="Editar {{ pelicula.titulo }}">Editar película</a></div>
+            <div class="detalle-pelicula"><p class="genero-pelicula">{{ pelicula.genero or 'Género no informado' }}</p><h4>{{ pelicula.titulo }}</h4><p class="datos-ficha">{{ pelicula.duracion_minutos or 'Sin duración' }}{% if pelicula.duracion_minutos and not 'min' in pelicula.duracion_minutos|string %} min{% endif %} <span class="clasificacion-pelicula">{{ pelicula.clasificacion or 'Sin clasificación' }}</span></p><a class="accion-secundaria" href="{{ url_for('admin.admin_peliculas', editar=pelicula.id_pelicula) }}" aria-label="Editar {{ pelicula.titulo }}">Editar película</a></div>
         </article>
         {% endfor %}
     </div>
     {% else %}
-    <div class="panel-peliculas estado-peliculas"><span class="icono-catalogo" aria-hidden="true">＋</span><h4>No hay películas cargadas.</h4><p>Buscá una película en OMDb o cargá su ficha manualmente.</p><a class="accion-principal" href="{{ url_for('admin_peliculas', nuevo=1) }}">Agregar la primera película</a></div>
+    <div class="panel-peliculas estado-peliculas"><span class="icono-catalogo" aria-hidden="true">＋</span><h4>No hay películas cargadas.</h4><p>Buscá una película en OMDb o cargá su ficha manualmente.</p><a class="accion-principal" href="{{ url_for('admin.admin_peliculas', nuevo=1) }}">Agregar la primera película</a></div>
     {% endif %}
 </section>
 {% endif %}

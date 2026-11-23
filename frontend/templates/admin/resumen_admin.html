@@ -7,13 +7,13 @@
 <section class="dashboard-encabezado">
     <h2>Resumen del cine</h2>
     <p>Indicadores de ventas y ocupación de las funciones.</p>
-    <a class="boton" href="{{ url_for('descargar_informe_estadisticas') }}">
+    <a class="boton" href="{{ url_for('admin.descargar_informe_estadisticas') }}">
         Descargar informe PDF
     </a>
 </section>
 
 <section class="barra-filtros-admin">
-    <form method="GET" action="{{ url_for('admin_resumen') }}" class="formulario-filtros">
+    <form method="GET" action="{{ url_for('admin.admin_resumen') }}" class="formulario-filtros">
         <div class="grupo-filtro">
             <label for="desde">Desde:</label>
             <input type="date" id="desde" name="desde" value="{{ filtros.desde }}">
@@ -38,7 +38,7 @@
 
         <div class="acciones-filtros">
             <button type="submit" class="boton-principal">Filtrar</button>
-            <a href="{{ url_for('admin_resumen') }}" class="boton-secundario">Limpiar</a>
+            <a href="{{ url_for('admin.admin_resumen') }}" class="boton-secundario">Limpiar</a>
         </div>
     </form>
 </section>

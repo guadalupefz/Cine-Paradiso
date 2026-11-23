@@ -19,7 +19,7 @@
     {% if error %}
         <p class="mensaje-error">
             No pudimos cargar la cartelera.
-            <a href="{{ url_for('index') }}">Volver a intentar</a>.
+            <a href="{{ url_for('public.index') }}">Volver a intentar</a>.
         </p>
     {% else %}
         <div class="barra-filtros">
@@ -75,10 +75,10 @@
                     </p>
 
                     <a class="enlace-ver-funciones"
-                       href="{{ url_for('ver_funciones', id_pelicula=pelicula.id_pelicula) }}">
+                       href="{{ url_for('public.ver_funciones', id_pelicula=pelicula.id_pelicula) }}">
                         <span>Ver funciones</span>
                     </a>
-                    <a href="{{ url_for('ver_resenas_pelicula', id_pelicula=pelicula.id_pelicula) }}">
+                    <a href="{{ url_for('public.ver_resenas_pelicula', id_pelicula=pelicula.id_pelicula) }}">
                         Reseñas y puntuación
                     </a>
                 </div>

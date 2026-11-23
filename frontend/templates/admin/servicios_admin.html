@@ -7,7 +7,7 @@
 {% endblock %}
 {% block content %}
 {% if servicio_editar %}
-<a class="volver-servicios" href="{{ url_for('admin_servicios') }}">← Volver a servicios adicionales</a>
+<a class="volver-servicios" href="{{ url_for('admin.admin_servicios') }}">← Volver a servicios adicionales</a>
 {% endif %}
 <div class="encabezado-servicios">
     <div>
@@ -58,7 +58,7 @@
 
             <p class="nota-precios">Los cambios de precio se aplican a nuevas compras. Las compras anteriores conservan el precio pagado.</p>
             <div class="acciones-formulario">
-                {% if servicio_editar %}<a class="accion-secundaria" href="{{ url_for('admin_servicios') }}">Cancelar</a>{% endif %}
+                {% if servicio_editar %}<a class="accion-secundaria" href="{{ url_for('admin.admin_servicios') }}">Cancelar</a>{% endif %}
                 <button type="submit" class="accion-principal">{{ 'Guardar cambios' if servicio_editar else 'Crear servicio' }}</button>
             </div>
         </form>
@@ -71,7 +71,7 @@
             {% if not error_listado %}<span class="cantidad-servicios">{{ servicios|length }} {{ 'producto' if servicios|length == 1 else 'productos' }}</span>{% endif %}
         </div>
         {% if error_listado %}
-        <div class="estado-servicios"><h4>No pudimos cargar el catálogo</h4><p>Intentá nuevamente para ver los servicios disponibles.</p><a class="accion-secundaria" href="{{ url_for('admin_servicios') }}">Volver a intentar</a></div>
+        <div class="estado-servicios"><h4>No pudimos cargar el catálogo</h4><p>Intentá nuevamente para ver los servicios disponibles.</p><a class="accion-secundaria" href="{{ url_for('admin.admin_servicios') }}">Volver a intentar</a></div>
         {% elif servicios %}
         <div class="tabla-scroll">
             <table>
@@ -89,7 +89,7 @@
                         <th scope="row">{{ servicio.nombre }}</th>
                         <td class="importe-servicio">${{ servicio.precio }} <span>ARS</span></td>
                         <td><div class="acciones-servicio">
-                            <a class="accion-editar" href="{{ url_for('admin_servicios', editar=servicio.id_servicio) }}" aria-label="Editar {{ servicio.nombre }}">Editar</a>
+                            <a class="accion-editar" href="{{ url_for('admin.admin_servicios', editar=servicio.id_servicio) }}" aria-label="Editar {{ servicio.nombre }}">Editar</a>
                             <form method="post" class="eliminar-servicio" data-confirmar-eliminacion>
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                                 <input type="hidden" name="accion" value="eliminar">

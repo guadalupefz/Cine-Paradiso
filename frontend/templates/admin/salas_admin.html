@@ -11,7 +11,7 @@
         <p role="alert" class="aviso error">No se pudieron cargar los locales.</p>
     {% elif not locales %}
         <p>Primero tenés que registrar un local.</p>
-        <a class="accion-principal" href="{{ url_for('admin_locales') }}">Ir a locales</a>
+        <a class="accion-principal" href="{{ url_for('admin.admin_locales') }}">Ir a locales</a>
     {% else %}
         <form method="post">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
@@ -46,8 +46,8 @@
                             <td>{{ sala.nombre }}</td>
                             <td>{{ sala.capacidad }}</td>
                             <td>
-                                <a href="{{ url_for('admin_butacas', id_sala=sala.id_sala) }}">Configurar butacas</a>
-                                <form method="post" action="{{ url_for('eliminar_sala_admin', id_sala=sala.id_sala) }}" onsubmit="return confirm('¿Eliminar esta sala y todas sus butacas? Esta acción no se puede deshacer.');">
+                                <a href="{{ url_for('admin.admin_butacas', id_sala=sala.id_sala) }}">Configurar butacas</a>
+                                <form method="post" action="{{ url_for('admin.eliminar_sala_admin', id_sala=sala.id_sala) }}" onsubmit="return confirm('¿Eliminar esta sala y todas sus butacas? Esta acción no se puede deshacer.');">
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                                     <button type="submit">Eliminar sala</button>
                                 </form>

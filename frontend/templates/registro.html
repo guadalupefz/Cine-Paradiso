@@ -4,7 +4,7 @@
 <h2 id="titulo-acceso">Crear cuenta</h2>
 <p class="introduccion-acceso">Registrate para seguir con tu visita al cine. Después podrás iniciar sesión con tu nueva cuenta.</p>
 {% if error_formulario %}<p id="error-registro" class="aviso error" role="alert">{{ error_formulario }}</p>{% endif %}
-<form method="post" action="{{ url_for('registro') }}" class="formulario-cuenta" {% if error_formulario %}aria-describedby="error-registro"{% endif %}>
+<form method="post" action="{{ url_for('auth.registro') }}" class="formulario-cuenta" {% if error_formulario %}aria-describedby="error-registro"{% endif %}>
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <input type="hidden" name="next" value="{{ destino or '' }}">
     <div class="nombres-cuenta"><div class="campo-cuenta"><label for="nombre">Nombre</label><input id="nombre" name="nombre" autocomplete="given-name" maxlength="100" required value="{{ datos_formulario.nombre }}"></div><div class="campo-cuenta"><label for="apellido">Apellido</label><input id="apellido" name="apellido" autocomplete="family-name" maxlength="100" required value="{{ datos_formulario.apellido }}"></div></div>
@@ -13,5 +13,5 @@
     <div class="campo-cuenta"><label for="confirmar_password">Confirmar contraseña</label><div class="entrada-password"><input id="confirmar_password" name="confirmar_password" type="password" autocomplete="new-password" maxlength="256" required><button class="mostrar-password" type="button" data-mostrar-password="confirmar_password" aria-controls="confirmar_password" aria-pressed="false">Mostrar</button></div></div>
     <button class="continuar-acceso" type="submit">Crear cuenta</button>
 </form>
-<p class="alternativa-acceso">¿Ya tenés cuenta? <a href="{{ url_for('login', next=destino) }}">Iniciar sesión</a></p>
+<p class="alternativa-acceso">¿Ya tenés cuenta? <a href="{{ url_for('auth.login', next=destino) }}">Iniciar sesión</a></p>
 {% endblock %}

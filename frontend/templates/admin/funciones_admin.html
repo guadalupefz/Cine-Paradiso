@@ -3,10 +3,10 @@
 {% block clase_pagina %}admin-panel admin-funciones{% endblock %}
 {% block estilos_adicionales %}<link rel="stylesheet" href="{{ url_for('static', filename='css/admin_funciones.css') }}"><script src="{{ url_for('static', filename='js/admin_funciones.js') }}" defer></script>{% endblock %}
 {% block content %}
-{% if mostrar_formulario %}<a class="volver-funciones" href="{{ url_for('admin_funciones') }}">← Volver a funciones</a>{% endif %}
+{% if mostrar_formulario %}<a class="volver-funciones" href="{{ url_for('admin.admin_funciones') }}">← Volver a funciones</a>{% endif %}
 <div class="encabezado-funciones">
     <div><p class="seccion-funciones">ADMINISTRACIÓN / PROGRAMACIÓN</p><h2>{{ 'Editar función' if funcion_editar else 'Programar función' if mostrar_formulario else 'Funciones' }}</h2><p class="texto-suave">{{ 'Elegí la película, la sala y el horario de la función.' if mostrar_formulario else 'Consultá y organizá las proyecciones de cada sala.' }}</p></div>
-    {% if not mostrar_formulario %}<a class="accion-principal" href="{{ url_for('admin_funciones', nuevo=1) }}">＋ Programar función</a>{% endif %}
+    {% if not mostrar_formulario %}<a class="accion-principal" href="{{ url_for('admin.admin_funciones', nuevo=1) }}">＋ Programar función</a>{% endif %}
 </div>
 {% for error in errores_carga %}<p class="aviso error" role="alert">{{ error }}</p>{% endfor %}
 {% if mostrar_formulario %}
@@ -57,13 +57,13 @@
             <dl class="resumen-funcion"><div><dt>Duración de la película</dt><dd id="duracion-elegida">—</dd></div><div><dt>Capacidad de la sala</dt><dd id="capacidad-elegida">—</dd></div></dl>
             <p class="ayuda-agenda">La disponibilidad se verifica al guardar. Estos horarios pueden cambiar si otro administrador modifica la programación.</p>
         </aside>
-        <div class="pie-formulario"><p class="texto-suave">Revisá la película, la sala y la fecha antes de confirmar.</p><div class="acciones-funcion"><a class="accion-secundaria" href="{{ url_for('admin_funciones') }}">Cancelar</a><button class="accion-principal" type="submit" {% if not habilitar_guardado %}disabled{% endif %}>{{ 'Guardar cambios' if funcion_editar else 'Programar función' }}</button></div></div>
+        <div class="pie-formulario"><p class="texto-suave">Revisá la película, la sala y la fecha antes de confirmar.</p><div class="acciones-funcion"><a class="accion-secundaria" href="{{ url_for('admin.admin_funciones') }}">Cancelar</a><button class="accion-principal" type="submit" {% if not habilitar_guardado %}disabled{% endif %}>{{ 'Guardar cambios' if funcion_editar else 'Programar función' }}</button></div></div>
     </form>
 </section>
 {% else %}
 <section aria-labelledby="titulo-listado">
     <div class="cabecera-listado"><h3 id="titulo-listado">Funciones programadas</h3>{% if not error_listado %}<span class="cantidad-funciones">{{ funciones|length }} {{ 'función' if funciones|length == 1 else 'funciones' }}</span>{% endif %}</div>
-    {% if error_listado %}<div class="panel-funciones estado-funciones"><h4>No pudimos cargar la programación</h4><p>Volvé a intentar para ver las funciones registradas.</p><a class="accion-secundaria" href="{{ url_for('admin_funciones') }}">Volver a intentar</a></div>
+    {% if error_listado %}<div class="panel-funciones estado-funciones"><h4>No pudimos cargar la programación</h4><p>Volvé a intentar para ver las funciones registradas.</p><a class="accion-secundaria" href="{{ url_for('admin.admin_funciones') }}">Volver a intentar</a></div>
     {% elif funciones %}
     <ul class="lista-funciones-admin">{% for funcion in funciones %}
         <li class="fila-funcion">
@@ -71,10 +71,10 @@
             <div><span class="etiqueta-dato">UBICACIÓN</span><p>{{ funcion.local_nombre }}</p><small>{{ funcion.sala_nombre }}</small></div>
             <div><span class="etiqueta-dato">FECHA Y HORA</span><p>{{ funcion.fecha_visible }}</p><small>{{ funcion.hora_visible }}</small></div>
             <div><span class="etiqueta-dato">PRECIO</span><p class="importe-funcion">${{ funcion.precio_base }}</p><small>ARS por entrada</small></div>
-            <a class="accion-secundaria" href="{{ url_for('admin_funciones', editar=funcion.id_funcion) }}" aria-label="Editar función {{ funcion.id_funcion }}">Editar</a>
+            <a class="accion-secundaria" href="{{ url_for('admin.admin_funciones', editar=funcion.id_funcion) }}" aria-label="Editar función {{ funcion.id_funcion }}">Editar</a>
         </li>
     {% endfor %}</ul>
-    {% else %}<div class="panel-funciones estado-funciones"><span class="icono-vacio" aria-hidden="true">＋</span><h4>No hay funciones programadas.</h4><p>Elegí una película, una sala y un horario para crear la primera función.</p><a class="accion-principal" href="{{ url_for('admin_funciones', nuevo=1) }}">Programar la primera función</a></div>{% endif %}
+    {% else %}<div class="panel-funciones estado-funciones"><span class="icono-vacio" aria-hidden="true">＋</span><h4>No hay funciones programadas.</h4><p>Elegí una película, una sala y un horario para crear la primera función.</p><a class="accion-principal" href="{{ url_for('admin.admin_funciones', nuevo=1) }}">Programar la primera función</a></div>{% endif %}
 </section>
 {% endif %}
 {% endblock %}

@@ -11,18 +11,18 @@
 </head>
 <body class="{% block clase_pagina %}admin-panel{% endblock %}">
     <a class="saltar-contenido" href="#contenido-admin">Saltar al contenido</a>
-    <header><a class="logo" href="{{ url_for('index') }}"><h1>Cine Paradiso</h1></a><p class="admin-leyenda">Administración · {{ usuario_actual.nombre }}</p></header>
+    <header><a class="logo" href="{{ url_for('public.index') }}"><h1>Cine Paradiso</h1></a><p class="admin-leyenda">Administración · {{ usuario_actual.nombre }}</p></header>
     <div class="contenedor_admin">
         <nav class="menu_admin" aria-label="Administración">
-            <a href="{{ url_for('admin_resumen') }}" {% if request.endpoint == 'admin_resumen' %}aria-current="page"{% endif %}>Resumen</a>
-            <a href="{{ url_for('admin_peliculas') }}" {% if request.endpoint == 'admin_peliculas' %}aria-current="page"{% endif %}>Películas</a>
-            <a href="{{ url_for('admin_funciones') }}" {% if request.endpoint == 'admin_funciones' %}aria-current="page"{% endif %}>Funciones</a>
-            <a href="{{ url_for('admin_locales') }}" {% if request.endpoint == 'admin_locales' %}aria-current="page"{% endif %}>Locales</a>
-            <a href="{{ url_for('admin_salas') }}" {% if request.endpoint in ('admin_salas', 'admin_butacas') %}aria-current="page"{% endif %}>Salas y butacas</a>
-            <a href="{{ url_for('admin_servicios') }}" {% if request.endpoint == 'admin_servicios' %}aria-current="page"{% endif %}>Servicios</a>
-            <a href="{{ url_for('validar_qr') }}" {% if request.endpoint == 'validar_qr' %}aria-current="page"{% endif %}>Validar QR</a>
-            <a href="{{ url_for('index') }}">Ver cartelera</a>
-            <form action="{{ url_for('logout') }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit">Cerrar sesión</button></form>
+            <a href="{{ url_for('admin.admin_resumen') }}" {% if request.endpoint == 'admin_resumen' %}aria-current="page"{% endif %}>Resumen</a>
+            <a href="{{ url_for('admin.admin_peliculas') }}" {% if request.endpoint == 'admin_peliculas' %}aria-current="page"{% endif %}>Películas</a>
+            <a href="{{ url_for('admin.admin_funciones') }}" {% if request.endpoint == 'admin_funciones' %}aria-current="page"{% endif %}>Funciones</a>
+            <a href="{{ url_for('admin.admin_locales') }}" {% if request.endpoint == 'admin_locales' %}aria-current="page"{% endif %}>Locales</a>
+            <a href="{{ url_for('admin.admin_salas') }}" {% if request.endpoint in ('admin_salas', 'admin_butacas') %}aria-current="page"{% endif %}>Salas y butacas</a>
+            <a href="{{ url_for('admin.admin_servicios') }}" {% if request.endpoint == 'admin_servicios' %}aria-current="page"{% endif %}>Servicios</a>
+            <a href="{{ url_for('admin.validar_qr') }}" {% if request.endpoint == 'validar_qr' %}aria-current="page"{% endif %}>Validar QR</a>
+            <a href="{{ url_for('public.index') }}">Ver cartelera</a>
+            <form action="{{ url_for('auth.logout') }}" method="post"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button type="submit">Cerrar sesión</button></form>
         </nav>
         <main id="contenido-admin" class="contenido_admin" tabindex="-1">
             {% with mensajes=get_flashed_messages(with_categories=true) %}{% for categoria,mensaje in mensajes %}<p role="{{ 'alert' if categoria == 'error' else 'status' }}" class="aviso {{ categoria }}">{{ mensaje }}</p>{% endfor %}{% endwith %}

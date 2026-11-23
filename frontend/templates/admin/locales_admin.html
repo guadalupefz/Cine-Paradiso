@@ -26,7 +26,7 @@
             {% for local in locales %}
                 <li>
                     <strong>{{ local.nombre }}</strong> — {{ local.direccion }}
-                    <form method="post" action="{{ url_for('eliminar_local_admin', id_local=local.id_local) }}" onsubmit="return confirm('¿Eliminar este local junto con todas sus salas y butacas? Esta acción no se puede deshacer.');">
+                    <form method="post" action="{{ url_for('admin.eliminar_local_admin', id_local=local.id_local) }}" onsubmit="return confirm('¿Eliminar este local junto con todas sus salas y butacas? Esta acción no se puede deshacer.');">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                         <button type="submit">Eliminar local</button>
                     </form>

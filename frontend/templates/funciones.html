@@ -7,7 +7,7 @@
 <section class="u8-funciones">
 
     <div class="u8-volver">
-        <a href="{{ url_for('index') }}">← Volver a Cartelera</a>
+        <a href="{{ url_for('public.index') }}">← Volver a Cartelera</a>
         <div class="u8-pasos">
             <span class="paso activo"><b>1</b> Función</span>
             <i></i>
@@ -65,7 +65,7 @@
                                     type="radio"
                                     name="funcion_seleccionada"
                                     value="{{ funcion.id_funcion }}"
-                                    data-url="{{ url_for('ver_butacas', id_funcion=funcion.id_funcion, id_pelicula=id_pelicula) }}"
+                                    data-url="{{ url_for('compras.ver_butacas', id_funcion=funcion.id_funcion, id_pelicula=id_pelicula) }}"
                                     data-fecha-completa="{{ funcion.fecha_completa }}"
                                     data-horario="{{ funcion.horario }}"
                                     data-local="{{ funcion.local_nombre or 'Local no disponible' }}"

@@ -4,7 +4,7 @@
 
 {% block content %}
 <section class="seccion-resenas">
-    <p><a href="{{ url_for('index') }}">Volver a la cartelera</a></p>
+    <p><a href="{{ url_for('public.index') }}">Volver a la cartelera</a></p>
     <h2>Reseñas{% if datos.pelicula %}: {{ datos.pelicula.titulo }}{% endif %}</h2>
 
     {% if error_resenas %}
@@ -55,7 +55,7 @@
         {% elif usuario_actual %}
             <p>La publicación de reseñas está disponible para cuentas de cliente.</p>
         {% else %}
-            <p><a href="{{ url_for('login', next=url_for('ver_resenas_pelicula', id_pelicula=datos.pelicula.id_pelicula if datos.pelicula else 0)) }}">Iniciá sesión como cliente</a> para publicar una reseña cuando hayas asistido.</p>
+            <p><a href="{{ url_for('auth.login', next=url_for('public.ver_resenas_pelicula', id_pelicula=datos.pelicula.id_pelicula if datos.pelicula else 0)) }}">Iniciá sesión como cliente</a> para publicar una reseña cuando hayas asistido.</p>
         {% endif %}
 
         <section aria-labelledby="titulo-resenas-publicas">
