@@ -20,3 +20,7 @@ instance/
 *.swp
 cookies.txt
 backend/cookies_admin.txt
+
+# --- IMAGENES DESCARGADAS ---
+backend/static/img/posters/*
+backend/static/img/servicios/*
