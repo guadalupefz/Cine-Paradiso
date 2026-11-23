@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const precio = document.getElementById("precio-funcion");
     const datos = document.getElementById("datos-funcion-seleccionada");
     const boton = document.getElementById("btn-elegir-butacas");
+    const poster = document.querySelector(".u8-poster img");
 
     // Actualizar el resumen de la función seleccionada.
     function actualizarResumen(opcion) {
@@ -62,5 +63,20 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
     }
+    if (poster && poster.dataset.fallback) {
+        const mostrarFallback = () => {
+            if (poster.getAttribute("src") !== poster.dataset.fallback) {
+                poster.src = poster.dataset.fallback;
+            }
+        };
+
+        poster.addEventListener("error", mostrarFallback, {
+            once: true
+        });
+
+        if (poster.complete && poster.naturalWidth === 0) {
+            mostrarFallback();
+        }
+    }   
 
 });
