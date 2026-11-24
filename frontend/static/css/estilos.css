@@ -97,32 +97,28 @@ footer {
     font-size: 20px;
 }
 
-/* Descripción de la película */
+
 .pelicula p {
     font-size: 15px;
     text-align: left;
 }
 
-/* Efecto al pasar el cursor por una película */
 .pelicula:hover {
     background-color: #fff8e8;
 }
 
-/* Pantallas de funciones, butacas y servicios */
 .funciones,
 .butacas,
 .servicios {
     text-align: center;
 }
 
-/* Contenedores de las listas */
 .lista-funciones,
 .lista-butacas,
 .lista-servicios {
     text-align: center;
 }
 
-/* Elementos de cada lista */
 .funcion,
 .butaca,
 .servicio {
@@ -135,151 +131,599 @@ footer {
     vertical-align: top;
 }
 
-/* Mensajes de error */
 .mensaje-error {
     color: #c90000;
     text-align: center;
 }
 
-/* Mensajes de estado vacío */
 .mensaje-vacio {
     text-align: center;
     padding: 20px;
 }
 
-/* Adaptación a celulares y tablets */
-* {
-    box-sizing: border-box;
+
+/* Selección visual de butacas */
+.lista-butacas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(55px, 1fr));
+    gap: 12px;
+    max-width: 600px;
+    margin: 25px auto;
 }
 
-.pelicula img {
-    object-fit: cover;
+.butaca {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 55px;
+    margin: 0;
+    padding: 8px;
+    border: 2px solid #16803c;
+    border-radius: 8px;
+    background-color: #e6f7eb;
+    color: #171111;
+    text-align: center;
 }
 
-@media (max-width: 768px) {
+.butaca p {
+    margin: 4px 0;
+    overflow-wrap: anywhere;
+}
+
+.butaca.disponible {
+    border-color: #16803c;
+    background-color: #e6f7eb;
+}
+
+.butaca.ocupada {
+    border-color: #b42318;
+    background-color: #fde8e7;
+    color: #8c1d18;
+}
+
+.butaca.reservada {
+    border-color: #d97706;
+    background-color: #fef3c7;
+    color: #92400e;
+    cursor: not-allowed;
+}
+
+.butaca.seleccionada {
+    border-color: #174ea6;
+    background-color: #dbeafe;
+    color: #174ea6;
+}
+
+.leyenda-butacas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    margin: 20px auto;
+}
+
+.leyenda-butacas span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.leyenda-butacas .indicador {
+    width: 16px;
+    height: 16px;
+    border: 2px solid;
+    border-radius: 4px;
+}
+
+.indicador.disponible {
+    border-color: #16803c;
+    background-color: #e6f7eb;
+}
+
+.indicador.ocupada {
+    border-color: #b42318;
+    background-color: #fde8e7;
+}
+
+.indicador.seleccionada {
+    border-color: #174ea6;
+    background-color: #dbeafe;
+}
+
+/* Interacción con las butacas */
+button.butaca {
+    width: 100%;
+    font-family: inherit;
+    font-size: inherit;
+    cursor: pointer;
+}
+
+button.butaca:disabled {
+    cursor: not-allowed;
+    opacity: 0.75;
+}
+
+button.butaca:focus-visible {
+    outline: 3px solid #174ea6;
+    outline-offset: 3px;
+}
+
+.contador {
+    text-align: center;
+    margin: 20px 0;
+}
+
+
+.menu_admin {
+    width: 250px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.contenido_admin {
+    flex: 1;
+    padding: 20px;
+    min-width: 0;
+    background-color: #fff8e8;
+}
+
+
+.barra_superior {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 2px solid #fff16a;
+}
+
+.contenedor_admin {
+    display: flex;
+}
+
+/* Adaptación a celulares y pantallas pequeñas */
+@media (max-width: 600px) {
+    header {
+        padding: 15px 10px;
+    }
+
+    nav {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    nav a {
+        margin: 0;
+    }
+
     main {
+        box-sizing: border-box;
         width: 95%;
         margin: 15px auto;
         padding: 12px;
-    }
-
-    .pelicula {
-        width: 100%;
-        max-width: 320px;
-        margin: 10px auto;
-        display: block;
-    }
-
-    .funcion,
-    .butaca,
-    .servicio {
-        max-width: 100%;
-        margin: 8px auto;
-    }
-
-    .lista-funciones,
-    .lista-butacas,
-    .lista-servicios {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
     }
 
     h2 {
         font-size: 24px;
     }
 
-    nav a {
-        display: inline-block;
-        margin: 6px;
-    }
-}
-
-/* Referencia visual de los estados de las butacas */
-.referencia-butacas {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin: 20px 0;
-}
-
-.estado-disponible,
-.estado-ocupada {
-    display: inline-block;
-    padding: 6px 10px;
-    border-radius: 6px;
-    font-weight: bold;
-}
-
-.estado-disponible {
-    color: #155724;
-    background-color: #d4edda;
-}
-
-.estado-ocupada {
-    color: #721c24;
-    background-color: #f8d7da;
-}
-
-.butaca {
-    min-width: 130px;
-    padding: 12px;
-    border-radius: 8px;
-    text-align: center;
-}
-
-.butaca-disponible {
-    border: 2px solid #287a43;
-}
-
-.butaca-ocupada {
-    border: 2px solid #b02a37;
-    opacity: 0.8;
-}
-
-.butaca h4 {
-    margin-top: 4px;
-}
-
-@media (max-width: 480px) {
-    .butaca {
+    .pelicula {
+        box-sizing: border-box;
         width: 100%;
-        max-width: 280px;
+        max-width: 300px;
+        margin: 10px auto;
+    }
+
+    .contenedor_admin {
+        flex-direction: column;
+    }
+
+    .menu_admin {
+        box-sizing: border-box;
+        width: 100%;
     }
 }
-/* Ajustes finales para las pantallas del recorrido del cliente */
+
+
+/* B19: presentación de las pantallas del recorrido cliente */
+
+/* Enlaces y acciones principales */
+main a {
+    color: #a60000;
+}
+
+main a:hover {
+    color: #760000;
+}
+
+main a:focus-visible,
+main button:focus-visible {
+    outline: 3px solid #174ea6;
+    outline-offset: 3px;
+}
+
+.boton,
+.funcion a,
+.continuar-compra button {
+    display: inline-block;
+    padding: 10px 16px;
+    margin-top: 10px;
+    border: 0;
+    border-radius: 6px;
+    background-color: #c90000;
+    color: white;
+    font-family: inherit;
+    font-size: 16px;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.boton:hover,
+.funcion a:hover,
+.continuar-compra button:hover:not(:disabled) {
+    background-color: #8f0000;
+    color: white;
+}
+
+.continuar-compra button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
 .pelicula img {
     display: block;
     object-fit: cover;
+    border-radius: 6px;
 }
 
-.funcion,
-.servicio {
-    width: 250px;
-    max-width: 100%;
-}
-
-.lista-funciones,
-.lista-servicios {
+.poster-sin-imagen {
     display: flex;
-    flex-wrap: wrap;
+    align-items: center;
     justify-content: center;
-    gap: 15px;
+    min-height: 180px;
+    padding: 10px;
+    background-color: #eee;
+    color: #444;
+    overflow-wrap: anywhere;
 }
 
-@media (max-width: 768px) {
-    .funcion,
-    .servicio {
-        width: 100%;
-        max-width: 320px;
+.dato-no-disponible {
+    color: #555;
+    font-style: italic;
+}
+
+
+.lista-funciones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    gap: 16px;
+    max-width: 900px;
+    margin: 20px auto;
+}
+
+.funcion {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.funcion p {
+    margin: 8px 0;
+}
+
+
+.lista-servicios {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+    gap: 16px;
+    max-width: 900px;
+    margin: 20px auto;
+}
+
+.servicio {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.servicio h4 {
+    color: #c90000;
+}
+
+.estado-vacio,
+.mensaje-vacio,
+.mensaje-error {
+    box-sizing: border-box;
+    max-width: 700px;
+    margin: 20px auto;
+    padding: 16px;
+    border-radius: 8px;
+    overflow-wrap: anywhere;
+}
+
+.estado-vacio,
+.mensaje-vacio {
+    background-color: #fff;
+    border: 1px solid #d6b9a5;
+}
+
+.mensaje-error {
+    background-color: #fde8e7;
+    border: 1px solid #b42318;
+    color: #8c1d18;
+}
+
+/* Resumen de compra */
+.compra {
+    max-width: 850px;
+    margin: 30px auto;
+    padding: 25px;
+    background: #fff;
+    border: 1px solid #e2d0c4;
+    border-radius: 12px;
+    box-sizing: border-box;
+}
+
+.compra h2 {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.compra .informacion-funcion {
+    display: flex;
+    align-items: flex-start;
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.compra .poster-funcion {
+    width: 150px;
+    height: auto;
+    max-height: 220px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+.compra .datos-funcion {
+    flex: 1;
+}
+
+.compra .datos-funcion h3 {
+    margin-top: 0;
+}
+
+.compra ul {
+    padding-left: 24px;
+}
+
+.compra li {
+    margin: 8px 0;
+    overflow-wrap: anywhere;
+}
+
+.compra .detalle-precio {
+    margin: 25px 0;
+    padding: 18px;
+    background: #fff7f0;
+    border-radius: 8px;
+}
+
+.compra .total-butacas {
+    padding-top: 12px;
+    border-top: 1px solid #d5bdb0;
+    font-size: 1.25rem;
+}
+
+.compra form {
+    margin-top: 25px;
+    text-align: center;
+}
+
+.compra button {
+    padding: 12px 25px;
+    font-size: 1rem;
+}
+
+@media (max-width: 600px) {
+    .compra {
+        padding: 15px;
     }
 
+    .compra .informacion-funcion {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .compra .poster-funcion {
+        width: 130px;
+    }
+
+    .compra .datos-funcion {
+        width: 100%;
+    }
+
+    .compra button {
+        width: 100%;
+    }
+}
+
+/* B19: adaptación de las pantallas a celulares */
+@media (max-width: 600px) {
     .introduccion {
         font-size: 16px;
     }
 
-    .pelicula img {
-        height: 260px;
+    .peliculas {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
+
+    .pelicula {
+        max-width: 100%;
+    }
+
+    .pelicula img {
+        height: auto;
+        max-height: 360px;
+        object-fit: contain;
+    }
+
+    .lista-funciones,
+    .lista-servicios {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .funcion,
+    .servicio {
+        min-width: 0;
+    }
+
+    .lista-butacas {
+        grid-template-columns: repeat(auto-fit, minmax(42px, 1fr));
+        gap: 8px;
+    }
+
+    .butaca {
+        padding: 6px 3px;
+        overflow-wrap: anywhere;
+    }
+
+    .leyenda-butacas {
+        gap: 10px;
+        font-size: 14px;
+    }
+
+    .boton,
+    .funcion a,
+    .continuar-compra button {
+        box-sizing: border-box;
+        max-width: 100%;
+    }
+}
+
+
+/* Formularios y tablas del panel, con la paleta del sitio. */
+.contenido_admin { min-width: 0; box-sizing: border-box; }
+.tarjeta-admin { background: #fff; border: 1px solid #d5bdb0; border-radius: 10px; padding: 20px; margin: 18px 0; }
+.tarjeta-admin form, .formulario-acceso form { display: grid; gap: 10px; }
+.tarjeta-admin input, .tarjeta-admin select, .tarjeta-admin textarea, .formulario-acceso input { width: 100%; min-width: 0; box-sizing: border-box; padding: 10px; border: 1px solid #846a61; border-radius: 5px; font: inherit; }
+.tarjeta-admin textarea { min-height: 100px; resize: vertical; }
+button { padding: 10px 16px; background: #a90000; color: white; border: 0; border-radius: 6px; cursor: pointer; font: inherit; }
+button:hover { background: #790000; }
+a { color: #8d1515; }
+.menu_admin a { color: #fff8e8; }
+.menu_admin form { margin-top: 20px; }
+.form-inline { display: inline-block !important; margin: 5px; }
+.tabla-scroll { overflow-x: auto; }
+.contenido_admin table { width: 100%; border-collapse: collapse; background: white; }
+.contenido_admin th, .contenido_admin td { padding: 12px; border-bottom: 1px solid #ddc9b5; text-align: left; }
+.contenido_admin th { background: #f2e2c8; }
+.aviso { padding: 12px; border-radius: 5px; border: 1px solid; overflow-wrap: anywhere; }
+.aviso.error { background: #fff0ef; color: #8a1212; }
+.aviso.ok { background: #eaf6e9; color: #215c27; }
+.formulario-acceso { max-width: 420px; margin: auto; padding: 15px; }
+.admin-leyenda { color: #fff8e8; }
+@media (max-width: 760px) { .contenedor_admin { display: block; } .menu_admin { width: auto; padding: 12px; } .menu_admin a { display: inline-block; margin: 5px 8px; } .contenido_admin { width: auto; margin: 10px; padding: 12px; } .tarjeta-admin { padding: 12px; } main { width: auto; margin: 12px; } }
+
+
+.imagen_qr {
+    width: 200px;
+}
+
+.acciones-comprobante {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin: 30px auto;
+}
+
+.acciones-comprobante a {
+    min-width: 220px;
+    text-align: center;
+}
+
+#modal-cancelacion {
+    position: fixed;
+    margin: auto;
+    width: min(90%, 460px);
+    padding: 24px;
+    border: none;
+    border-radius: 12px;
+    background-color: #fffaf0;
+    color: #333;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
+}
+
+#modal-cancelacion::backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.contenido-modal-cancelacion {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Alineación horizontal continua para la barra de filtros del Administrador */
+.barra-filtros-admin {
+    margin: 20px 0 30px 0;
+}
+
+.formulario-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 20px;
+}
+
+.grupo-filtro {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.grupo-filtro label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.grupo-filtro input[type="date"],
+.grupo-filtro select {
+    padding: 6px 12px;
+    border: 1px solid #1c2b4a;
+    border-radius: 6px;
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #ffffff;
+    font-size: 14px;
+}
+
+.acciones-filtros {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.boton-principal {
+    padding: 8px 18px;
+    background-color: #f3c644;
+    color: #000000;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.boton-secundario {
+    color: #f3c644;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
 }

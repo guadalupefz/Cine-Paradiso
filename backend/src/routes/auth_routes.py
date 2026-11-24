@@ -1,0 +1,183 @@
+from backend.limites import controlar_intentos
+from flask import Blueprint, request, jsonify, session
+from flask_jwt_extended import create_access_token, get_jwt, jwt_required
+from backend.autenticacion import revocar_token
+import mysql.connector
+from backend.seguridad import verificar_acceso
+from backend.db.db import get_connection
+from backend.src.validators.auth_validator import validar_datos_registro, validar_datos_login
+from backend.src.services.auth_service import (registrar_usuario, autenticar_usuario,
+obtener_perfil_usuario)
+
+auth_bp = Blueprint('auth', __name__)
+
+
+@auth_bp.route('/auth/registro', methods=['POST'])
+def registro():
+    respuesta_limite = controlar_intentos()
+    if respuesta_limite is not None:
+        return respuesta_limite
+
+    conn = None
+    cursor = None
+
+    try:
+        data = request.get_json(silent=True)
+
+        errores_val = validar_datos_registro(data)
+
+        if errores_val:
+            return jsonify({'errors': errores_val}), 400
+
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        usuario, errores_srv = registrar_usuario(
+            cursor,
+            nombre=data.get('nombre', '').strip(),
+            apellido=data.get('apellido', '').strip(),
+            email=data.get('email', '').strip().lower(),
+            password=data.get('password', '')
+        )
+
+        if errores_srv:
+            return jsonify({'errors': errores_srv}), 409
+
+        conn.commit()
+
+        return jsonify({
+            'message': 'Usuario registrado exitosamente.',
+            'usuario': usuario
+        }), 201
+
+    except mysql.connector.IntegrityError:
+        if conn:
+            conn.rollback()
+
+        return jsonify({'error': 'El email ya está registrado.'}), 409
+
+    except Exception:
+        if conn:
+            conn.rollback()
+
+        return (
+            jsonify({
+                'errors': [{
+                    'code': 'ERROR_SERVIDOR',
+                    'message': 'Ocurrió un error interno en el servidor.',
+                    'level': 'error',
+                }]
+            }),
+            500,
+        )
+
+    finally:
+        if cursor is not None:
+            cursor.close()
+
+        if conn is not None:
+            conn.close()
+
+
+@auth_bp.post("/auth/login")
+def login():
+    respuesta_limite = controlar_intentos()
+    if respuesta_limite is not None:
+        return respuesta_limite
+
+    conn = None
+    cursor = None
+
+    try:
+        datos = request.get_json(silent=True)
+
+        errores_val = validar_datos_login(datos)
+
+        if errores_val:
+            return jsonify({'errors': errores_val}), 400
+        
+        email = datos.get("email")
+        password = datos.get("password")
+        
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        usuario = autenticar_usuario(
+            cursor,
+            email.strip().lower(),
+            password
+        )
+
+    except mysql.connector.Error:
+        return jsonify({"error": "No se pudo iniciar sesión"}), 500
+
+    finally:
+        if cursor is not None:
+            cursor.close()
+
+        if conn is not None:
+            conn.close()
+
+    if usuario is None:
+        return jsonify({"error": "Credenciales inválidas"}), 401
+
+    session.clear()
+
+    token = create_access_token(identity=str(usuario["id_usuario"]))
+
+    publico = {
+        clave: valor
+        for clave, valor in usuario.items()
+        if clave != "password_hash"
+    }
+
+    respuesta = jsonify({
+        "mensaje": "Sesión iniciada",
+        "usuario": publico,
+        "access_token": token,
+        "token_type": "Bearer",
+        "expires_in": 7200
+    })
+
+    respuesta.headers["Cache-Control"] = "no-store"
+
+    return respuesta, 200
+
+@auth_bp.get("/usuarios/me")
+@jwt_required()
+def perfil():
+    id_usuario, respuesta_acceso = verificar_acceso(('administrador', 'cliente'))
+    if respuesta_acceso is not None:
+        return respuesta_acceso
+
+    conn = None
+    cursor = None
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        usuario = obtener_perfil_usuario(cursor, id_usuario)
+
+        if usuario is None:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+
+        return jsonify(usuario), 200
+
+    except mysql.connector.Error:
+        return jsonify({"error": "No se pudo consultar el perfil"}), 500
+
+    finally:
+        if cursor is not None:
+            cursor.close()
+
+        if conn is not None:
+            conn.close()
+
+@auth_bp.post("/auth/logout")
+@jwt_required()
+def logout():
+    revocar_token(get_jwt())
+    session.clear()
+
+    return jsonify({"mensaje": "Sesión cerrada"}), 200

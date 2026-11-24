@@ -1,0 +1,53 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Validar QR{% endblock %}
+
+{% block content %}
+
+<h2>Validación de entradas QR</h2>
+
+<button type="button" id="btn-escanear">
+    Escanear QR con cámara
+</button>
+
+<div id="reader" style="width:300px; margin-top:15px;"></div>
+
+<form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+    <div class="campo_formulario">
+        <label for="id_funcion">ID de función</label>
+        <input
+            type="number"
+            id="id_funcion"
+            name="id_funcion"
+            value="{{ request.form.get('id_funcion', '') }}"
+            placeholder="Ej: 15"
+            required
+            min="1"
+            step="1"
+        >
+    </div>
+
+    <div class="campo_formulario">
+        <label for="qr_token">Código de entrada</label>
+        <input
+            type="text"
+            id="qr_token"
+            name="qr_token"
+            value="{{ request.form.get('qr_token', '') }}"
+            placeholder="Token QR"
+        >
+    </div>
+
+    <button type="submit">Validar ingreso</button>
+</form>
+
+{% if resultado %}
+<p>{{ resultado.mensaje }}</p>
+{% endif %}
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script src="{{ url_for('static', filename='js/validar_qr.js') }}"></script>
+
+{% endblock %}

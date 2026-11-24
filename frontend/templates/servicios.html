@@ -1,59 +1,150 @@
 {% extends "base.html" %}
 
-{% block title %}Servicios adicionales - Cine Paradiso{% endblock %}
+{% block title %}Servicios - Cine Paradiso{% endblock %}
+{% block estilos_adicionales %}<link rel="stylesheet" href="{{ url_for('static', filename='css/servicios.css') }}">{% endblock %}
 
 {% block content %}
-<section class="servicios">
-    <h2>Servicios adicionales</h2>
+    <div class="envoltura-servicios" data-cantidad-butacas="{{ ids_butacas|length if ids_butacas else 0 }}" data-precio-entrada="{{ funcion.precio_base if funcion and funcion.precio_base else 0 }}">
+    {% if not modo_catalogo %}
 
-    <p class="introduccion">
-        Elegí los servicios adicionales que quieras agregar a tu compra.
-    </p>
-
-    {% if error %}
-        <p class="mensaje-error" role="alert">
-            No se pudieron cargar los servicios. Intentá nuevamente más tarde.
-        </p>
-
-    {% elif servicios %}
-        <form action="{{ url_for('ver_servicios') }}" method="post">
-            <div class="lista-servicios">
-                {% for servicio in servicios %}
-                    <article class="servicio">
-                        <h3>{{ servicio.nombre }}</h3>
-
-                        <p>{{ servicio.descripcion }}</p>
-
-                        <p>Precio: ${{ servicio.precio }}</p>
-
-                        <label>
-                            <input
-                                type="checkbox"
-                                name="servicios"
-                                value="{{ servicio.id_servicio }}"
-                            >
-                            Agregar a mi compra
-                        </label>
-                    </article>
-                {% endfor %}
+        <!-- Indicador de pasos -->
+        <div class="pasos-compra">
+            <div class="paso">
+                <span class="circulo-paso">1</span>
+                <span class="texto-paso">Función</span>
             </div>
+            <span class="separador-paso"></span>
+            <div class="paso">
+                <span class="circulo-paso">2</span>
+                <span class="texto-paso">Butacas</span>
+            </div>
+            <span class="separador-paso"></span>
+            <div class="paso activo">
+                <span class="circulo-paso">3</span>
+                <span class="texto-paso">Servicios</span>
+            </div>
+        </div>
 
-            <button type="submit" disabled>
-                Continuar con la compra
-            </button>
-
-            <p class="mensaje-vacio">
-                La confirmación de la compra estará disponible cuando se integre el backend.
-            </p>
-        </form>
-
-    {% else %}
-        <p class="mensaje-vacio">
-            No hay servicios adicionales disponibles en este momento.
-        </p>
+        <!-- Función seleccionada -->
+        <div class="info-funcion-seleccionada">
+            <span class="icono-ticket">🎟️</span>
+            <div>
+                <strong>{{ funcion.titulo if funcion else "Función seleccionada" }}</strong>
+                <p>
+                    {{ funcion.fecha_corta if funcion else "" }}
+                    {% if funcion and funcion.sala_nombre %}· {{ funcion.sala_nombre }}{% endif %}
+                    · Butacas: {{ detalle_butacas|join(', ') }}
+                </p>
+            </div>
+        </div>
+      
+        <!-- Aviso si el precio no está disponible -->
+        {% if not (funcion and funcion.precio_base) %}
+            <div class="alerta-precio-no-disponible">
+                ⚠️ El precio de la entrada no está disponible. No es posible continuar con la compra.
+            </div>
+        {% endif %}
     {% endif %}
 
-    <a href="{{ url_for('index') }}">Volver a cartelera</a>
-</section>
-{% endblock %}
+        <!-- Sección servicios -->
+        <section class="seccion-servicios">
+            <div class="encabezado-seccion-servicios">
+                
+                {% if not modo_catalogo %}
+                    <h2>Comprar</h2>
+                {% endif %}
 
+                <h3 class="subtitulo-vino">Servicios</h3>
+
+                <p class="descripcion-servicios">El mejor acompañamiento para una gran historia. Elegí tus favoritos.</p>
+            </div>
+
+            {% if error %}
+                <p class="mensaje-error">
+                    No se pudieron cargar los servicios.
+                </p>
+            {% elif servicios %}
+                <div class="lista-servicios">
+                    {% for servicio in servicios %}
+                        <div class="tarjeta-servicio" data-id="{{ servicio.id_servicio }}">
+                            <div class="ilustracion-servicio {% if servicio.imagen_url %}con-imagen{% endif %}">
+                                {% if servicio.imagen_url %}
+                                    <img src="{{ servicio.imagen_url }}" alt="{{ servicio.nombre }}" class="imagen-servicio-cliente">
+                                {% else %}
+                                    <div class="circulo-icono">
+                                        <span>🍿</span>
+                                    </div>
+                                    <small>IMAGEN NO DISPONIBLE</small>
+                                {% endif %}
+                            </div>
+                            <div class="cuerpo-servicio">
+                                <h4>{{ servicio.nombre }}</h4>
+                                <p>{{ servicio.descripcion }}</p>
+                            </div>
+                            <div class="pie-tarjeta-servicio">
+                                <span class="precio-servicio" data-precio="{{ servicio.precio }}">ARS {{ servicio.precio }}</span>
+                        
+                                {% if not modo_catalogo %}
+                                    <div class="controles-cantidad">
+                                        <button type="button" class="btn-cantidad btn-restar" data-id="{{ servicio.id_servicio }}" disabled>-</button>
+                                        <span class="contador-cantidad" id="cant-{{ servicio.id_servicio }}">0</span>
+                                        <button type="button" class="btn-cantidad btn-sumar" data-id="{{ servicio.id_servicio }}" {% if not (funcion and funcion.precio_base) %}disabled{% endif %}>Agregar</button>
+                                    </div>
+                                {% endif %}
+
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="mensaje-vacio">
+                    No hay servicios disponibles en este momento.
+                </p>
+            {% endif %}
+        </section>
+    {% if not modo_catalogo %}
+        <form action="/reservar-compra" method="POST" id="form-servicios-compra">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="id_funcion" value="{{ id_funcion }}">
+            <input type="hidden" name="butacas" value="{{ ids_butacas|join(',') }}">
+            <input type="hidden" name="servicios" id="input-servicios-ocultos" value="">
+
+            <div class="barra-resumen-compra">
+                <div class="resumen-izquierda">
+                    <div class="item-resumen">
+                        {% if funcion and funcion.precio_base %}
+                            <span>{{ ids_butacas|length if ids_butacas else 0 }} entradas · ARS {{ funcion.precio_base }} c/u</span>
+                            <strong>ARS {{ (ids_butacas|length if ids_butacas else 0) * (funcion.precio_base|float) }}</strong>
+                        {% else %}
+                            <span>Entradas</span>
+                            <strong>Precio no disponible</strong>
+                        {% endif %}
+                    </div>
+                    <div class="divisor-resumen"></div>
+                    <div class="item-resumen" id="texto-servicios-agregados">
+                        <span>Servicios agregados: 0</span>
+                        <strong>ARS 0</strong>
+                    </div>
+                </div>
+
+                <!-- Bloque derecho -->
+                <div class="resumen-derecha">
+                    <div class="total-visita">
+                        <small>Total de tu visita</small>
+                        <span class="monto-total" id="monto-total-visita">{% if funcion and funcion.precio_base %}ARS 0{% else %}No disponible{% endif %}</span>
+                    </div>
+                    <button type="submit" class="btn-continuar-extras" {% if not (funcion and funcion.precio_base) %}disabled{% endif %}>Continuar a resumen →</button>
+                </div>
+            </div>
+        </form>
+    {% endif %}
+
+        {% if modo_catalogo %}
+            <p class="nota-pie-servicios">Conocé nuestros productos y disfrutá de una experiencia completa en Cine Paradiso.</p>
+        {% else %}
+            <p class="nota-pie-servicios">Retirá tus pochoclos y bebidas en el mostrador antes de la función. <span class="opcional">Los servicios son opcionales.</span></p>
+        {% endif %}
+    </div>
+
+    <script src="{{ url_for('static', filename='js/servicios.js') }}" defer></script>
+{% endblock %}

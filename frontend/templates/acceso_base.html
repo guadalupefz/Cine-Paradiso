@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block clase_pagina %}pagina-acceso{% endblock %}
+{% block estilos_adicionales %}<link rel="stylesheet" href="{{ url_for('static', filename='css/acceso.css') }}"><script src="{{ url_for('static', filename='js/acceso.js') }}" defer></script>{% endblock %}
+{% block content %}
+<div class="envoltura-acceso {{ 'con-funcion' if contexto else '' }}">
+    <a class="volver-acceso" href="{{ url_for('index') }}">← Volver a la cartelera</a>
+    <div class="distribucion-acceso">
+        <section class="tarjeta-acceso" aria-labelledby="titulo-acceso">
+            <p class="etiqueta-acceso">TU LUGAR EN EL PARAÍSO</p>
+            {% block formulario_acceso %}{% endblock %}
+        </section>
+        {% if contexto %}
+        <aside class="seleccion-acceso" aria-label="Tu función elegida">
+            <div class="cabecera-seleccion"><p class="etiqueta-acceso">TU FUNCIÓN ELEGIDA</p><span class="estado-seleccion">Sin confirmar</span></div>
+            {% if contexto.no_disponible %}
+            <h3>Tu selección</h3><p>Conservamos el paso al que ibas. Los datos de la función se consultarán cuando continúes.</p>
+            {% else %}
+            <div class="ficha-seleccion"><img src="{{ contexto.poster }}" alt="Póster de {{ contexto.titulo }}" data-poster-fallback="{{ url_for('static', filename='img/poster_sin_imagen.svg') }}" referrerpolicy="no-referrer"><div><h3>{{ contexto.titulo }}</h3><p>{{ contexto.fecha }}</p><p>{{ contexto.sala }}</p></div></div>
+            {% if contexto.butacas %}<div class="detalle-seleccion"><span>Tu selección anterior</span><strong>{{ contexto.butacas|join(', ') }}</strong></div>{% else %}<p class="ayuda-seleccion">Después de ingresar podrás elegir tus butacas.</p>{% endif %}
+            {% if contexto.precio is not none %}<div class="detalle-seleccion"><span>Precio actual por entrada</span><strong>${{ contexto.precio }} <small>ARS</small></strong></div>{% endif %}
+            {% endif %}
+            <p class="nota-seleccion">Identificarte no confirma la compra ni bloquea las butacas. La disponibilidad se volverá a consultar al continuar.</p>
+        </aside>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

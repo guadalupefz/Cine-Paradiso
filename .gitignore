@@ -1,4 +1,5 @@
 # --- ENTORNOS VIRTUALES Y CACHÉ ---
+.env
 env/
 venv/
 .env/
@@ -19,3 +20,9 @@ jwt_keys/
 .directory
 .vscode/
 *.swp
+cookies.txt
+backend/cookies_admin.txt
+
+# --- IMAGENES DESCARGADAS ---
+backend/static/img/posters/*
+backend/static/img/servicios/*

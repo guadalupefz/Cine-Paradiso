@@ -1,0 +1,70 @@
+/* Catálogo y ficha de películas del panel administrativo. */
+.admin-peliculas .encabezado-peliculas { display: flex; justify-content: space-between; align-items: center; gap: 24px; margin-bottom: 28px; }
+.admin-peliculas .seccion-peliculas { color: var(--dorado); font-size: 11px; font-weight: bold; letter-spacing: 1.7px; margin-bottom: 8px; }
+.admin-peliculas .texto-suave { color: var(--suave); font-size: 14px; margin: 0; }
+.admin-peliculas .panel-peliculas { border: 1px solid var(--borde); border-radius: 14px; background: var(--panel); padding: 26px; }
+.admin-peliculas .titulo-panel { margin-bottom: 24px; }
+.admin-peliculas .volver-peliculas { display: inline-block; margin-bottom: 22px; font-size: 14px; }
+.admin-peliculas .accion-principal, .admin-peliculas .accion-secundaria { display: inline-block; padding: 11px 18px; border-radius: 7px; font: inherit; font-size: 14px; text-decoration: none; text-align: center; }
+.admin-peliculas .accion-principal { color: #171b24; background: var(--dorado); font-weight: bold; border: 1px solid var(--dorado); }
+.admin-peliculas .accion-principal:hover { color: #171b24; background: #ffda86; }
+.admin-peliculas .accion-secundaria { color: var(--texto); background: transparent; border: 1px solid #53627a; }
+.admin-peliculas .accion-secundaria:hover { color: white; background: #25334a; }
+.admin-peliculas .campo-pelicula { display: grid; align-content: start; gap: 8px; min-width: 0; }
+.admin-peliculas label { font-size: 14px; font-weight: bold; }
+.admin-peliculas input:not([type="hidden"]), .admin-peliculas textarea { width: 100%; min-width: 0; padding: 13px 14px; border: 1px solid #43516a; border-radius: 7px; background: #0d1728; color: var(--texto); font: inherit; }
+.admin-peliculas input::placeholder, .admin-peliculas textarea::placeholder { color: #8898af; }
+.admin-peliculas textarea { resize: vertical; min-height: 160px; }
+.admin-peliculas small { color: var(--suave); font-size: 12px; }
+.admin-peliculas textarea:focus-visible { outline: 3px solid var(--dorado); outline-offset: 4px; }
+.admin-peliculas .buscar-pelicula { display: flex; align-items: flex-end; gap: 14px; max-width: 760px; }
+.admin-peliculas .buscar-pelicula .campo-pelicula { flex: 1; }
+.admin-peliculas .buscar-pelicula button { flex-shrink: 0; }
+.admin-peliculas .cabecera-catalogo { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin: 32px 0 18px; }
+.admin-peliculas .cabecera-catalogo h3 { margin: 0; }
+.admin-peliculas .cantidad-peliculas { color: var(--suave); font-size: 13px; }
+.admin-peliculas .grilla-peliculas { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 215px), 1fr)); gap: 20px; }
+.admin-peliculas .ficha-pelicula { display: flex; flex-direction: column; min-width: 0; background: var(--panel); border: 1px solid var(--borde); border-radius: 12px; overflow: hidden; }
+.admin-peliculas .poster-catalogo { display: block; width: 100%; aspect-ratio: 2 / 3; object-fit: cover; background: #101929; }
+.admin-peliculas .detalle-pelicula { display: flex; flex-direction: column; align-items: flex-start; flex: 1; padding: 18px; }
+.admin-peliculas .detalle-pelicula h4 { font-size: 18px; line-height: 1.35; overflow-wrap: anywhere; margin: 4px 0 12px; }
+.admin-peliculas .genero-pelicula { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--dorado); overflow-wrap: anywhere; margin: 0; }
+.admin-peliculas .datos-ficha { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 13px; color: var(--suave); margin: 0 0 20px; }
+.admin-peliculas .clasificacion-pelicula { padding: 2px 7px; border: 1px solid #43516a; border-radius: 5px; font-size: 11px; }
+.admin-peliculas .detalle-pelicula .accion-secundaria { width: 100%; margin-top: auto; }
+.admin-peliculas .formulario-pelicula { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: 28px; }
+.admin-peliculas .campos-pelicula { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; align-content: start; }
+.admin-peliculas .ancho-completo { grid-column: 1 / -1; }
+.admin-peliculas .poster-formulario { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.admin-peliculas .poster-formulario p { font-size: 12px; }
+.admin-peliculas .poster-preview { width: 100%; aspect-ratio: 2 / 3; object-fit: contain; background: #0d1728; border: 1px solid var(--borde); border-radius: 8px; }
+.admin-peliculas .pie-formulario { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-top: 1px solid var(--borde); padding-top: 24px; }
+.admin-peliculas .pie-formulario .texto-suave { max-width: 460px; font-size: 12px; }
+.admin-peliculas .acciones-pelicula { display: flex; gap: 12px; flex-shrink: 0; }
+.admin-peliculas .resultado-pelicula { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 24px; margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--borde); }
+.admin-peliculas .resultado-pelicula img { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; border-radius: 7px; }
+.admin-peliculas .resultado-pelicula h4 { font-size: 22px; margin: 6px 0 10px; }
+.admin-peliculas .sinopsis-resultado { color: var(--suave); font-size: 14px; overflow-wrap: anywhere; }
+.admin-peliculas .estado-peliculas { text-align: center; padding: 40px 24px; color: var(--suave); }
+.admin-peliculas .estado-peliculas h4 { text-align: center; color: var(--texto); }
+.admin-peliculas .icono-catalogo { display: inline-flex; align-items: center; justify-content: center; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--borde); font-size: 24px; color: var(--dorado); }
+@media (max-width: 1050px) {
+    .admin-peliculas .formulario-pelicula { grid-template-columns: minmax(0, 1fr) 190px; gap: 22px; }
+    .admin-peliculas .pie-formulario { align-items: flex-start; flex-direction: column; }
+}
+@media (max-width: 760px) {
+    .admin-peliculas .encabezado-peliculas { align-items: flex-start; flex-direction: column; gap: 16px; }
+    .admin-peliculas .panel-peliculas { padding: 18px; }
+    .admin-peliculas .buscar-pelicula { align-items: stretch; flex-direction: column; }
+    .admin-peliculas .formulario-pelicula { grid-template-columns: minmax(0, 1fr); }
+    .admin-peliculas .poster-formulario { max-width: 300px; width: 100%; }
+    .admin-peliculas .poster-preview { max-height: 300px; }
+    .admin-peliculas .acciones-pelicula { flex-wrap: wrap; }
+    .admin-peliculas .resultado-pelicula { grid-template-columns: 80px minmax(0, 1fr); gap: 16px; }
+    .admin-peliculas .resultado-pelicula h4 { font-size: 18px; }
+}
+@media (max-width: 420px) {
+    .admin-peliculas .campos-pelicula { grid-template-columns: minmax(0, 1fr); }
+    .admin-peliculas .resultado-pelicula { grid-template-columns: minmax(0, 1fr); }
+    .admin-peliculas .resultado-pelicula img { width: 100px; }
+}

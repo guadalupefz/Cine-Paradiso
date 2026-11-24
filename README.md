@@ -19,50 +19,59 @@ Además, contará con un backoffice para administrar la información del cine.
 - Implementar mecanismos de autenticación y autorización.
 - Generar y validar códigos QR asociados a las entradas.
 ```
-## INSTALACION Y CONFIGURACION
-```
-Seguí estos pasos para configurar el entorno de desarrollo en tu máquina local que posea el sistema operativo Linux:
-```
-### CLONAR EL REPOSITORIO
-```bash
-git clone https://github.com
-cd tu-repositorio
-```
+## INSTALACIÓN Y EJECUCIÓN
 
-### INSTALAR DEPENDENCIAS
+La guía vigente está en [docs/integracion-hito2.md](docs/integracion-hito2.md).
 
 ```bash
-Ejecutar: bash setup.sh. 
-Nota  El script tiene un comando sudo apt-get update, por lo que solicitará la contraseña del usuario.       
-
+git clone https://github.com/guadalupefz/Cine-Paradiso.git
+cd Cine-Paradiso
+git switch develop
+bash init.sh
 ```
-### VARIABLES DE ENTORNO
+
+Completar `.env` desde `.env.example`, crear/cargar MySQL y activar `.venv`.
+El backend se inicia con `python -m backend.app` y el frontend con `python frontend/app.py`.
+La autenticación de la API utiliza Flask-JWT-Extended. El frontend envía el token desde Python. La configuración y la migración para bases existentes están en [Autenticación](docs/autenticacion.md).
+
+## Ejecución con Docker Compose
+
+Crear el archivo de entorno y definir al menos una contraseña real para MySQL:
 
 ```bash
-Crea un archivo `.env` en la raíz del proyecto basándote en el archivo `.env.example`:
-
-  .env
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=contraseña_base_datos
-DB_NAME=nombre_base_datos
-DB_PORT=3306
+cp .env.example .env
+docker compose up --build
 ```
----
-### EJECUTAR SCRIPT DE BASE DE DATOS
-```
- Ejecutar int_db.sql que se encuentra en la carpeta backend/db.
 
-```
-###  USO / EJECUCION
+Los servicios quedan disponibles en:
 
-Para iniciar el servidor en modo de desarrollo, ejecutá:
+- Frontend: http://127.0.0.1:8080
+- Backend: http://127.0.0.1:5001/api
+- MySQL: `127.0.0.1:3307`
 
-```
- source .venv/bin/activate para activar el entorno virtual.
- python3 app.py
+Docker crea el usuario `cine_app`, definido por `DB_USER`, con acceso a la base
+`cine_paradiso`. El esquema inicial se carga automáticamente la primera vez que
+se crea el volumen `mysql_data`.
 
+Para cargar datos ficticios después del primer arranque:
+
+```bash
+docker compose exec -T db sh -c 'mysql -u"$MYSQL_USER" -p"$MYSQL_PASSWORD" "$MYSQL_DATABASE"' < backend/db/datos_prueba.sql
 ```
+
+Si cambias usuario, contraseña o nombre de base después de haber creado el
+volumen, recrea la base local con:
+
+```bash
+docker compose down -v
+docker compose up --build
+```
+
+## CONEXIÓN Y AYUDANTES SQL
+
+`backend/db/db.py` contiene `get_connection`. `backend/db/__init__.py` exporta
+`ejecutar_buscar`, `ejecutar_buscar_uno` y `ejecutar_guardar`.
+Importarlos desde `backend.db`; no hace falta otro archivo `backend/db.py`.
 
 ## GRUPO TP final IDS
 ```
@@ -75,7 +84,7 @@ GRUPO TP final IDS
 - Integrante 6: Santino Muller
 - Integrante 7: Alberto Parot
 - Integrante 8: Matías Goro
-- Integrante 9: Nicolas Merlo 
+- Integrante 9: Nicolas Merlo
 - Integrante 10: Henry Luis
 
 ```

@@ -1,0 +1,153 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Resumen · Cine Paradiso{% endblock %}
+
+{% block content %}
+
+<section class="dashboard-encabezado">
+    <h2>Resumen del cine</h2>
+    <p>Indicadores de ventas y ocupación de las funciones.</p>
+    <a class="boton" href="{{ url_for('descargar_informe_estadisticas') }}">
+        Descargar informe PDF
+    </a>
+</section>
+
+<section class="barra-filtros-admin">
+    <form method="GET" action="{{ url_for('admin_resumen') }}" class="formulario-filtros">
+        <div class="grupo-filtro">
+            <label for="desde">Desde:</label>
+            <input type="date" id="desde" name="desde" value="{{ filtros.desde }}">
+        </div>
+
+        <div class="grupo-filtro">
+            <label for="hasta">Hasta:</label>
+            <input type="date" id="hasta" name="hasta" value="{{ filtros.hasta }}">
+        </div>
+
+        <div class="grupo-filtro">
+            <label for="id_local">Local:</label>
+            <select id="id_local" name="id_local">
+                <option value="">Todos los locales</option>
+                {% for local in locales %}
+                <option value="{{ local.id_local }}" {% if filtros.id_local == local.id_local %}selected{% endif %}>
+                    {{ local.nombre }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="acciones-filtros">
+            <button type="submit" class="boton-principal">Filtrar</button>
+            <a href="{{ url_for('admin_resumen') }}" class="boton-secundario">Limpiar</a>
+        </div>
+    </form>
+</section>
+
+<section class="dashboard-seccion">
+    <h3>Ventas por género</h3>
+
+    {% if not ventas_ok %}
+        <p class="dashboard-estado error">No se pudieron cargar las estadísticas de ventas.</p>
+    {% elif ventas.get('ventas_por_genero', []) %}
+        <div class="dashboard-grilla">
+            {% for fila in ventas.get('ventas_por_genero', []) %}
+                <article class="dashboard-indicador">
+                    <h4>{{ fila.genero or 'Sin género' }}</h4>
+                    <p>Entradas vendidas</p>
+                    <strong>{{ fila.entradas_vendidas }}</strong>
+                    <p>Recaudación estimada</p>
+                    <strong>${{ fila.importe_estimado_entradas }}</strong>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="dashboard-estado">Todavía no hay ventas para mostrar.</p>
+    {% endif %}
+</section>
+
+<section class="dashboard-seccion">
+    <h3>Ventas por franja horaria</h3>
+
+    {% if not ventas_ok %}
+        <p class="dashboard-estado error">No se pudieron cargar las estadísticas de ventas.</p>
+    {% elif ventas.get('ventas_por_franja_horaria', []) %}
+        <div class="dashboard-grilla">
+            {% for fila in ventas.get('ventas_por_franja_horaria', []) %}
+                <article class="dashboard-indicador">
+                    <h4>{{ fila.franja_horaria }}</h4>
+                    <p>Entradas vendidas</p>
+                    <strong>{{ fila.entradas_vendidas }}</strong>
+                    <p>Recaudación estimada</p>
+                    <strong>${{ fila.importe_estimado_entradas }}</strong>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="dashboard-estado">Todavía no hay ventas por franja horaria.</p>
+    {% endif %}
+</section>
+
+<section class="dashboard-seccion">
+    <h3>Cancelaciones</h3>
+
+    {% if not ventas_ok %}
+        <p class="dashboard-estado error">No se pudo consultar la cantidad de cancelaciones.</p>
+    {% elif ventas.get('cantidad_cancelaciones') is not none %}
+        <article class="dashboard-indicador dashboard-cancelaciones">
+            <p>Compras canceladas</p>
+            <strong>{{ ventas.get('cantidad_cancelaciones') }}</strong>
+        </article>
+    {% else %}
+        <p class="dashboard-estado">No hay información de cancelaciones para mostrar.</p>
+    {% endif %}
+</section>
+
+<section class="dashboard-seccion">
+    <h3>Ocupación por función</h3>
+
+    {% if not ocupacion_ok %}
+        <p class="dashboard-estado error">No se pudieron cargar las estadísticas de ocupación.</p>
+    {% elif ocupacion.get('ocupacion_por_funcion', []) %}
+        <div class="dashboard-grilla">
+            {% for fila in ocupacion.get('ocupacion_por_funcion', []) %}
+                <article class="dashboard-indicador">
+                    <h4>{{ fila.pelicula }}</h4>
+                    <p>Función: {{ fila.fecha_hora_inicio }}</p>
+                    <p>Sala: {{ fila.sala }}</p>
+                    <p>Butacas ocupadas / capacidad</p>
+                    <strong>{{ fila.butacas_ocupadas }}/{{ fila.capacidad }}</strong>
+                    <p>Porcentaje de ocupación</p>
+                    <strong>{{ fila.porcentaje_ocupacion or 0 }}%</strong>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="dashboard-estado">No hay funciones para mostrar.</p>
+    {% endif %}
+</section>
+
+<section class="dashboard-seccion">
+    <h3>Ocupación por película</h3>
+
+    {% if not ocupacion_ok %}
+        <p class="dashboard-estado error">No se pudieron cargar las estadísticas de ocupación.</p>
+    {% elif ocupacion.get('ocupacion_por_pelicula', []) %}
+        <div class="dashboard-grilla">
+            {% for fila in ocupacion.get('ocupacion_por_pelicula', []) %}
+                <article class="dashboard-indicador">
+                    <h4>{{ fila.pelicula }}</h4>
+                    <p>Butacas ocupadas</p>
+                    <strong>{{ fila.butacas_ocupadas }}</strong>
+                    <p>Capacidad total</p>
+                    <strong>{{ fila.capacidad_total }}</strong>
+                    <p>Porcentaje de ocupación</p>
+                    <strong>{{ fila.porcentaje_ocupacion or 0 }}%</strong>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="dashboard-estado">No hay películas con funciones para mostrar.</p>
+    {% endif %}
+</section>
+
+{% endblock %}

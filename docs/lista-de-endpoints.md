@@ -43,6 +43,15 @@
 - `POST /api/peliculas/sincronizar` — Sincronizar películas con una API externa.
   Permiso: Administrador.
 
+- `GET /api/peliculas/{id}/resenas` — Consultar puntuación promedio y reseñas públicas.
+  Permiso: Público.
+
+- `GET /api/peliculas/{id}/resenas/propia` — Consultar elegibilidad y reseña propia.
+  Permiso: Cliente.
+
+- `POST /api/peliculas/{id}/resenas` — Crear o actualizar la reseña propia (puntuación 1–5).
+  Permiso: Cliente con asistencia validada por QR.
+
 ## Butacas y compras
 
 - `GET /api/funciones/{id}/butacas` — Consultar las butacas disponibles para una función.
@@ -103,3 +112,18 @@
 - 403 Forbidden: Usuario sin permisos suficientes.
 - 404 Not Found: Recurso inexistente.
 - 500 Internal Server Error: Error interno del servidor.
+
+
+## Integración administrativa del hito 2
+
+- POST /api/auth/logout: cerrar la sesión actual.
+- GET /api/usuarios/me: perfil autenticado, sin contraseña ni hash.
+- GET /api/compras/{id}/servicios: detalle histórico de una compra del titular; compra ajena o inexistente404.
+- POST /api/servicios: alta de servicio, administrador; JSON nombre y precio como texto decimal.
+- PUT /api/servicios/{id}: modificar nombre/precio, administrador; no cambia detalles históricos.
+- DELETE /api/servicios/{id}: eliminar solo servicios sin compras;409 si tienen historial.
+- POST /api/peliculas y PUT /api/peliculas/{id}: carga/modificación manual, administrador.
+- GET /api/pelicula?titulo=...: consulta a OMDb para administración.
+- POST /api/pelicula?titulo=...: importación externa para administración.
+
+Las rutas autenticadas reciben Authorization: Bearer <access_token>, emitido por POST /api/auth/login. Los permisos se consultan en MySQL. POST /api/auth/logout revoca ese token. Ver [Autenticación](autenticacion.md) para configuración y migración. El listado también contiene rutas planificadas: no implica que todas estén implementadas.

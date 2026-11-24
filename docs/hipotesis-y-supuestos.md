@@ -22,7 +22,7 @@ Se propone permitir la cancelación de una compra hasta dos horas antes del comi
 
 ### 2.2. Reserva temporal de butacas
 
-Cuando un cliente seleccione una butaca, esta quedará reservada temporalmente durante diez minutos para que pueda completar la compra. Si el tiempo se cumple sin confirmar la operación, la butaca volverá a estar disponible.
+Cuando un cliente seleccione una butaca, esta quedará reservada temporalmente durante quince minutos para que pueda completar la compra. Si el tiempo se cumple sin confirmar la operación, la butaca volverá a estar disponible.
 
 Antes de confirmar la compra, el sistema deberá verificar nuevamente que las butacas seleccionadas continúen disponibles.
 

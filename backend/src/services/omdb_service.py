@@ -1,0 +1,224 @@
+import os
+import requests
+import logging
+from pathlib import Path
+from deep_translator import MyMemoryTranslator
+
+from backend.src.validators.duracion_validator import minutos_de_duracion
+from backend.src.validators.peliculas_validator import validar_pelicula
+
+OMDB_URL = "https://www.omdbapi.com/"
+TIMEOUT = 10
+
+def _obtener_api_key():
+    api_key = os.getenv("OMDB_API_KEY", "").strip()
+
+    if not api_key:
+        raise ValueError("No está configurada la API Key de OMDb.")
+
+    return api_key
+
+def _consultar_omdb(parametros):
+    parametros = {**parametros, "apikey": _obtener_api_key()}
+
+    try:
+        respuesta = requests.get(
+            OMDB_URL,
+            params=parametros,
+            timeout=TIMEOUT
+        )
+
+        respuesta.raise_for_status()
+        datos = respuesta.json()
+
+    except requests.exceptions.Timeout:
+        raise TimeoutError("La API de OMDb tardó demasiado en responder.")
+
+    except requests.exceptions.ConnectionError:
+        raise ConnectionError("No se pudo establecer conexión con OMDb.")
+
+    except requests.exceptions.HTTPError:
+        raise RuntimeError("OMDb devolvió un error HTTP.")
+
+    except requests.exceptions.RequestException:
+        raise RuntimeError("Ocurrió un error al consultar OMDb.")
+
+    except ValueError:
+        raise ValueError("OMDb devolvió una respuesta JSON inválida.")
+
+    if not isinstance(datos, dict):
+        raise RuntimeError("OMDb devolvió un formato de respuesta inválido.")
+
+    if datos.get("Response") == "False":
+        raise ValueError(
+            datos.get("Error", "No se encontraron resultados.")
+        )
+
+    return datos
+
+def _normalizar_pelicula(datos):
+    poster = datos.get("Poster")
+
+    return {
+        "id_imdb": datos.get("imdbID"),
+        "titulo": datos.get("Title"),
+        "anio": datos.get("Year"),
+        "genero": _traducir_texto(datos.get("Genre")),
+        "sinopsis": _traducir_texto(datos.get("Plot")),
+        "duracion": datos.get("Runtime"),
+        "director": datos.get("Director"),
+        "reparto": datos.get("Actors"),
+        "calificacion_imdb": datos.get("imdbRating"),
+        "clasificacion": datos.get("Rated"),
+        "poster": poster if poster != "N/A" else None
+    }
+
+def descargar_poster(url, id_imdb):
+    if not url or url == "N/A":
+        return None
+
+    if not isinstance(id_imdb, str) or not id_imdb.startswith("tt"):
+        return None
+
+    try:
+        respuesta = requests.get(url, timeout=TIMEOUT)
+        respuesta.raise_for_status()
+
+        tipo_imagen = respuesta.headers.get("Content-Type", "").split(";")[0]
+
+        extensiones = {
+            "image/jpeg": ".jpg",
+            "image/png": ".png",
+            "image/webp": ".webp"
+        }
+        
+        extension = extensiones.get(tipo_imagen)
+        if not extension:
+            return None
+        if len(respuesta.content) > 10 * 1024 * 1024:
+            return None
+
+        carpeta = Path(__file__).resolve().parents[2] / "static" / "img" / "posters"
+        carpeta.mkdir(parents=True, exist_ok=True)
+
+        nombre_archivo = f"{id_imdb}{extension}"
+        ruta_archivo = carpeta / nombre_archivo
+        with open(ruta_archivo, "wb") as archivo:
+            archivo.write(respuesta.content)
+
+        return f"/static/img/posters/{nombre_archivo}"
+    except requests.exceptions.RequestException:
+        logging.exception("No se pudo descargar el póster de %s", id_imdb)
+        return None
+
+def preparar_pelicula_para_guardar(pelicula):
+    if not isinstance(pelicula, dict):
+        raise ValueError("Se requieren los datos completos de la película de OMDb.")
+        
+    id_imdb = pelicula.get("id_imdb")
+    
+    if not isinstance(id_imdb, str) or not id_imdb:
+        raise ValueError("OMDb no devolvió un identificador IMDb válido.")
+
+    poster = descargar_poster(pelicula.get("poster"), id_imdb)
+    
+    datos = {
+        "titulo": pelicula.get("titulo"),
+        "sinopsis": pelicula.get("sinopsis") or "Sin información",
+        "poster": poster, #or "/static/img/default.svg",
+        "duracion_minutos": minutos_de_duracion(pelicula.get("duracion")),
+        "clasificacion": pelicula.get("clasificacion") or "Sin información",
+        "genero": pelicula.get("genero") or "Sin información",
+    }
+    datos, error = validar_pelicula(datos)
+    if error:
+        raise ValueError(error)
+    return {"id_externo_api": id_imdb, **datos}
+
+def buscar_peliculas(titulo, pagina=1):
+    if not titulo or not titulo.strip():
+        raise ValueError("Debés ingresar un título para buscar.")
+
+    if not isinstance(pagina, int) or not 1 <= pagina <= 100:
+        raise ValueError("La página debe ser un número entre 1 y 100.")
+
+    datos = _consultar_omdb({
+        "s": titulo.strip(),
+        "type": "movie",
+        "page": pagina
+    })
+
+    peliculas = [
+        {
+            "id_imdb": pelicula.get("imdbID"),
+            "titulo": pelicula.get("Title"),
+            "anio": pelicula.get("Year"),
+            "poster": (
+                pelicula.get("Poster")
+                if pelicula.get("Poster") != "N/A"
+                else None
+            )
+        }
+        for pelicula in datos.get("Search", [])
+    ]
+
+    return {
+        "total_resultados": int(datos.get("totalResults", 0)),
+        "pagina": pagina,
+        "peliculas": peliculas
+    }
+
+def obtener_pelicula_por_id(id_imdb):
+    if not id_imdb or not id_imdb.strip():
+        raise ValueError("Debés proporcionar un identificador IMDb.")
+
+    datos = _consultar_omdb({
+        "i": id_imdb.strip(),
+        "plot": "full"
+    })
+
+    return _normalizar_pelicula(datos)
+
+def obtener_pelicula_por_titulo(titulo):
+    if not titulo or not titulo.strip():
+        raise ValueError("Debés proporcionar un título.")
+
+    datos = _consultar_omdb({
+        "t": titulo.strip(),
+        "type": "movie",
+        "plot": "full"
+    })
+
+    return _normalizar_pelicula(datos)
+
+
+def _traducir_texto(texto):
+    resultado = texto
+
+    if texto and texto != "N/A":
+        try:
+            traductor = MyMemoryTranslator(source="en-US", target="es-AR")
+            limite = 450
+            partes = []
+            inicio = 0
+
+            while inicio < len(texto):
+                fin = min(inicio + limite, len(texto))
+                if fin < len(texto):
+                    espacio = texto.rfind(" ", inicio, fin)
+                    if espacio > inicio:
+                        fin = espacio
+
+                fragmento = texto[inicio:fin].strip()
+                if fragmento:
+                    traduccion = traductor.translate(fragmento)
+                    partes.append(traduccion if traduccion else fragmento)
+
+                inicio = fin
+
+            if partes:
+                resultado = " ".join(partes)
+        except Exception as error:
+            print(error)
+
+    return resultado

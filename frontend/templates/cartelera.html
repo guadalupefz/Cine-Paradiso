@@ -3,42 +3,91 @@
 {% block title %}Cartelera - Cine Paradiso{% endblock %}
 
 {% block content %}
-<section class="cartelera">
-    <h2>Cartelera</h2>
+<section>
+    <div class="cabecera-cartelera">
+        <div>
+            <p class="etiqueta-cartelera">EN NUESTRA PANTALLA · NOVIEMBRE 2026</p>
+            <h2>Cartelera</h2>
+            <p class="introduccion">Elegí una película, encontrá tu función y que empiece la magia.</p>
+        </div>
+        <div class="sello-cartelera">
+            <p><span aria-hidden="true">✦</span>BUEN CINE, SIEMPRE.</p>
+            <small>{{ peliculas|length }} películas para descubrir</small>
+        </div>
+    </div>
 
-    <p class="introduccion">
-        Descubrí nuestras películas y elegí tu próxima función.
-    </p>
+    {% if error %}
+        <p class="mensaje-error">
+            No pudimos cargar la cartelera.
+            <a href="{{ url_for('index') }}">Volver a intentar</a>.
+        </p>
+    {% else %}
+        <div class="barra-filtros">
+            <nav class="filtros-cartelera" aria-label="Filtrar películas por género">
+                <button type="button" class="filtro-genero activo" data-genero="todos">
+                    Todas las películas
+                </button>
+                <button type="button" class="filtro-genero" data-genero="drama">
+                    Drama
+                </button>
+                <button type="button" class="filtro-genero" data-genero="comedia">
+                    Comedia
+                </button>
+                <button type="button" class="filtro-genero" data-genero="otros">
+                    Más géneros
+                </button>
+            </nav>
+            <span class="cantidad-cartelera">{{ peliculas|length }} películas disponibles</span>
+        </div>
 
-    <div class="peliculas">
-        {% for pelicula in peliculas %}
-            <div class="pelicula">
-                <img
-                    src="{{ pelicula.poster }}"
-                    alt="Póster de {{ pelicula.titulo }}"
-                >
+        <div class="peliculas">
+            {% for pelicula in peliculas %}
+                <div class="pelicula"
+                     data-genero="{{ (pelicula.genero or '')|lower }}">
+
+                    <img
+                        src="{{ pelicula.poster or url_for('static', filename='img/poster_sin_imagen.svg') }}"
+                        alt="Póster de {{ pelicula.titulo }}"
+                        loading="lazy"
+                        referrerpolicy="no-referrer"
+                        data-poster-fallback="{{ url_for('static', filename='img/poster_sin_imagen.svg') }}"
+                        onerror="this.onerror=null;this.src=this.dataset.posterFallback;">
+
+                    <p class="genero-pelicula">
+                        {{ pelicula.genero or 'Género no informado' }}
+                    </p>
+
+                    <p class="datos-ficha">
+                        {% if pelicula.duracion %}
+                            {{ pelicula.duracion }} min
+                        {% else %}
+                            Duración no disponible
+                        {% endif %}
+                        <span class="clasificacion-pelicula">
+                            {{ pelicula.clasificacion or 'Sin clasificación' }}
+                        </span>
+                    </p>
 
                 <h3>{{ pelicula.titulo }}</h3>
 
-                <p>{{ pelicula.sinopsis }}</p>
+                    <p class="sinopsis-pelicula">
+                        {{ pelicula.sinopsis or 'Sinopsis no disponible.' }}
+                    </p>
 
-                <p>
-                    Duración: {{ pelicula.duracion_minutos }} minutos
+                    <a class="enlace-ver-funciones"
+                       href="{{ url_for('ver_funciones', id_pelicula=pelicula.id_pelicula) }}">
+                        <span>Ver funciones</span>
+                    </a>
+                    <a href="{{ url_for('ver_resenas_pelicula', id_pelicula=pelicula.id_pelicula) }}">
+                        Reseñas y puntuación
+                    </a>
+                </div>
+            {% else %}
+                <p class="estado-vacio">
+                    No hay películas disponibles en este momento.
                 </p>
-
-                <p>
-                    Clasificación: {{ pelicula.clasificacion }}
-                </p>
-
-                <a href="{{ url_for('ver_funciones', id_pelicula=pelicula.id_pelicula) }}">
-                    Ver funciones
-                </a>
-            </div>
-        {% else %}
-            <p class="mensaje-vacio">
-                No hay películas disponibles en este momento.
-            </p>
-        {% endfor %}
-    </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 </section>
 {% endblock %}

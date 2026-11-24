@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Comprobante de compra{% endblock %}
+
+{% block content %}
+
+<h2>Comprobante de compra {{ comprobante.compra.id_compra }}</h2>
+
+<article class="tarjeta-admin">
+
+    <h3>Datos de la compra</h3>
+
+    <p>Cliente: {{ comprobante.compra.nombre }} {{ comprobante.compra.apellido }}</p>
+    <p>Email: {{ comprobante.compra.email }}</p>
+    <p>Fecha: {{ comprobante.compra.fecha_hora }}</p>
+    <p>Estado: {{ comprobante.compra.estado }}</p>
+    <p>Total: ${{ comprobante.compra.total }}</p>
+
+</article>
+
+<h3>Entradas</h3>
+
+{% for entrada in comprobante.entradas %}
+
+<article class="tarjeta-admin">
+
+    <p>Pelicula: {{ entrada.pelicula }}</p>
+    <p>Función: {{ entrada.fecha_hora_inicio }}</p>
+    <p>Cine: {{ entrada.local }}</p>
+    <p>Dirección: {{ entrada.direccion }}</p>
+    <p>Sala: {{ entrada.sala }}</p>
+    <p>Butaca: {{ entrada.fila }}{{ entrada.numero }}</p>
+
+    {% if comprobante.compra.estado in ["aprobada", "confirmada"] %}
+    <img src="{{ url_for('ver_qr_cliente', id_entrada=entrada.id_entrada) }}" alt="QR de la entrada" class="imagen_qr">
+    <p>Código de validación manual: {{ entrada.qr_token }}</p>
+    {% endif %}
+
+</article>
+
+{% endfor %}
+
+<h3>Servicios adicionales</h3>
+{% for servicio in comprobante.servicios %}
+<p>{{ servicio.nombre }} - Cantidad: {{ servicio.cantidad }} - ${{ servicio.subtotal }}</p>
+{% else %}
+<p>No se compraron servicios adicionales</p>
+{% endfor %}
+
+
+{% if comprobante.compra.estado in ["aprobada", "confirmada"] %}
+<div class="acciones-comprobante">
+    <a href="{{ url_for('descargar_comprobante_pdf', id_compra=comprobante.compra.id_compra) }}"
+       class="boton-principal">
+        Descargar comprobante PDF
+    </a>
+
+
+    <button type="button" class="boton-cancelar-compra" data-id-compra="{{ comprobante.compra.id_compra }}">
+        Cancelar compra
+    </button>
+   
+    <a href="{{ url_for('mis_compras') }}" class="boton-secundario">
+        Volver a mis compras
+    </a>
+</div>
+{% else %}
+<a href="{{ url_for('mis_compras') }}" class="boton-secundario">
+    Volver a mis compras
+</a>
+{% endif %}
+
+
+<dialog id="modal-cancelacion">
+    <div class="contenido-modal-cancelacion">
+        <h3>¿Cancelar esta compra?</h3>
+
+        <p>
+            ¿Estás seguro de que querés cancelar esta compra?
+            Esta acción no se puede deshacer.
+        </p>
+
+        <form method="POST" id="form-cancelacion">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <button type="button" id="cerrar-modal-cancelacion">
+                Volver
+            </button>
+
+            <button type="submit">
+                Sí, cancelar compra
+            </button>
+        </form>
+    </div>
+</dialog>
+
+{% endblock %}

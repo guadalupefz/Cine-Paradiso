@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Reseñas · {{ datos.pelicula.titulo if datos.pelicula else "Película" }} · Cine Paradiso{% endblock %}
+
+{% block content %}
+<section class="seccion-resenas">
+    <p><a href="{{ url_for('index') }}">Volver a la cartelera</a></p>
+    <h2>Reseñas{% if datos.pelicula %}: {{ datos.pelicula.titulo }}{% endif %}</h2>
+
+    {% if error_resenas %}
+        <p class="mensaje-error">No se pudieron cargar las reseñas. {{ error_resenas }}</p>
+    {% else %}
+        <p>
+            {% if datos.cantidad %}
+                Puntuación promedio: <strong>{{ "%.1f"|format(datos.promedio) }}/5</strong>
+                · {{ datos.cantidad }} reseñas
+            {% else %}
+                Todavía no hay puntuaciones para esta película.
+            {% endif %}
+        </p>
+
+        {% if usuario_actual and usuario_actual.rol|trim|lower == "cliente" %}
+            <section aria-labelledby="titulo-mi-resena">
+                <h3 id="titulo-mi-resena">Tu reseña</h3>
+                {% if error_propio %}
+                    <p class="mensaje-error">No se pudo comprobar si podés reseñar. {{ error_propio }}</p>
+                {% elif propia %}
+                    {% if propia.resena %}
+                        <p>Tu puntuación actual: {{ propia.resena.puntuacion }}/5</p>
+                    {% endif %}
+                    {% if propia.puede_resenar %}
+                        <p>Solo pueden reseñar quienes ingresaron con una entrada validada por QR.</p>
+                        <form method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <label for="puntuacion">Puntuación</label>
+                            <select id="puntuacion" name="puntuacion" required>
+                                <option value="">Elegí del 1 al 5</option>
+                                {% for valor in range(1, 6) %}
+                                    <option value="{{ valor }}" {% if propia.resena and propia.resena.puntuacion == valor %}selected{% endif %}>
+                                        {{ valor }} / 5
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <label for="comentario">Comentario (opcional, máximo 1000 caracteres)</label>
+                            <textarea id="comentario" name="comentario" maxlength="1000" rows="5">{% if propia.resena %}{{ propia.resena.comentario }}{% endif %}</textarea>
+                            <button type="submit">
+                                {% if propia.resena %}Actualizar reseña{% else %}Publicar reseña{% endif %}
+                            </button>
+                        </form>
+                    {% else %}
+                        <p>Para publicar una reseña, primero debe validarse una entrada tuya para esta película.</p>
+                    {% endif %}
+                {% endif %}
+            </section>
+        {% elif usuario_actual %}
+            <p>La publicación de reseñas está disponible para cuentas de cliente.</p>
+        {% else %}
+            <p><a href="{{ url_for('login', next=url_for('ver_resenas_pelicula', id_pelicula=datos.pelicula.id_pelicula if datos.pelicula else 0)) }}">Iniciá sesión como cliente</a> para publicar una reseña cuando hayas asistido.</p>
+        {% endif %}
+
+        <section aria-labelledby="titulo-resenas-publicas">
+            <h3 id="titulo-resenas-publicas">Opiniones de clientes</h3>
+            {% for resena in datos.resenas %}
+                <article class="tarjeta-resena">
+                    <p><strong>{{ resena.puntuacion }}/5</strong> · {{ resena.fecha_actualizacion }}</p>
+                    {% if resena.comentario %}
+                        <p>{{ resena.comentario }}</p>
+                    {% else %}
+                        <p>Sin comentario escrito.</p>
+                    {% endif %}
+                </article>
+            {% else %}
+                <p>No hay reseñas publicadas todavía.</p>
+            {% endfor %}
+        </section>
+    {% endif %}
+</section>
+{% endblock %}

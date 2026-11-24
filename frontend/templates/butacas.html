@@ -3,64 +3,212 @@
 {% block title %}Selección de butacas - Cine Paradiso{% endblock %}
 
 {% block content %}
-    <section class="butacas">
-        <h2>{{ pelicula.titulo }}</h2>
+<section class="seleccion-butacas">
 
-        <p class="introduccion">
-            Función seleccionada: {{ id_funcion }}
+    <nav class="progreso-compra" aria-label="Progreso de compra">
+
+        <span class="paso completado">
+            <span class="numero-paso">1</span>
+            <span>Función</span>
+        </span>
+
+        <span class="separador-pasos"></span>
+
+        <span class="paso activo">
+            <span class="numero-paso">2</span>
+            <span>Butacas</span>
+        </span>
+
+        <span class="separador-pasos"></span>
+
+        <span class="paso">
+            <span class="numero-paso">3</span>
+            <span>Servicios</span>
+        </span>
+
+    </nav>
+
+    <h2>Seleccioná tus butacas</h2>
+
+    {% if error %}
+
+        <p class="mensaje-error">
+            No se pudieron cargar los datos de esta función.
         </p>
 
-        <h3>Seleccioná tus butacas</h3>
+    {% elif butacas %}
 
-        <p class="referencia-butacas">
-            <span class="estado-disponible">Disponible</span>
-            <span class="estado-ocupada">Ocupada</span>
-        </p>
+        <div class="contenido-seleccion-butacas"
+            data-precio="{{ funcion.precio_base or 0 }}"
+            data-id-funcion="{{ id_funcion }}">
 
-        {% if error %}
-            <p class="mensaje-error" role="alert">
-                No se pudieron cargar las butacas.
-                Intentá nuevamente más tarde.
-            </p>
+            <!-- Columna izquierda -->
+            <div class="sector-mapa">
 
-        {% elif butacas %}
-            <div class="lista-butacas">
-                {% for butaca in butacas %}
-                    <article class="butaca
-                        {% if butaca.estado == 'disponible' %}
-                            butaca-disponible
-                        {% elif butaca.estado == 'ocupada' %}
-                            butaca-ocupada
-                        {% endif %}">
+                <div class="informacion-funcion">
 
-                        <h4>Butaca {{ butaca.fila }}{{ butaca.numero }}</h4>
+                    {% if funcion.poster %}
+                        <img
+                            src="{{ funcion.poster }}"
+                            alt="Póster de {{ funcion.titulo }}"
+                            class="poster-funcion"
+                        >
+                    {% endif %}
 
-                        {% if butaca.estado == 'disponible' %}
-                            <p class="estado-disponible">
-                                Disponible
-                            </p>
-                        {% elif butaca.estado == 'ocupada' %}
-                            <p class="estado-ocupada">
-                                Ocupada
-                            </p>
-                        {% else %}
-                            <p>
-                                Estado: {{ butaca.estado }}
-                            </p>
-                        {% endif %}
-                    </article>
-                {% endfor %}
+                    <div class="datos-funcion">
+                        <h3>{{ funcion.titulo }}</h3>
+
+                        <p class="detalle-pelicula">
+                            {{ funcion.genero }} ·
+                            {{ funcion.duracion_minutos }} min ·
+                            {{ funcion.clasificacion }}
+                        </p>
+
+                        <hr class="separador-funcion">
+
+                        <div class="detalle-horario">
+                            <p>{{ funcion.fecha }}</p>
+                            <p>{{ funcion.horario }} · {{ funcion.sala_nombre }}</p>
+                            <p>2D · En español</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Mapa de butacas -->
+                <div class="mapa-cine">
+                    <div class="pantalla-cine">
+                        PANTALLA
+                    </div>
+
+                    <div class="leyenda-butacas">
+                        <span>
+                            <i class="indicador disponible"></i>
+                            Disponible
+                        </span>
+
+                        <span>
+                            <i class="indicador ocupada"></i>
+                            Ocupada
+                        </span>
+
+                        <span>
+                            <i class="indicador reservada"></i>
+                            Reservada
+                        </span>
+
+                        <span>
+                            <i class="indicador seleccionada"></i>
+                            Seleccionada
+                        </span>
+                    </div>
+
+                    <p class="ayuda-mapa" id="ayuda-mapa-butacas">Deslizá el mapa hacia los costados para ver todas las butacas.</p>
+                    <div class="desplazamiento-butacas" role="region" aria-label="Mapa de butacas de la sala" aria-describedby="ayuda-mapa-butacas" tabindex="0">
+                    <div class="lista-butacas">
+
+                        {% for fila, butacas_fila in butacas|groupby("fila") %}
+
+                            <div class="fila-butacas">
+
+                                <span class="nombre-fila">
+                                    {{ fila }}
+                                </span>
+
+                                {% for butaca in butacas_fila %}
+
+                                   {% set estado = butaca.estado|lower %}
+                                   {% set ocupada = estado in ['ocupada', 'ocupado'] %}
+                                   {% set reservada = estado in ['reservada', 'reservado'] %}
+                                   {% set bloqueada = ocupada or reservada %}
+
+                                    {% if butaca.numero == 6 %}
+                                        <span class="pasillo-butacas" aria-hidden="true"></span>
+                                    {% endif %}
+
+                                    <button
+                                        type="button"
+                                        class="butaca {% if ocupada %}ocupada{% elif reservada %}reservada{% else %}disponible{% endif %}"
+                                        data-id-butaca="{{ butaca.id_butaca }}"
+                                        data-etiqueta="{{ fila }}{{ butaca.numero }}"
+                                        {% if bloqueada %}
+                                            disabled
+                                            aria-label="Butaca {{ fila }}{{ butaca.numero }}, no disponible"
+                                        {% else %}
+                                            aria-pressed="false"
+                                            aria-label="Butaca {{ fila }}{{ butaca.numero }}, disponible"
+                                        {% endif %}
+                                    >
+                                        {{ fila }}{{ butaca.numero }}
+                                    </button>
+
+                                {% endfor %}
+
+                            </div>
+
+                        {% endfor %}
+
+                    </div>
+                    </div>
+
+                </div>
+
             </div>
 
-        {% else %}
-            <p class="mensaje-vacio">
-                No hay butacas disponibles para mostrar.
-            </p>
-        {% endif %}
+            <!-- Columna derecha: resumen -->
+            <aside class="resumen-butacas">
 
-        <a href="{{ url_for('ver_funciones', id_pelicula=id_pelicula) }}">
-            Volver a funciones
-        </a>
-    </section>
+                <p class="encabezado-resumen">TU VISITA AL PARADISO</p>
+
+                <h3>BUTACAS SELECCIONADAS</h3>
+
+                <ul id="detalle-butacas"></ul>
+
+                <p class="datos-entradas">
+                    <strong id="cantidad-seleccionadas">0</strong> entradas
+                    · {{ funcion.fecha }}
+                    · {{ funcion.horario }}
+                </p>
+
+                <div class="separador-resumen"></div>
+
+                <div class="detalle-precio">
+                    <span>Subtotal</span>
+                    <strong id="total-butacas">$0.00</strong>
+                </div>
+
+                <p class="mensaje-servicios">
+                    Precio final de las entradas.¿Se te antoja algo rico? Podés sumar algo en el siguiente paso.
+                </p>
+
+
+                <button id="continuar-compra" type="button" disabled>
+                    Continuar
+                </button>
+
+                <p id="mensaje-seleccion" aria-live="polite" hidden></p>
+
+            </aside>
+
+
+        </div>
+
+    {% else %}
+
+        <p class="mensaje-vacio">
+            No hay butacas disponibles para esta función.
+        </p>
+
+    {% endif %}
+
+    <a class="volver-funciones"
+       href="{{ url_for('ver_funciones', id_pelicula=id_pelicula) }}">
+        Volver a funciones
+    </a>
+
+</section>
+
+<script src="{{ url_for('static', filename='js/butacas.js') }}"></script>
+
 {% endblock %}
 

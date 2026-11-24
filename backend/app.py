@@ -1,37 +1,82 @@
 import os
-
+import sys
+from pathlib import Path
+from datetime import timedelta
 from dotenv import load_dotenv
-from flask import Flask
-from flask_jwt_extended import JWTManager
+from flask import Flask, jsonify
+import mysql.connector
 
-from src.routes.butacas import mis_rutas
-from src.routes.auth import auth_routes
+RAIZ = Path(__file__).resolve().parents[1]
+if str(RAIZ) not in sys.path:
+    sys.path.insert(0, str(RAIZ))
+load_dotenv(RAIZ / ".env")
 
-
-load_dotenv()
-
-app = Flask(__name__)
-
-app.secret_key = os.getenv("SECRET_KEY") or os.getenv("FLASK_SECRET_KEY")
-if not app.secret_key:
-    raise RuntimeError(
-        "SECRET_KEY no esta configurada. Definila en una variable de entorno."
-    )
-
-app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
-if not app.config["JWT_SECRET_KEY"]:
-    raise RuntimeError(
-        "JWT_SECRET_KEY no esta configurada. Definila en una variable de entorno."
-    )
-
-app.register_blueprint(mis_rutas, url_prefix='/api')
-app.register_blueprint(auth_routes, url_prefix='/api')
+from backend.autenticacion import jwt
 
 
-@app.route('/')
+from backend.src.routes.auth_routes import auth_bp
+from backend.src.routes.butacas import mis_rutas
+from backend.src.routes.peliculas_routes import peliculas_bp
+from backend.src.routes.funciones_routes import funciones_bp
+from backend.src.routes.locales_routes import locales_bp
+from backend.src.routes.salas_routes import salas_bp
+from backend.src.routes.configuracion_butacas import configuracion_butacas_bp
+from backend.src.routes.compras_routes import compras_bp
+from backend.src.routes.servicios_routes import servicios_bp
+from backend.src.routes.estadisticas_routes import estadisticas_bp
+from backend.src.routes.resenas_routes import resenas_bp
+from backend.src.routes.qr_routes import qr_bp
+from backend.src.routes.reservas_routes import reservas_bp
+from backend.src.services.correo_service import mail
+
+
+app = Flask(__name__, static_folder="static")
+app.config.update(
+    SECRET_KEY=os.environ["SECRET_KEY"],
+    SESSION_COOKIE_NAME="cine_backend",
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    SESSION_COOKIE_SECURE=os.environ.get("COOKIE_SECURE", "0") == "1",
+    PERMANENT_SESSION_LIFETIME=timedelta(hours=2),
+    MAX_CONTENT_LENGTH=5 * 1024 * 1024,
+    JWT_SECRET_KEY=os.environ.get("JWT_SECRET_KEY") or os.environ["SECRET_KEY"],
+    JWT_ACCESS_TOKEN_EXPIRES=timedelta(hours=2),
+    JWT_TOKEN_LOCATION=["headers"],
+)
+
+app.config["MAIL_SERVER"] = os.getenv("MAIL_SERVER")
+app.config["MAIL_PORT"] = int(os.getenv("MAIL_PORT", 587))
+app.config["MAIL_USE_TLS"] = os.getenv("MAIL_USE_TLS", "True") == "True"
+app.config["MAIL_USE_SSL"] = os.getenv("MAIL_USE_SSL", "False") == "True"
+app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
+app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
+app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER")
+
+app.config["FRONTEND_URL"] = os.getenv(
+    "FRONTEND_URL",
+    "http://127.0.0.1:8080"
+).rstrip("/")
+
+
+mail.init_app(app)
+jwt.init_app(app)
+
+@app.errorhandler(413)
+def carga_demasiado_grande(error):
+    return jsonify({"error": "La imagen o los datos enviados superan el límite de 5 MB."}), 413
+
+@app.errorhandler(mysql.connector.Error)
+def error_base_datos(error):
+    return jsonify({"error": "No se pudo acceder a la base de datos"}), 500
+
+
+for blueprint in (auth_bp, mis_rutas, peliculas_bp, funciones_bp, locales_bp, salas_bp, configuracion_butacas_bp, compras_bp, servicios_bp, estadisticas_bp, resenas_bp, qr_bp, reservas_bp):
+    app.register_blueprint(blueprint, url_prefix="/api")
+
+@app.get("/")
 def index():
     return "Backend de Cine Paradiso"
 
-
-if __name__ == '__main__':
-    app.run("127.0.0.1", port=5001, debug=True)
+if __name__ == "__main__":
+    host = os.environ.get("FLASK_HOST", "127.0.0.1")
+    app.run(host, port=5001, debug=os.environ.get("FLASK_DEBUG") == "1")

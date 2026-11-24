@@ -1,0 +1,212 @@
+
+{% extends "base.html" %}
+
+{% block title %}Resumen y pago - Cine Paradiso{% endblock %}
+
+{% block content %}
+<div class="compra">
+
+    <h2>Resumen y pago</h2>
+
+    {% if error %}
+
+        <p class="mensaje-error">
+            No se pudo recuperar la información de la función o de las butacas.
+        </p>
+
+        <a href="{{ url_for('index') }}">Volver a la cartelera</a>
+
+    {% else %}
+
+        <form method="POST" action="{{ url_for('procesar_compra') }}">
+
+            <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token }}"
+            >
+
+            <input
+                type="hidden"
+                name="id_funcion"
+                value="{{ id_funcion }}"
+            >
+
+            <input
+                type="hidden"
+                name="butacas"
+                value="{{ butacas|join(',') }}"
+            >
+
+            <input
+                type="hidden"
+                name="servicios"
+                value="{{ servicios_texto }}"
+            >
+
+            <div class="contenido-compra">
+
+                <div class="datos-compra">
+
+                    <div class="informacion-funcion">
+
+                        {% if funcion.poster %}
+                            <img
+                                src="{{ funcion.poster }}"
+                                alt="Póster de {{ funcion.titulo }}"
+                                class="poster-funcion"
+                            >
+                        {% endif %}
+
+                        <div class="datos-funcion">
+
+                            <h3>{{ funcion.titulo }}</h3>
+
+                            <p>
+                                Fecha: {{ funcion.fecha }}
+                            </p>
+
+                            <p>
+                                Horario: {{ funcion.horario }}
+                            </p>
+
+                            <p>
+                                Cine: {{ funcion.local_nombre }}
+                            </p>
+
+                            <p>
+                                Sala: {{ funcion.sala_nombre }}
+                            </p>
+
+                            <p>
+                                Duración: {{ funcion.duracion_minutos }} minutos
+                            </p>
+
+                            <p>
+                                Clasificación: {{ funcion.clasificacion }}
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <div class="datos-contacto">
+
+                        <h3>Tus datos de contacto</h3>
+
+                        <p>
+                            Nombre y apellido:
+                            {{ usuario_actual.nombre }} {{ usuario_actual.apellido }}
+                        </p>
+
+                        <p>
+                            Correo electrónico:
+                            {{ usuario_actual.email }}
+                        </p>
+
+                    </div>
+
+                    <div class="forma-pago">
+
+                        <h3>Elegí cómo pagar</h3>
+
+                        <p>Pago</p>
+
+                        <label>
+                            <input
+                                type="radio"
+                                name="metodo_pago"
+                                value="tarjeta"
+                                checked
+                            >
+                            Tarjeta de débito o crédito
+                        </label>
+
+                    </div>
+
+                </div>
+
+                <div class="resumen-compra">
+
+                    <h3>Tu compra</h3>
+
+                    <h3>Butacas seleccionadas</h3>
+
+                    <div class="butacas-compra">
+
+                        {% for butaca in detalle_butacas %}
+                            <p>Butaca {{ butaca }}</p>
+                        {% endfor %}
+
+                    </div>
+
+                {% if detalle_servicios %}
+                    <h3>Servicios adicionales</h3>
+
+                    {% for servicio in detalle_servicios %}
+                        <p>
+                            {{ servicio.nombre }} ({{ servicio.cantidad }}):
+                            ${{ servicio.subtotal }}
+                        </p>
+                    {% endfor %}
+                {% endif %}
+
+                    <div class="detalle-precio">
+
+                        <p>
+                            Precio por butaca:
+                            ${{ "%.2f"|format(precio_unitario) }}
+                        </p>
+
+                        <p>
+                            Cantidad de butacas:
+                            {{ detalle_butacas|length }}
+                        </p>
+
+                        <p class="total-butacas">
+                            Total:
+                            ${{ "%.2f"|format(total) }}
+                        </p>
+
+                    </div>
+
+                    <p>
+                        Revisá los datos antes de confirmar.
+                        La compra todavía no fue confirmada.
+                    </p>
+                    {% if vencimiento_reserva %}
+                        <p class="aviso-vencimiento">
+                            Tus butacas están reservadas temporalmente.
+                        </p>
+
+                        <p class="aviso-vencimiento">
+                            La reserva vence el {{ vencimiento_reserva }}.
+                        </p>
+
+                        <button type="submit">Confirmar compra</button>
+                    {% else %}
+                        <p class="mensaje-error">
+                            {% if reserva_vencida %}
+                                La reserva venció, selecciona nuevamente tus butacas
+                            {% else %}
+                                No tenés una reserva pendiente
+                            {% endif %}
+                        </p>
+
+                        <a href="{{ url_for('ver_servicios',
+                            id_funcion=id_funcion,
+                            butacas=butacas|join(',')) }}">
+                            Volver a servicios y reservar
+                        </a>
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+        </form>
+
+    {% endif %}
+
+</div>
+{% endblock %}
