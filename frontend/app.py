@@ -1,8 +1,20 @@
 import os
+import sys
 import secrets
 from pathlib import Path
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, session, abort, url_for
+
+# 0. Registramos la raíz en sys.path
+RAIZ = Path(__file__).resolve().parents[1]
+
+# Registramos la raíz en sys.path
+if str(RAIZ) not in sys.path:
+    sys.path.insert(0, str(RAIZ))
+
+# Carga de variables de entorno (.env)
+load_dotenv(RAIZ / ".env")
+
 from frontend.utils.auth_helpers import usuario_actual
 
 # Importación de Blueprints
@@ -11,10 +23,6 @@ from frontend.routes.public_routes import public_bp
 from frontend.routes.compras_routes import compras_bp
 from frontend.routes.usuario_routes import usuario_bp
 from frontend.routes.admin_routes import admin_bp
-
-# Carga de variables de entorno (.env)
-RAIZ = Path(__file__).resolve().parent.parent
-load_dotenv(RAIZ / ".env")
 
 app = Flask(
     __name__,

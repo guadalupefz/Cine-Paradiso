@@ -47,6 +47,28 @@ def mis_compras():
         id_compra_cancelar=compra_cancelable["id_compra"] if compra_cancelable else None
     )
 
+def consultar_comprobante(id_compra):
+    """Consulta los datos del comprobante desde la API del backend."""
+    comprobante, estado = llamar_backend(
+        "GET",
+        f"/compras/{id_compra}/comprobante"
+    )
+
+    if estado != 200:
+        abort(estado)
+
+    return comprobante
+
+
+def obtener_comprobante(id_compra):
+    """Obtiene el comprobante y verifica que la compra esté aprobada o confirmada."""
+    comprobante = consultar_comprobante(id_compra)
+    compra = comprobante["compra"]
+
+    if compra["estado"].lower() not in ("aprobada", "confirmada"):
+        abort(403)
+
+    return comprobante
 
 @usuario_bp.get("/mis-entradas", endpoint="mis_entradas")
 @requiere_usuario
@@ -100,41 +122,19 @@ def ver_qr_cliente(id_entrada):
 @usuario_bp.get("/compras/<int:id_compra>/comprobante", endpoint="ver_comprobante")
 @requiere_usuario
 def ver_comprobante(id_compra):
-    comprobante, estado = llamar_backend(
-        "GET",
-        f"/compras/{id_compra}/comprobante"
-    )
-
-    if estado != 200:
-        abort(estado)
-
-    return render_template(
-        "comprobante.html",
-        comprobante=comprobante
-    )
+    comprobante = consultar_comprobante(id_compra)
+    return render_template("comprobante.html", comprobante=comprobante)
 
 
 @usuario_bp.get("/compras/<int:id_compra>/comprobante/pdf", endpoint="descargar_comprobante_pdf")
 @requiere_usuario
 def descargar_comprobante_pdf(id_compra):
-    comprobante, estado = llamar_backend(
-        "GET",
-        f"/compras/{id_compra}/comprobante"
-    )
-
-    if estado != 200:
-        abort(estado)
+    comprobante = obtener_comprobante(id_compra)
 
     compra = comprobante["compra"]
-
-    # Solo se permite descargar el comprobante de compras aprobadas o confirmadas
-    if compra["estado"].lower() not in ("aprobada", "confirmada"):
-        abort(403)
-
     entradas = comprobante["entradas"]
     servicios = comprobante.get("servicios", [])
 
-    # Utilización del servicio auxiliar de PDF
     buffer = crear_comprobante_pdf(
         compra,
         entradas,

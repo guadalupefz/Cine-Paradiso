@@ -85,10 +85,12 @@ def borrar_servicio(id_servicio):
         return respuesta_acceso
 
     conexion = get_connection()
+    imagen = ""
     try:
-        with conexion.cursor() as cursor:
-            servicios_service.eliminar_servicio(cursor, id_servicio)
+        with conexion.cursor(dictionary=True) as cursor:
+            imagen = servicios_service.eliminar_servicio(cursor, id_servicio)
         conexion.commit()
+        servicios_service.descartar_imagen(imagen)
         return jsonify({"mensaje": "Servicio eliminado"}), 200
     except LookupError:
         conexion.rollback()

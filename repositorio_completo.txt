@@ -1,4 +1,4 @@
--e 
+
 
 === ARCHIVO: ./frontend/templates/login.html ===
 {% extends "acceso_base.html" %}
@@ -9,17 +9,37 @@
 <form method="post" action="{{ url_for('auth.login') }}" class="formulario-cuenta">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <input type="hidden" name="next" value="{{ destino or '' }}">
-    <div class="campo-cuenta"><label for="email">Correo electrónico</label><input id="email" type="email" name="email" autocomplete="username" maxlength="150" required value="{{ email_acceso }}" placeholder="nombre@ejemplo.com"></div>
-    <div class="campo-cuenta"><label for="password">Contraseña</label><div class="entrada-password"><input id="password" type="password" name="password" autocomplete="current-password" maxlength="256" required><button class="mostrar-password" type="button" data-mostrar-password="password" aria-controls="password" aria-pressed="false">Mostrar</button></div></div>
+    <div class="campo-cuenta">
+        <label for="email">Correo electrónico</label>
+        <input id="email" type="email" name="email" autocomplete="username" maxlength="150" required value="{{ email_acceso }}" placeholder="nombre@ejemplo.com">
+    </div>
+    <div class="campo-cuenta">
+        <label for="password">Contraseña</label>
+        <div class="entrada-password">
+            <input id="password" type="password" name="password" autocomplete="current-password" maxlength="256" required>
+            <button class="mostrar-password" type="button" data-mostrar-password="password" aria-controls="password" aria-pressed="false">Mostrar</button>
+        </div>
+    </div>
     <button class="continuar-acceso" type="submit">{{ 'Ingresar y continuar' if destino else 'Ingresar' }}</button>
 </form>
 <p class="alternativa-acceso">¿Todavía no tenés cuenta? <a href="{{ url_for('auth.registro', next=destino) }}">Crear cuenta</a></p>
 {% endblock %}
--e 
+
 
 === ARCHIVO: ./frontend/templates/error.html ===
-{% extends "base.html" %}{% block content %}<h2>No se pudo continuar</h2><p role="alert">{{ mensaje }}</p><a href="{{ url_for('public.index') }}">Volver al inicio</a>{% endblock %}
--e 
+{% extends "base.html" %}
+
+{% block title %}Error · Cine Paradiso{% endblock %}
+
+{% block content %}
+    <h2>No se pudo continuar</h2>
+
+    <p role="alert">{{ mensaje }}</p>
+
+    <a href="{{ url_for('public.index') }}">
+        Volver al inicio
+    </a>
+{% endblock %}
 
 === ARCHIVO: ./frontend/templates/acceso_base.html ===
 {% extends "base.html" %}
@@ -49,7 +69,7 @@
     </div>
 </div>
 {% endblock %}
--e 
+
 
 === ARCHIVO: ./frontend/templates/admin/funciones_admin.html ===
 {% extends "admin/base_admin.html" %}
@@ -132,7 +152,7 @@
 </section>
 {% endif %}
 {% endblock %}
--e 
+
 
 === ARCHIVO: ./frontend/templates/admin/salas_admin.html ===
 {% extends "admin/base_admin.html" %}
@@ -199,7 +219,7 @@
     {% endif %}
 </section>
 {% endblock %}
--e 
+
 
 === ARCHIVO: ./frontend/templates/admin/validar_qr.html ===
 {% extends "admin/base_admin.html" %}
@@ -221,14 +241,27 @@
 
     <div class="campo_formulario">
         <label for="id_funcion">ID de función</label>
-        <input type="number" id="id_funcion" name="id_funcion" value="{{ request.form.get('id_funcion', '') }}"
-        placeholder="Ej: 15" required min="1" step="1">
+        <input
+            type="number"
+            id="id_funcion"
+            name="id_funcion"
+            value="{{ request.form.get('id_funcion', '') }}"
+            placeholder="Ej: 15"
+            required
+            min="1"
+            step="1"
+        >
     </div>
 
     <div class="campo_formulario">
         <label for="qr_token">Código de entrada</label>
-        <input type="text" id="qr_token" name="qr_token" value="{{ request.form.get('qr_token', '') }}"
-        placeholder="Token QR">
+        <input
+            type="text"
+            id="qr_token"
+            name="qr_token"
+            value="{{ request.form.get('qr_token', '') }}"
+            placeholder="Token QR"
+        >
     </div>
 
     <button type="submit">Validar ingreso</button>
@@ -239,34 +272,10 @@
 {% endif %}
 
 <script src="https://unpkg.com/html5-qrcode"></script>
+<script src="{{ url_for('static', filename='js/validar_qr.js') }}"></script>
 
-<script>
-let scanner = null;
-
-document.getElementById("btn-escanear").addEventListener("click", function () {
-    if (!scanner) {
-        scanner = new Html5Qrcode("reader");
-    }
-
-    scanner.start(
-        { facingMode: "environment" },
-        {
-            fps: 10,
-            qrbox: 250
-        },
-        function(decodedText) {
-            document.getElementById("qr_token").value = decodedText;
-            scanner.stop();
-            alert("QR leído correctamente");
-        }
-    ).catch(function(error) {
-        console.error(error);
-        alert("No se pudo abrir la cámara");
-    });
-});
-</script>
 {% endblock %}
--e 
+
 
 === ARCHIVO: ./frontend/templates/admin/butacas_admin.html ===
 {% extends "admin/base_admin.html" %}
@@ -300,7 +309,7 @@ document.getElementById("btn-escanear").addEventListener("click", function () {
     </form>
 </section>
 {% endblock %}
--e 
+
 
 === ARCHIVO: ./frontend/templates/admin/base_admin.html ===
 <!DOCTYPE html>
@@ -336,7 +345,7 @@ document.getElementById("btn-escanear").addEventListener("click", function () {
     </div>
 </body>
 </html>
--e 
+
 
 === ARCHIVO: ./frontend/templates/admin/locales_admin.html ===
 {% extends "admin/base_admin.html" %}
@@ -379,7 +388,7 @@ document.getElementById("btn-escanear").addEventListener("click", function () {
     {% endif %}
 </section>
 {% endblock %}
--e 
+
 
 === ARCHIVO: ./frontend/templates/admin/resumen_admin.html ===
 {% extends "admin/base_admin.html" %}
@@ -535,7 +544,7 @@ document.getElementById("btn-escanear").addEventListener("click", function () {
 </section>
 
 {% endblock %}
--e 
+
 
 === ARCHIVO: ./frontend/templates/admin/servicios_admin.html ===
 {% extends "admin/base_admin.html" %}
@@ -649,10 +658,10 @@ document.getElementById("btn-escanear").addEventListener("click", function () {
     {% endif %}
 </div>
 {% endblock %}
--e 
+
 
 === ARCHIVO: ./frontend/templates/admin/panel_admin.html ===
--e 
+
 
 === ARCHIVO: ./frontend/templates/admin/peliculas_admin.html ===
 {% extends "admin/base_admin.html" %}
@@ -737,7 +746,7 @@ document.getElementById("btn-escanear").addEventListener("click", function () {
 </section>
 {% endif %}
 {% endblock %}
--e 
+
 
 === ARCHIVO: ./frontend/templates/resenas.html ===
 {% extends "base.html" %}
@@ -818,7 +827,7 @@ document.getElementById("btn-escanear").addEventListener("click", function () {
     {% endif %}
 </section>
 {% endblock %}
--e 
+
 
 === ARCHIVO: ./frontend/templates/comprobante.html ===
 {% extends "base.html" %}
@@ -916,10 +925,8 @@ document.getElementById("btn-escanear").addEventListener("click", function () {
     </div>
 </dialog>
 
-<script src="{{ url_for('static', filename='js/cancelacion.js') }}" defer></script>
-
 {% endblock %}
--e 
+
 
 === ARCHIVO: ./frontend/templates/funciones.html ===
 {% extends "base.html" %}
@@ -953,7 +960,7 @@ document.getElementById("btn-escanear").addEventListener("click", function () {
             <img
                 src="{{ pelicula.poster or url_for('static', filename='img/poster_sin_imagen.svg') }}"
                 alt="Póster de {{ pelicula.titulo }}"
-                onerror="this.onerror=null;this.src='{{ url_for('static', filename='img/poster_sin_imagen.svg') }}';"
+                data-fallback="{{ url_for('static', filename='img/poster_sin_imagen.svg') }}"
             >
         </aside>
 
@@ -1037,7 +1044,7 @@ document.getElementById("btn-escanear").addEventListener("click", function () {
 
 <script src="{{ url_for('static', filename='js/funciones.js') }}"></script>
 {% endblock %}
--e 
+
 
 === ARCHIVO: ./frontend/templates/entradas.html ===
 {% extends "base.html" %}
@@ -1218,7 +1225,7 @@ document.getElementById("btn-escanear").addEventListener("click", function () {
 
 <script src="{{ url_for('static', filename='js/mis_entradas.js') }}" defer></script>
 {% endblock %}
--e 
+
 
 === ARCHIVO: ./frontend/templates/cartelera.html ===
 {% extends "base.html" %}
@@ -1314,10 +1321,10 @@ document.getElementById("btn-escanear").addEventListener("click", function () {
     {% endif %}
 </section>
 {% endblock %}
--e 
+
 
 === ARCHIVO: ./frontend/templates/_init_.html ===
--e 
+
 
 === ARCHIVO: ./frontend/templates/compras.html ===
 {% extends "base.html" %}
@@ -1402,7 +1409,7 @@ document.getElementById("btn-escanear").addEventListener("click", function () {
 {% endif %}
 
 {% endblock %}
--e 
+
 
 === ARCHIVO: ./frontend/templates/butacas.html ===
 {% extends "base.html" %}
@@ -1618,7 +1625,7 @@ document.getElementById("btn-escanear").addEventListener("click", function () {
 <script src="{{ url_for('static', filename='js/butacas.js') }}"></script>
 
 {% endblock %}
--e 
+
 
 === ARCHIVO: ./frontend/templates/compra.html ===
 
@@ -1833,7 +1840,7 @@ document.getElementById("btn-escanear").addEventListener("click", function () {
 
 </div>
 {% endblock %}
--e 
+
 
 === ARCHIVO: ./frontend/templates/servicios.html ===
 {% extends "base.html" %}
@@ -1985,7 +1992,7 @@ document.getElementById("btn-escanear").addEventListener("click", function () {
     </div>
 
     <script src="{{ url_for('static', filename='js/servicios.js') }}" defer></script>
-{% endblock %}-e 
+{% endblock %}
 
 === ARCHIVO: ./frontend/templates/base.html ===
 <!DOCTYPE html>
@@ -2150,7 +2157,7 @@ document.getElementById("btn-escanear").addEventListener("click", function () {
     <footer class="pie-sitio"><p class="lema-sitio">El cine de siempre. Las historias de hoy.</p><p class="datos-pie">Buenos Aires, Argentina　·　Todos los precios en ARS　·　&copy; 2026 Cine Paradiso</p></footer>
 </body>
 </html>
--e 
+
 
 === ARCHIVO: ./frontend/templates/registro.html ===
 {% extends "acceso_base.html" %}
@@ -2162,15 +2169,40 @@ document.getElementById("btn-escanear").addEventListener("click", function () {
 <form method="post" action="{{ url_for('auth.registro') }}" class="formulario-cuenta" {% if error_formulario %}aria-describedby="error-registro"{% endif %}>
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <input type="hidden" name="next" value="{{ destino or '' }}">
-    <div class="nombres-cuenta"><div class="campo-cuenta"><label for="nombre">Nombre</label><input id="nombre" name="nombre" autocomplete="given-name" maxlength="100" required value="{{ datos_formulario.nombre }}"></div><div class="campo-cuenta"><label for="apellido">Apellido</label><input id="apellido" name="apellido" autocomplete="family-name" maxlength="100" required value="{{ datos_formulario.apellido }}"></div></div>
-    <div class="campo-cuenta"><label for="email">Correo electrónico</label><input id="email" name="email" type="email" autocomplete="email" maxlength="150" required value="{{ datos_formulario.email }}" placeholder="nombre@ejemplo.com"></div>
-    <div class="campo-cuenta"><label for="password">Contraseña</label><div class="entrada-password"><input id="password" name="password" type="password" autocomplete="new-password" maxlength="256" required aria-describedby="ayuda-password"><button class="mostrar-password" type="button" data-mostrar-password="password" aria-controls="password" aria-pressed="false">Mostrar</button></div><small id="ayuda-password">Usá una contraseña larga y única. Máximo 256 caracteres.</small></div>
-    <div class="campo-cuenta"><label for="confirmar_password">Confirmar contraseña</label><div class="entrada-password"><input id="confirmar_password" name="confirmar_password" type="password" autocomplete="new-password" maxlength="256" required><button class="mostrar-password" type="button" data-mostrar-password="confirmar_password" aria-controls="confirmar_password" aria-pressed="false">Mostrar</button></div></div>
+    <div class="nombres-cuenta">
+        <div class="campo-cuenta">
+            <label for="nombre">Nombre</label>
+            <input id="nombre" name="nombre" autocomplete="given-name" maxlength="100" required value="{{ datos_formulario.nombre }}">
+        </div>
+        <div class="campo-cuenta">
+            <label for="apellido">Apellido</label>
+            <input id="apellido" name="apellido" autocomplete="family-name" maxlength="100" required value="{{ datos_formulario.apellido }}">
+        </div>
+    </div>
+    <div class="campo-cuenta">
+        <label for="email">Correo electrónico</label>
+        <input id="email" name="email" type="email" autocomplete="email" maxlength="150" required value="{{ datos_formulario.email }}" placeholder="nombre@ejemplo.com">
+    </div>
+    <div class="campo-cuenta">
+        <label for="password">Contraseña</label>
+        <div class="entrada-password">
+            <input id="password" name="password" type="password" autocomplete="new-password" maxlength="256" required aria-describedby="ayuda-password">
+            <button class="mostrar-password" type="button" data-mostrar-password="password" aria-controls="password" aria-pressed="false">Mostrar</button>
+        </div>
+        <small id="ayuda-password">Usá una contraseña larga y única. Máximo 256 caracteres.</small>
+    </div>
+    <div class="campo-cuenta">
+        <label for="confirmar_password">Confirmar contraseña</label>
+        <div class="entrada-password">
+            <input id="confirmar_password" name="confirmar_password" type="password" autocomplete="new-password" maxlength="256" required>
+            <button class="mostrar-password" type="button" data-mostrar-password="confirmar_password" aria-controls="confirmar_password" aria-pressed="false">Mostrar</button>
+        </div>
+    </div>
     <button class="continuar-acceso" type="submit">Crear cuenta</button>
 </form>
 <p class="alternativa-acceso">¿Ya tenés cuenta? <a href="{{ url_for('auth.login', next=destino) }}">Iniciar sesión</a></p>
 {% endblock %}
--e 
+
 
 === ARCHIVO: ./frontend/routes/usuario_routes.py ===
 import requests
@@ -2222,6 +2254,28 @@ def mis_compras():
         id_compra_cancelar=compra_cancelable["id_compra"] if compra_cancelable else None
     )
 
+def consultar_comprobante(id_compra):
+    """Consulta los datos del comprobante desde la API del backend."""
+    comprobante, estado = llamar_backend(
+        "GET",
+        f"/compras/{id_compra}/comprobante"
+    )
+
+    if estado != 200:
+        abort(estado)
+
+    return comprobante
+
+
+def obtener_comprobante(id_compra):
+    """Obtiene el comprobante y verifica que la compra esté aprobada o confirmada."""
+    comprobante = consultar_comprobante(id_compra)
+    compra = comprobante["compra"]
+
+    if compra["estado"].lower() not in ("aprobada", "confirmada"):
+        abort(403)
+
+    return comprobante
 
 @usuario_bp.get("/mis-entradas", endpoint="mis_entradas")
 @requiere_usuario
@@ -2275,41 +2329,19 @@ def ver_qr_cliente(id_entrada):
 @usuario_bp.get("/compras/<int:id_compra>/comprobante", endpoint="ver_comprobante")
 @requiere_usuario
 def ver_comprobante(id_compra):
-    comprobante, estado = llamar_backend(
-        "GET",
-        f"/compras/{id_compra}/comprobante"
-    )
-
-    if estado != 200:
-        abort(estado)
-
-    return render_template(
-        "comprobante.html",
-        comprobante=comprobante
-    )
+    comprobante = consultar_comprobante(id_compra)
+    return render_template("comprobante.html", comprobante=comprobante)
 
 
 @usuario_bp.get("/compras/<int:id_compra>/comprobante/pdf", endpoint="descargar_comprobante_pdf")
 @requiere_usuario
 def descargar_comprobante_pdf(id_compra):
-    comprobante, estado = llamar_backend(
-        "GET",
-        f"/compras/{id_compra}/comprobante"
-    )
-
-    if estado != 200:
-        abort(estado)
+    comprobante = obtener_comprobante(id_compra)
 
     compra = comprobante["compra"]
-
-    # Solo se permite descargar el comprobante de compras aprobadas o confirmadas
-    if compra["estado"].lower() not in ("aprobada", "confirmada"):
-        abort(403)
-
     entradas = comprobante["entradas"]
     servicios = comprobante.get("servicios", [])
 
-    # Utilización del servicio auxiliar de PDF
     buffer = crear_comprobante_pdf(
         compra,
         entradas,
@@ -2322,7 +2354,7 @@ def descargar_comprobante_pdf(id_compra):
         mimetype="application/pdf",
         as_attachment=True,
         download_name=f"comprobante_{id_compra}.pdf"
-    )-e 
+    )
 
 === ARCHIVO: ./frontend/routes/auth_routes.py ===
 import secrets
@@ -2423,7 +2455,7 @@ def logout():
         return redirect(url_for('public.index'))
 
     session.clear()
-    return redirect(url_for('public.index'))-e 
+    return redirect(url_for('public.index'))
 
 === ARCHIVO: ./frontend/routes/public_routes.py ===
 from datetime import datetime
@@ -2574,7 +2606,7 @@ def ver_resenas_pelicula(id_pelicula):
         error_resenas=mensaje_error(datos) if estado != 200 else None,
         propia=propia,
         error_propio=error_propio,
-    ), 200 if estado == 200 else estado-e 
+    ), 200 if estado == 200 else estado
 
 === ARCHIVO: ./frontend/routes/compras_routes.py ===
 import os
@@ -2647,17 +2679,8 @@ def ver_servicios():
     servicios = lista(datos, "servicios")
 
     for s in servicios:
-        img = s.get("imagen")
-        if img:
-            if img.startswith(("http://", "https://")):
-                s["imagen_url"] = img
-            else:
-                ruta_limpia = img.lstrip("/")
-                if not ruta_limpia.startswith("static/"):
-                    ruta_limpia = f"static/{ruta_limpia}"
-                s["imagen_url"] = f"{BACKEND_ORIGEN}/{ruta_limpia}"
-        else:
-            s["imagen_url"] = None
+        img = s.get("imagen") or ""
+        s["imagen_url"] = f"{BACKEND_ORIGEN}{img}" if img else None
 
     if not id_funcion and not ids_butacas:
         return render_template(
@@ -2908,7 +2931,7 @@ def procesar_compra():
         return redirect(url_for("usuario.ver_comprobante", id_compra=id_compra))
 
     flash("No se pudo confirmar la compra: " + mensaje_error(resultado), "error")
-    return redirect(url_for('compras.ver_compra', id_funcion=id_funcion, butacas=butacas_texto))-e 
+    return redirect(url_for('compras.ver_compra', id_funcion=id_funcion, butacas=butacas_texto))
 
 === ARCHIVO: ./frontend/routes/admin_routes.py ===
 from datetime import datetime
@@ -3454,7 +3477,7 @@ def validar_qr():
         )
         flash(mensaje_error(resultado), "ok" if estado == 200 else "error")
 
-    return render_template("admin/validar_qr.html", resultado=resultado)-e 
+    return render_template("admin/validar_qr.html", resultado=resultado)
 
 === ARCHIVO: ./frontend/tests/test_estados_publicos.py ===
 import os
@@ -3545,7 +3568,7 @@ class EstadosPublicos(unittest.TestCase):
 
 if __name__=='__main__':
     unittest.main()
--e 
+
 
 === ARCHIVO: ./frontend/tests/test_continuidad_acceso.py ===
 import os
@@ -3675,7 +3698,7 @@ class ContinuidadAcceso(unittest.TestCase):
 
 
 if __name__=='__main__':unittest.main()
--e 
+
 
 === ARCHIVO: ./frontend/tests/test_registro_frontend.py ===
 import os
@@ -3765,7 +3788,7 @@ class RegistroFrontend(unittest.TestCase):
 
 
 if __name__=='__main__':unittest.main()
--e 
+
 
 === ARCHIVO: ./frontend/tests/test_funciones_admin.py ===
 import os
@@ -3908,7 +3931,331 @@ class FuncionesAdmin(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
--e 
+
+
+=== ARCHIVO: ./frontend/tests/test_suite_frontend_v3.py ===
+import os
+import unittest
+from unittest.mock import patch
+
+os.environ.setdefault("SECRET_KEY", "clave-ficticia-para-pruebas-de-frontend-2026")
+os.environ.setdefault("BACKEND_URL", "http://127.0.0.1:5001/api")
+
+from frontend.app import app
+
+
+class BaseTestCase(unittest.TestCase):
+    """Clase base para configurar el cliente de pruebas de Flask."""
+
+    CSRF_TOKEN = "csrf-test-token"
+
+    def setUp(self):
+        app.config.update(
+            TESTING=True,
+            SECRET_KEY="clave-ficticia-para-pruebas-de-frontend-2026"
+        )
+        self.client = app.test_client()
+        with self.client.session_transaction() as sesion:
+            sesion["csrf_token"] = self.CSRF_TOKEN
+
+        self.usuario_cliente = {
+            "id_usuario": 8,
+            "nombre": "Cliente Test",
+            "apellido": "Usuario",
+            "email": "cliente@example.com",
+            "rol": "cliente"
+        }
+        self.usuario_admin = {
+            "id_usuario": 1,
+            "nombre": "Admin Test",
+            "apellido": "Sistema",
+            "email": "admin@example.com",
+            "rol": "administrador"
+        }
+
+    def post(self, url, data=None, **kwargs):
+        """Helper para peticiones POST que inyecta automáticamente el csrf_token."""
+        data_dict = dict(data) if data else {}
+        data_dict.setdefault("csrf_token", self.CSRF_TOKEN)
+        return self.client.post(url, data=data_dict, **kwargs)
+
+    def establecer_sesion(self, token="token-jwt-valido"):
+        """Simula una sesión de usuario autenticado."""
+        with self.client.session_transaction() as sesion:
+            sesion["backend_token"] = token
+            sesion["csrf_token"] = self.CSRF_TOKEN
+
+
+class TestPublicRoutes(BaseTestCase):
+    """Pruebas para las rutas públicas (Cartelera, Funciones y Reseñas)."""
+
+    @patch("frontend.routes.public_routes.llamar_backend")
+    def test_cartelera_index_200(self, mock_backend):
+        mock_backend.return_value = (
+            {
+                "peliculas": [
+                    {
+                        "id_pelicula": 1,
+                        "titulo": "Cine Paradiso",
+                        "duracion_minutos": 124,
+                        "poster": "static/img/demo.jpg"
+                    }
+                ]
+            },
+            200
+        )
+        response = self.client.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b"Cine Paradiso", response.data)
+
+    @patch("frontend.routes.public_routes.llamar_backend")
+    def test_ver_funciones_filtro_pelicula(self, mock_backend):
+        mock_backend.return_value = (
+            {
+                "cartelera": [
+                    {
+                        "id_funcion": 10,
+                        "id_pelicula": 1,
+                        "titulo": "Cine Paradiso",
+                        "fecha_hora_inicio": "Fri, 20 Nov 2026 20:00:00 GMT",
+                        "sala_nombre": "Sala 1",
+                        "precio_base": 4500
+                    }
+                ]
+            },
+            200
+        )
+        response = self.client.get("/funciones?id_pelicula=1")
+        self.assertEqual(response.status_code, 200)
+
+    @patch("frontend.utils.auth_helpers.llamar_backend")
+    @patch("frontend.routes.public_routes.llamar_backend")
+    def test_ver_resenas_pelicula_get(self, mock_backend_public, mock_backend_auth):
+        mock_backend_auth.return_value = (self.usuario_cliente, 200)
+        mock_backend_public.side_effect = [
+            ({"resenas": []}, 200),
+            ({"comentario": "Excelente"}, 200)
+        ]
+        self.establecer_sesion()
+        response = self.client.get("/peliculas/1/resenas")
+        self.assertEqual(response.status_code, 200)
+
+
+class TestAuthRoutes(BaseTestCase):
+    """Pruebas para las rutas de Autenticación (Login, Registro y Logout)."""
+
+    @patch("frontend.routes.auth_routes.llamar_backend")
+    def test_registro_contrasenas_no_coinciden(self, mock_backend):
+        response = self.post("/registro", data={
+            "nombre": "Test",
+            "apellido": "User",
+            "email": "test@example.com",
+            "password": "Password1!",
+            "confirmar_password": "Password2!"
+        })
+        self.assertEqual(response.status_code, 400)
+        mock_backend.assert_not_called()
+
+    @patch("frontend.routes.auth_routes.llamar_backend")
+    def test_registro_exitoso(self, mock_backend):
+        mock_backend.return_value = ({"mensaje": "Usuario creado"}, 201)
+        response = self.post("/registro", data={
+            "nombre": "Test",
+            "apellido": "User",
+            "email": "test@example.com",
+            "password": "Password123!",
+            "confirmar_password": "Password123!"
+        })
+        self.assertEqual(response.status_code, 302)
+
+    @patch("frontend.routes.auth_routes.llamar_backend")
+    def test_login_exitoso_guarda_token(self, mock_backend):
+        mock_backend.return_value = (
+            {
+                "access_token": "token-jwt-ficticio",
+                "usuario": self.usuario_cliente
+            },
+            200
+        )
+        response = self.post("/login", data={
+            "email": "cliente@example.com",
+            "password": "Password123!"
+        })
+        self.assertEqual(response.status_code, 302)
+        with self.client.session_transaction() as sesion:
+            self.assertEqual(sesion.get("backend_token"), "token-jwt-ficticio")
+
+    @patch("frontend.routes.auth_routes.llamar_backend")
+    def test_logout_limpia_sesion(self, mock_backend):
+        mock_backend.return_value = ({"mensaje": "Sesión cerrada"}, 200)
+        self.establecer_sesion()
+        response = self.post("/logout")
+        self.assertEqual(response.status_code, 302)
+        with self.client.session_transaction() as sesion:
+            self.assertNotIn("backend_token", sesion)
+
+
+class TestComprasRoutes(BaseTestCase):
+    """Pruebas para las rutas de Compras y Selección de Butacas."""
+
+    @patch("frontend.utils.auth_helpers.llamar_backend")
+    def test_ver_butacas_requiere_autenticacion(self, mock_backend):
+        mock_backend.return_value = (None, 401)
+        response = self.client.get("/butacas/10")
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/login", response.location)
+
+    @patch("frontend.utils.auth_helpers.llamar_backend")
+    @patch("frontend.routes.compras_routes.llamar_backend")
+    def test_ver_butacas_autenticado_200(self, mock_backend_compras, mock_backend_auth):
+        mock_backend_auth.return_value = (self.usuario_cliente, 200)
+        mock_backend_compras.side_effect = [
+            ({"butacas": [{"id_butaca": 1, "fila": "A", "numero": 1}]}, 200),
+            ({"cartelera": [{"id_funcion": 10, "fecha_hora_inicio": "Fri, 20 Nov 2026 20:00:00 GMT"}]}, 200)
+        ]
+        self.establecer_sesion()
+        response = self.client.get("/butacas/10")
+        self.assertEqual(response.status_code, 200)
+
+    @patch("frontend.routes.compras_routes.llamar_backend")
+    def test_ver_servicios_catalogo_publico(self, mock_backend):
+        mock_backend.return_value = (
+            {"servicios": [{"id_servicio": 1, "nombre": "Pochoclos Grandes", "precio": 3000}]},
+            200
+        )
+        response = self.client.get("/servicios")
+        self.assertEqual(response.status_code, 200)
+
+    @patch("frontend.utils.auth_helpers.llamar_backend")
+    @patch("frontend.routes.compras_routes.llamar_backend")
+    def test_reservar_compra_nueva(self, mock_backend_compras, mock_backend_auth):
+        mock_backend_auth.return_value = (self.usuario_cliente, 200)
+        mock_backend_compras.return_value = (
+            {"id_compra": 99, "fecha_hora_vencimiento": "2026-11-20 21:00:00"},
+            201
+        )
+        self.establecer_sesion()
+        response = self.post("/reservar-compra", data={
+            "id_funcion": "10",
+            "butacas": "1,2",
+            "combos": "{}"
+        })
+        self.assertEqual(response.status_code, 302)
+
+
+class TestUsuarioRoutes(BaseTestCase):
+    """Pruebas para las rutas de Usuario (Historial y Comprobantes)."""
+
+    @patch("frontend.utils.auth_helpers.llamar_backend")
+    @patch("frontend.routes.usuario_routes.llamar_backend")
+    def test_mis_compras_listado(self, mock_backend_usuario, mock_backend_auth):
+        mock_backend_auth.return_value = (self.usuario_cliente, 200)
+        mock_backend_usuario.side_effect = [
+            ({"compras": [{"id_compra": 1, "estado": "confirmada", "total": 5000}]}, 200),
+            ({"entradas": []}, 200)
+        ]
+        self.establecer_sesion()
+        response = self.client.get("/mis-compras")
+        self.assertEqual(response.status_code, 200)
+
+    @patch("frontend.utils.auth_helpers.llamar_backend")
+    @patch("frontend.routes.usuario_routes.llamar_backend")
+    def test_descargar_comprobante_pdf_exitoso(self, mock_backend_usuario, mock_backend_auth):
+        mock_backend_auth.return_value = (self.usuario_cliente, 200)
+        mock_backend_usuario.return_value = (
+            {
+                "compra": {
+                    "id_compra": 1,
+                    "nombre": "Cliente",
+                    "apellido": "Test",
+                    "email": "cliente@example.com",
+                    "estado": "aprobada",
+                    "monto_total": 5000,
+                    "total": 5000,
+                    "fecha_hora": "2026-11-20 20:00:00"
+                },
+                "entradas": [],
+                "servicios": []
+            },
+            200
+        )
+        self.establecer_sesion()
+        response = self.client.get("/compras/1/comprobante/pdf")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content_type, "application/pdf")
+
+    @patch("frontend.utils.auth_helpers.llamar_backend")
+    @patch("frontend.routes.usuario_routes.llamar_backend")
+    def test_descargar_comprobante_pdf_403_si_pendiente(self, mock_backend_usuario, mock_backend_auth):
+        mock_backend_auth.return_value = (self.usuario_cliente, 200)
+        mock_backend_usuario.return_value = (
+            {
+                "compra": {"id_compra": 1, "estado": "pendiente"},
+                "entradas": [],
+                "servicios": []
+            },
+            200
+        )
+        self.establecer_sesion()
+        response = self.client.get("/compras/1/comprobante/pdf")
+        self.assertEqual(response.status_code, 403)
+
+
+class TestAdminRoutes(BaseTestCase):
+    """Pruebas para las rutas de Administración."""
+
+    @patch("frontend.utils.auth_helpers.llamar_backend")
+    def test_admin_resumen_bloquea_cliente(self, mock_backend):
+        mock_backend.return_value = (self.usuario_cliente, 200)
+        self.establecer_sesion()
+        response = self.client.get("/admin")
+        self.assertEqual(response.status_code, 403)
+
+    @patch("frontend.utils.auth_helpers.llamar_backend")
+    @patch("frontend.routes.admin_routes.llamar_backend")
+    def test_admin_resumen_acceso_permitido(self, mock_backend_admin, mock_backend_auth):
+        mock_backend_auth.return_value = (self.usuario_admin, 200)
+        mock_backend_admin.side_effect = [
+            ({"resumen": {"total_ventas": 150000}}, 200),
+            ({"ocupacion": []}, 200),
+            ({"locales": []}, 200)
+        ]
+        self.establecer_sesion()
+        response = self.client.get("/admin")
+        self.assertEqual(response.status_code, 200)
+
+    @patch("frontend.utils.auth_helpers.llamar_backend")
+    @patch("frontend.routes.admin_routes.llamar_backend")
+    def test_validar_qr_post(self, mock_backend_admin, mock_backend_auth):
+        mock_backend_auth.return_value = (self.usuario_admin, 200)
+        mock_backend_admin.return_value = ({"valido": True, "mensaje": "Entrada válida"}, 200)
+        self.establecer_sesion()
+        response = self.post("/admin/validar-qr", data={"codigo_qr": "QR123456"})
+        self.assertEqual(response.status_code, 200)
+
+
+class TestSeguridadYErrores(BaseTestCase):
+    """Pruebas de casos borde para CSRF y Manejadores de Error Globales."""
+
+    def test_csrf_token_invalido_devuelve_400(self):
+        """Verifica que el middleware rechace un POST con token CSRF inválido."""
+        response = self.client.post("/login", data={
+            "csrf_token": "token-invalido-o-expirado",
+            "email": "test@example.com",
+            "password": "Password123!"
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(b"venci", response.data.lower())
+
+    def test_pagina_no_encontrada_devuelve_404(self):
+        """Verifica que rutas no registradas retornen estado 404."""
+        response = self.client.get("/ruta-que-no-existe-xyz")
+        self.assertEqual(response.status_code, 404)
+
+
+if __name__ == "__main__":
+    unittest.main()
+
 
 === ARCHIVO: ./frontend/tests/test_suite_frontend_v2.py ===
 import os
@@ -4212,7 +4559,7 @@ class TestAdminRoutes(BaseTestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()-e 
+    unittest.main()
 
 === ARCHIVO: ./frontend/tests/test_eliminar_estructura.py ===
 import os
@@ -4281,7 +4628,7 @@ class EliminarEstructura(unittest.TestCase):
         for recurso in ("locales", "salas"):
             self.assertEqual(self.client.get(f"/admin/{recurso}/7/eliminar").status_code, 405)
         self.assertFalse(any(metodo == "DELETE" for metodo, _ in self.llamadas))
--e 
+
 
 === ARCHIVO: ./frontend/tests/test_servicios_admin.py ===
 import os
@@ -4453,7 +4800,7 @@ class ServiciosAdmin(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
--e 
+
 
 === ARCHIVO: ./frontend/tests/test_resenas_pdf.py ===
 import os
@@ -4626,7 +4973,7 @@ class ResenasYPdfTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
--e 
+
 
 === ARCHIVO: ./frontend/tests/test_peliculas_admin.py ===
 import os
@@ -4805,460 +5152,7 @@ class PeliculasAdmin(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
--e 
 
-=== ARCHIVO: ./frontend/tests_front/test_admin_routhes.py ===
-import unittest
-from unittest.mock import patch
-from frontend.app import app
-
-
-class TestAdminRoutes(unittest.TestCase):
-
-    def setUp(self):
-        app.config.update(TESTING=True)
-        self.client = app.test_client()
-
-    @patch("frontend.utils.auth_helpers.llamar_backend")
-    def test_cliente_bloqueado_en_panel_admin(self, mock_backend):
-        # Simular que el usuario logueado es un cliente normal
-        mock_backend.return_value = (
-            {"id_usuario": 2, "nombre": "Juan", "rol": "cliente"},
-            200
-        )
-
-        with self.client.session_transaction() as sesion:
-            sesion["backend_token"] = "token-cliente"
-
-        respuesta = self.client.get("/admin")
-        
-        # Debe ser rechazado con 403 Forbidden
-        self.assertEqual(respuesta.status_code, 403)
-
-    @patch("frontend.routes.admin_routes.llamar_backend")
-    @patch("frontend.utils.auth_helpers.llamar_backend")
-    def test_admin_accede_a_resumen_metricas(self, mock_backend_auth, mock_backend_admin):
-        # 1. Simular perfil del administrador
-        mock_backend_auth.return_value = (
-            {"id_usuario": 1, "nombre": "Admin", "rol": "administrador"},
-            200
-        )
-        # 2. Simular métricas de ventas devueltas por el Backend
-        mock_backend_admin.return_value = ({"ventas_por_genero": []}, 200)
-
-        with self.client.session_transaction() as sesion:
-            sesion["backend_token"] = "token-admin"
-
-        respuesta = self.client.get("/admin")
-        self.assertEqual(respuesta.status_code, 200)-e 
-
-=== ARCHIVO: ./frontend/tests_front/test_suite_frontend.py ===
-import os
-import unittest
-from io import BytesIO
-from unittest.mock import patch
-
-# Configuración del entorno de testing antes de importar la app
-os.environ.setdefault("SECRET_KEY", "clave-ficticia-para-pruebas-de-frontend-2026")
-os.environ.setdefault("BACKEND_URL", "http://127.0.0.1:5001/api")
-
-from frontend.app import app
-
-
-class BaseTestCase(unittest.TestCase):
-    """Clase base para configurar el cliente de pruebas de Flask."""
-
-    def setUp(self):
-        app.config.update(
-            TESTING=True,
-            SECRET_KEY="clave-ficticia-para-pruebas-de-frontend-2026",
-            WTF_CSRF_ENABLED=False
-        )
-        self.client = app.test_client()
-        self.usuario_cliente = {
-            "id_usuario": 8,
-            "nombre": "Cliente Test",
-            "apellido": "Usuario",
-            "email": "cliente@example.com",
-            "rol": "cliente"
-        }
-        self.usuario_admin = {
-            "id_usuario": 1,
-            "nombre": "Admin Test",
-            "apellido": "Sistema",
-            "email": "admin@example.com",
-            "rol": "administrador"
-        }
-
-    def establecer_sesion(self, token="token-jwt-valido"):
-        """Utility method para simular sesión autenticada."""
-        with self.client.session_transaction() as sesion:
-            sesion["backend_token"] = token
-            sesion["csrf_token"] = "csrf-test-token"
-
-
-class TestPublicRoutes(BaseTestCase):
-    """Pruebas para las rutas públicas (Cartelera, Funciones y Reseñas)."""
-
-    @patch("frontend.routes.public_routes.llamar_backend")
-    def test_cartelera_index_200(self, mock_backend):
-        mock_backend.return_value = (
-            {
-                "peliculas": [
-                    {
-                        "id_pelicula": 1,
-                        "titulo": "Cine Paradiso",
-                        "duracion_minutos": 124,
-                        "poster": "static/img/demo.jpg"
-                    }
-                ]
-            },
-            200
-        )
-        response = self.client.get("/")
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Cine Paradiso", response.data)
-        mock_backend.assert_called_with("GET", "/peliculas")
-
-    @patch("frontend.routes.public_routes.llamar_backend")
-    def test_ver_funciones_filtro_pelicula(self, mock_backend):
-        mock_backend.return_value = (
-            {
-                "cartelera": [
-                    {
-                        "id_funcion": 10,
-                        "id_pelicula": 1,
-                        "titulo": "Cine Paradiso",
-                        "fecha_hora_inicio": "Fri, 20 Nov 2026 20:00:00 GMT",
-                        "sala_nombre": "Sala 1",
-                        "precio_base": 4500
-                    }
-                ]
-            },
-            200
-        )
-        response = self.client.get("/funciones?id_pelicula=1")
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Sala 1", response.data)
-
-    @patch("frontend.utils.auth_helpers.llamar_backend")
-    @patch("frontend.routes.public_routes.llamar_backend")
-    def test_ver_resenas_pelicula_get(self, mock_backend_public, mock_backend_auth):
-        mock_backend_auth.return_value = (self.usuario_cliente, 200)
-        mock_backend_public.side_effect = [
-            ({"resenas": []}, 200),        # GET /peliculas/1/resenas
-            ({"comentario": "Excelente"}, 200) # GET /peliculas/1/resenas/propia
-        ]
-        self.establecer_sesion()
-        response = self.client.get("/peliculas/1/resenas")
-        self.assertEqual(response.status_code, 200)
-
-
-class TestAuthRoutes(BaseTestCase):
-    """Pruebas para el módulo de Autenticación (Login, Registro y Logout)."""
-
-    @patch("frontend.routes.auth_routes.llamar_backend")
-    def test_registro_contrasenas_no_coinciden(self, mock_backend):
-        response = self.client.post("/registro", data={
-            "nombre": "Test",
-            "apellido": "User",
-            "email": "test@example.com",
-            "password": "Password1!",
-            "confirmar_password": "Password2!"
-        })
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("Las contrase".encode("utf-8"), response.data)
-        mock_backend.assert_not_called()
-
-    @patch("frontend.routes.auth_routes.llamar_backend")
-    def test_registro_exitoso(self, mock_backend):
-        mock_backend.return_value = ({"mensaje": "Usuario creado"}, 201)
-        response = self.client.post("/registro", data={
-            "nombre": "Test",
-            "apellido": "User",
-            "email": "test@example.com",
-            "password": "Password123!",
-            "confirmar_password": "Password123!"
-        })
-        self.assertEqual(response.status_code, 302)
-        mock_backend.assert_called_once()
-
-    @patch("frontend.routes.auth_routes.llamar_backend")
-    def test_login_exitoso_guarda_token(self, mock_backend):
-        mock_backend.return_value = (
-            {
-                "access_token": "token-jwt-ficticio",
-                "usuario": self.usuario_cliente
-            },
-            200
-        )
-        response = self.client.post("/login", data={
-            "email": "cliente@example.com",
-            "password": "Password123!"
-        })
-        self.assertEqual(response.status_code, 302)
-        with self.client.session_transaction() as sesion:
-            self.assertEqual(sesion.get("backend_token"), "token-jwt-ficticio")
-
-    @patch("frontend.routes.auth_routes.llamar_backend")
-    def test_logout_limpia_sesion(self, mock_backend):
-        mock_backend.return_value = ({"mensaje": "Sesión cerrada"}, 200)
-        self.establecer_sesion()
-        response = self.client.post("/logout")
-        self.assertEqual(response.status_code, 302)
-        with self.client.session_transaction() as sesion:
-            self.assertNotIn("backend_token", sesion)
-
-
-class TestComprasRoutes(BaseTestCase):
-    """Pruebas para el flujo de Selección de Butacas, Combos y Pago."""
-
-    @patch("frontend.utils.auth_helpers.llamar_backend")
-    def test_ver_butacas_requiere_autenticacion(self, mock_backend):
-        mock_backend.return_value = (None, 401)
-        response = self.client.get("/butacas/10")
-        self.assertEqual(response.status_code, 302)
-        self.assertIn("/login", response.location)
-
-    @patch("frontend.utils.auth_helpers.llamar_backend")
-    @patch("frontend.routes.compras_routes.llamar_backend")
-    def test_ver_butacas_autenticado_200(self, mock_backend_compras, mock_backend_auth):
-        mock_backend_auth.return_value = (self.usuario_cliente, 200)
-        mock_backend_compras.side_effect = [
-            ({"butacas": [{"id_butaca": 1, "fila": "A", "numero": 1}]}, 200), # GET /funciones/10/butacas
-            ({"cartelera": [{"id_funcion": 10, "fecha_hora_inicio": "Fri, 20 Nov 2026 20:00:00 GMT"}]}, 200) # GET /cartelera
-        ]
-        self.establecer_sesion()
-        response = self.client.get("/butacas/10")
-        self.assertEqual(response.status_code, 200)
-
-    @patch("frontend.routes.compras_routes.llamar_backend")
-    def test_ver_servicios_catalogo_publico(self, mock_backend):
-        mock_backend.return_value = (
-            {"servicios": [{"id_servicio": 1, "nombre": "Pochoclos Grandes", "precio": 3000}]},
-            200
-        )
-        response = self.client.get("/servicios")
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Pochoclos Grandes", response.data)
-
-    @patch("frontend.utils.auth_helpers.llamar_backend")
-    @patch("frontend.routes.compras_routes.llamar_backend")
-    def test_reservar_compra_nueva(self, mock_backend_compras, mock_backend_auth):
-        mock_backend_auth.return_value = (self.usuario_cliente, 200)
-        mock_backend_compras.return_value = (
-            {"id_compra": 99, "fecha_hora_vencimiento": "2026-11-20 21:00:00"},
-            201
-        )
-        self.establecer_sesion()
-        response = self.client.post("/reservar-compra", data={
-            "id_funcion": "10",
-            "butacas": "1,2",
-            "servicios": "1:2"
-        })
-        self.assertEqual(response.status_code, 302)
-        with self.client.session_transaction() as sesion:
-            self.assertEqual(sesion.get("reserva_pendiente", {}).get("id_compra"), 99)
-
-
-class TestUsuarioRoutes(BaseTestCase):
-    """Pruebas para el Portal del Usuario (Mis Compras, Entradas, QR y PDFs)."""
-
-    @patch("frontend.utils.auth_helpers.llamar_backend")
-    @patch("frontend.routes.usuario_routes.llamar_backend")
-    def test_mis_compras_listado(self, mock_backend_usuario, mock_backend_auth):
-        mock_backend_auth.return_value = (self.usuario_cliente, 200)
-        mock_backend_usuario.side_effect = [
-            ({"compras": [{"id_compra": 50, "estado": "confirmada", "total": "9000.00"}]}, 200), # GET /compras
-            ({"entradas": [{"id_entrada": 101, "pelicula": "Cine Paradiso"}]}, 200)               # GET /compras/50/entradas
-        ]
-        self.establecer_sesion()
-        response = self.client.get("/mis-compras")
-        self.assertEqual(response.status_code, 200)
-
-    @patch("frontend.utils.auth_helpers.llamar_backend")
-    @patch("frontend.routes.usuario_routes.crear_comprobante_pdf")
-    @patch("frontend.routes.usuario_routes.llamar_backend")
-    def test_descargar_comprobante_pdf_exitoso(self, mock_backend_usuario, mock_pdf, mock_backend_auth):
-        mock_backend_auth.return_value = (self.usuario_cliente, 200)
-        mock_backend_usuario.return_value = (
-            {
-                "compra": {"id_compra": 50, "estado": "confirmada", "nombre": "Juan", "apellido": "Perez", "email": "j@p.com", "fecha_hora": "2026-11-20", "total": "5000"},
-                "entradas": [{"id_entrada": 1, "pelicula": "Test", "fecha_hora_inicio": "2026-11-20", "local": "Local 1", "sala": "Sala A", "fila": "A", "numero": 1}],
-                "servicios": []
-            },
-            200
-        )
-        mock_pdf.return_value = BytesIO(b"%PDF-1.4 Fake PDF Content")
-        self.establecer_sesion()
-        response = self.client.get("/compras/50/comprobante/pdf")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.mimetype, "application/pdf")
-
-    @patch("frontend.utils.auth_helpers.llamar_backend")
-    @patch("frontend.routes.usuario_routes.llamar_backend")
-    def test_descargar_comprobante_pdf_403_si_pendiente(self, mock_backend_usuario, mock_backend_auth):
-        mock_backend_auth.return_value = (self.usuario_cliente, 200)
-        mock_backend_usuario.return_value = (
-            {
-                "compra": {"id_compra": 50, "estado": "pendiente"},
-                "entradas": []
-            },
-            200
-        )
-        self.establecer_sesion()
-        response = self.client.get("/compras/50/comprobante/pdf")
-        self.assertEqual(response.status_code, 403)
-
-
-class TestAdminRoutes(BaseTestCase):
-    """Pruebas para el Panel de Administración (Métricas, ABMs y Escáner QR)."""
-
-    @patch("frontend.utils.auth_helpers.llamar_backend")
-    def test_admin_resumen_bloquea_cliente(self, mock_backend_auth):
-        mock_backend_auth.return_value = (self.usuario_cliente, 200)
-        self.establecer_sesion()
-        response = self.client.get("/admin")
-        self.assertEqual(response.status_code, 403)
-
-    @patch("frontend.utils.auth_helpers.llamar_backend")
-    @patch("frontend.routes.admin_routes.llamar_backend")
-    def test_admin_resumen_acceso_permitido(self, mock_backend_admin, mock_backend_auth):
-        mock_backend_auth.return_value = (self.usuario_admin, 200)
-        mock_backend_admin.side_effect = [
-            ({"ventas_por_genero": []}, 200),  # GET /estadisticas/ventas
-            ({"ocupacion_por_funcion": []}, 200), # GET /estadisticas/ocupacion
-            ({"locales": []}, 200)              # GET /locales
-        ]
-        self.establecer_sesion()
-        response = self.client.get("/admin")
-        self.assertEqual(response.status_code, 200)
-
-    @patch("frontend.utils.auth_helpers.llamar_backend")
-    @patch("frontend.routes.admin_routes.llamar_backend")
-    def test_validar_qr_post(self, mock_backend_admin, mock_backend_auth):
-        mock_backend_auth.return_value = (self.usuario_admin, 200)
-        mock_backend_admin.return_value = ({"mensaje": "Entrada validada correctamente"}, 200)
-        self.establecer_sesion()
-        response = self.client.post("/admin/validar-qr", data={
-            "qr_token": "TOKEN-VALIDO-12345",
-            "id_funcion": "10"
-        })
-        self.assertEqual(response.status_code, 200)
-        mock_backend_admin.assert_called_once_with(
-            "POST",
-            "/qr/validar",
-            json={"qr_token": "TOKEN-VALIDO-12345", "id_funcion": 10}
-        )
-
-
-if __name__ == "__main__":
-    unittest.main()
--e 
-
-=== ARCHIVO: ./frontend/tests_front/test_auth_roputes.py ===
-import unittest
-from unittest.mock import patch
-from frontend.app import app
-
-
-class TestAuthRoutes(unittest.TestCase):
-
-    def setUp(self):
-        app.config.update(TESTING=True)
-        self.client = app.test_client()
-
-    @patch("frontend.routes.auth_routes.llamar_backend")
-    def test_login_exitoso_guarda_token_y_redirige(self, mock_backend):
-        # Simular respuesta exitosa de inicio de sesión desde el Backend
-        mock_backend.return_value = (
-            {
-                "access_token": "token-jwt-ficticio-123",
-                "usuario": {"id_usuario": 5, "nombre": "Guadalupe", "rol": "cliente"}
-            },
-            200
-        )
-
-        # Enviar formulario de login con token CSRF válido
-        with self.client.session_transaction() as sesion:
-            sesion["csrf_token"] = "csrf-test-token"
-
-        respuesta = self.client.post(
-            "/login",
-            data={
-                "email": "cliente@example.com",
-                "password": "Password123!",
-                "csrf_token": "csrf-test-token"
-            },
-            follow_redirects=False
-        )
-
-        # Verificar redirección al inicio tras login exitoso
-        self.assertEqual(respuesta.status_code, 302)
-        
-        # Verificar que el JWT se guardó en la sesión del usuario
-        with self.client.session_transaction() as sesion:
-            self.assertEqual(sesion.get("backend_token"), "token-jwt-ficticio-123")-e 
-
-=== ARCHIVO: ./frontend/tests_front/test_public.routes.py ===
-import unittest
-from unittest.mock import patch
-from frontend.app import app
-
-
-class TestPublicRoutes(unittest.TestCase):
-
-    def setUp(self):
-        app.config.update(TESTING=True)
-        self.client = app.test_client()
-
-    @patch("frontend.routes.public_routes.llamar_backend")
-    def test_cartelera_responde_200(self, mock_backend):
-        # 1. Simular respuesta exitosa del Backend para GET /peliculas
-        mock_backend.return_value = (
-            {
-                "peliculas": [
-                    {
-                        "id_pelicula": 1,
-                        "titulo": "Cine Paradiso",
-                        "duracion_minutos": 124,
-                        "poster": "/static/img/demo.jpg"
-                    }
-                ]
-            },
-            200
-        )
-
-        # 2. Realizar petición a la ruta principal
-        respuesta = self.client.get("/")
-
-        # 3. Assertions
-        self.assertEqual(respuesta.status_code, 200)
-        self.assertIn(b"Cine Paradiso", respuesta.data)
-        mock_backend.assert_called_with("GET", "/peliculas")
-
-    @patch("frontend.routes.public_routes.llamar_backend")
-    def test_ver_funciones_filtra_por_pelicula(self, mock_backend):
-        mock_backend.return_value = (
-            {
-                "cartelera": [
-                    {
-                        "id_funcion": 10,
-                        "id_pelicula": 1,
-                        "titulo": "Cine Paradiso",
-                        "fecha_hora_inicio": "Fri, 20 Nov 2026 20:00:00 GMT",
-                        "sala_nombre": "Sala 1",
-                        "precio_base": 4500
-                    }
-                ]
-            },
-            200
-        )
-
-        respuesta = self.client.get("/funciones?id_pelicula=1")
-
-        self.assertEqual(respuesta.status_code, 200)
-        self.assertIn(b"Sala 1", respuesta.data)-e 
 
 === ARCHIVO: ./frontend/static/css/mis_entradas.css ===
 
@@ -5269,7 +5163,8 @@ class TestPublicRoutes(unittest.TestCase):
 }
 
 body {
-    min-width: 1100px;
+    width: 100%;
+    min-width: 0;
     background: #f8f2e5;
     color: #332a25;
     font-family: Arial, sans-serif;
@@ -6204,7 +6099,211 @@ a {
     font-family: Georgia, serif;
     font-size: 24px;
 }
--e 
+
+/* Tablets y pantallas medianas */
+@media (max-width: 900px) {
+    .pagina {
+        padding: 30px 22px 40px;
+    }
+
+    .navbar {
+        padding: 0 22px;
+        gap: 18px;
+    }
+
+    .navbar nav {
+        gap: 18px;
+    }
+
+    .entrada-card {
+        grid-template-columns: 135px minmax(0, 1fr);
+        gap: 18px;
+    }
+
+    .poster-actual {
+        width: 135px;
+        height: 205px;
+    }
+
+    .entrada-acciones {
+        grid-column: 2;
+    }
+
+    .historial-card {
+        grid-template-columns: 50px minmax(0, 1fr) minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    .historial-estado {
+        grid-column: 2 / -1;
+    }
+
+    .modal-contenido {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-cancelacion {
+        max-width: 650px;
+    }
+}
+
+/* Celulares */
+@media (max-width: 600px) {
+    .navbar {
+        height: auto;
+        min-height: 72px;
+        padding: 14px 18px;
+        flex-wrap: wrap;
+    }
+
+    .logo {
+        font-size: 22px;
+    }
+
+    .navbar nav {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px 20px;
+    }
+
+    .navbar nav a {
+        padding: 8px 0;
+    }
+
+    .cuenta {
+        margin-left: auto;
+    }
+
+    .pagina {
+        padding: 24px 16px 35px;
+    }
+
+    .breadcrumb {
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 28px;
+    }
+
+    .titulo-seccion {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 16px;
+        padding-bottom: 20px;
+    }
+
+    .titulo-seccion h1 {
+        font-size: 38px;
+    }
+
+    .usuario {
+        text-align: left;
+    }
+
+    .tabs {
+        gap: 18px;
+        flex-wrap: wrap;
+        margin-bottom: 22px;
+    }
+
+    .tab {
+        padding: 12px 0;
+    }
+
+    .entrada-card {
+        grid-template-columns: minmax(0, 1fr);
+        padding: 18px;
+        gap: 16px;
+    }
+
+    .poster-actual {
+        width: 145px;
+        height: 215px;
+        justify-self: center;
+    }
+
+    .entrada-info {
+        padding-top: 0;
+    }
+
+    .entrada-info h2 {
+        font-size: 25px;
+    }
+
+    .entrada-acciones {
+        grid-column: auto;
+    }
+
+    .historial-card {
+        grid-template-columns: 44px minmax(0, 1fr);
+        gap: 10px 12px;
+        padding: 14px;
+    }
+
+    .historial-icon {
+        width: 40px;
+        height: 40px;
+        grid-row: span 3;
+    }
+
+    .historial-info,
+    .historial-detalle,
+    .historial-estado {
+        grid-column: 2;
+    }
+
+    .historial-info h2 {
+        font-size: 17px;
+    }
+
+    .footer {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 22px 18px;
+    }
+
+    .footer div {
+        flex-wrap: wrap;
+        gap: 10px 18px;
+    }
+
+    .modal-overlay {
+        align-items: flex-start;
+        padding: 10px;
+    }
+
+    .modal-cancelacion {
+        max-height: calc(100vh - 20px);
+        padding: 18px;
+    }
+
+    .modal-header h2 {
+        font-size: 27px;
+    }
+
+    .modal-contenido {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    .compra-card,
+    .columna-formulario {
+        padding: 13px;
+    }
+
+    .pelicula-modal {
+        align-items: flex-start;
+    }
+
+    .pelicula-datos h3 {
+        font-size: 19px;
+    }
+
+    .exito-card {
+        padding: 26px 20px;
+    }
+}
 
 === ARCHIVO: ./frontend/static/css/admin_servicios.css ===
 /* Estilos específicos de servicios adicionales. */
@@ -6286,7 +6385,7 @@ a {
     .admin-servicios thead th:nth-child(3) { width: 28%; }
     .admin-servicios .accion-editar, .admin-servicios .accion-eliminar { white-space: nowrap; font-size: 12px; }
 }
--e 
+
 
 === ARCHIVO: ./frontend/static/css/sitio_publico.css ===
 /* Base pública compartida: navegación, tarjetas, formularios y estados. */
@@ -10626,7 +10725,7 @@ body.sitio-publico .compra {
     flex: 1;
     min-width: 0;
 }
--e 
+
 
 === ARCHIVO: ./frontend/static/css/estilos.css ===
 /* Estilos generales de Cine Paradiso */
@@ -11358,7 +11457,7 @@ a { color: #8d1515; }
     font-weight: 600;
     font-size: 14px;
 }
--e 
+
 
 === ARCHIVO: ./frontend/static/css/acceso.css ===
 /* Acceso y registro, con la función elegida cuando existe un destino de compra. */
@@ -11410,7 +11509,7 @@ a { color: #8d1515; }
     .sitio-publico .ficha-seleccion { grid-template-columns: 72px minmax(0, 1fr); gap: 14px; }
     .sitio-publico .ficha-seleccion h3 { font-size: 21px; }
 }
--e 
+
 
 === ARCHIVO: ./frontend/static/css/admin_funciones.css ===
 /* Programación y edición de funciones. */
@@ -11484,7 +11583,7 @@ a { color: #8d1515; }
     .admin-funciones .fila-funcion { padding: 18px; gap: 18px; }
     .admin-funciones .pelicula-funcion { grid-column: 1 / -1; }
 }
--e 
+
 
 === ARCHIVO: ./frontend/static/css/servicios.css ===
 /* Estilos específicos de servicios adicionales (Cliente) */
@@ -11857,7 +11956,7 @@ a { color: #8d1515; }
     .btn-continuar-extras {
         text-align: center;
     }
-}-e 
+}
 
 === ARCHIVO: ./frontend/static/css/admin_peliculas.css ===
 /* Catálogo y ficha de películas del panel administrativo. */
@@ -11930,7 +12029,7 @@ a { color: #8d1515; }
     .admin-peliculas .resultado-pelicula { grid-template-columns: minmax(0, 1fr); }
     .admin-peliculas .resultado-pelicula img { width: 100px; }
 }
--e 
+
 
 === ARCHIVO: ./frontend/static/css/admin_panel.css ===
 /* Base visual compartida por las vistas administrativas adaptadas al mockup. */
@@ -11945,65 +12044,249 @@ a { color: #8d1515; }
     color: var(--texto);
     line-height: 1.5;
 }
-.admin-panel *, .admin-panel *::before, .admin-panel *::after { box-sizing: border-box; }
-.admin-panel header { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px 32px; text-align: left; background: #101929; border-bottom: 1px solid var(--borde); }
-.admin-panel .logo { color: var(--dorado); }
-.admin-panel .logo h1 { font-size: 22px; margin: 0; letter-spacing: -.5px; }
-.admin-panel .admin-leyenda { margin: 0; font-size: 14px; color: var(--suave); }
-.admin-panel .contenedor_admin { min-height: calc(100vh - 74px); }
-.admin-panel .menu_admin { width: 205px; flex: 0 0 205px; margin: 0; padding: 28px 16px; gap: 6px; border-right: 1px solid var(--borde); background: #101929; }
-.admin-panel .menu_admin a { display: block; margin: 0; padding: 10px 14px; border-radius: 7px; color: var(--suave); font-size: 14px; }
-.admin-panel .menu_admin a:hover { color: var(--texto); background: #1e2b42; }
-.admin-panel .menu_admin a[aria-current="page"] { background: #3c3424; color: var(--dorado); }
-.admin-panel .menu_admin form { margin: 24px 0 0; }
-.admin-panel .menu_admin button { background: transparent; color: var(--suave); border: 1px solid var(--borde); width: 100%; }
-.admin-panel .contenido_admin { width: auto; max-width: 1520px; margin: 0 auto; padding: 36px; background: transparent; border-radius: 0; }
-.admin-panel h2, .admin-panel h3, .admin-panel h4 { color: var(--texto); text-align: left; }
-.admin-panel h2 { font-size: 30px; line-height: 1.2; margin: 8px 0 12px; letter-spacing: -.7px; }
-.admin-panel h3 { font-size: 18px; margin: 0 0 5px; }
-.admin-panel h4 { font-size: 18px; margin: 10px 0; }
-.admin-panel p { margin-top: 0; }
-.admin-panel a { text-decoration: none; color: var(--dorado); }
-.admin-panel a:hover { color: #ffdfa0; }
-.admin-panel :is(a, button, input):focus-visible { outline: 3px solid var(--dorado); outline-offset: 4px; }
 
-.admin-panel .aviso.error { background: #3b222d; color: #ffd3d0; border-color: #8a4e59; }
-.admin-panel .aviso.ok { background: #173b32; color: #bcf2d7; border-color: #357560; }
-@media (max-width: 1180px) {
-    .admin-panel .contenido_admin { padding: 28px 24px; }
-}
-@media (max-width: 760px) {
-    .admin-panel header { padding: 18px 20px; align-items: flex-start; flex-direction: column; gap: 4px; }
-    .admin-panel .contenedor_admin { display: block; }
-    .admin-panel .menu_admin { width: 100%; padding: 12px; border-right: 0; border-bottom: 1px solid var(--borde); display: flex; flex-direction: row; flex-wrap: wrap; gap: 4px; justify-content: flex-start; }
-    .admin-panel .menu_admin a { padding: 8px 10px; }
-    .admin-panel .menu_admin form { margin: 0; }
-    .admin-panel .menu_admin button { padding: 8px 10px; font-size: 14px; }
-    .admin-panel .contenido_admin { margin: 0; padding: 26px 16px; }
-    .admin-panel h2 { font-size: 26px; }
+.admin-panel *, .admin-panel *::before, .admin-panel *::after {
+    box-sizing: border-box;
 }
 
-/* Componentes para las pantallas que heredan la base del panel. */
-.admin-panel .saltar-contenido { position: absolute; top: -100px; left: 16px; z-index: 10; padding: 10px 16px; background: var(--dorado); color: #171b24; }
-.admin-panel .saltar-contenido:focus { top: 8px; }
-.admin-panel .tarjeta-admin { border-color: var(--borde); background: var(--panel); color: var(--texto); overflow-wrap: anywhere; }
-.admin-panel .tarjeta-admin h3 { color: var(--texto); }
-.admin-panel .contenido_admin > form { display: grid; gap: 16px; max-width: 620px; margin-top: 24px; }
-.admin-panel .campo_formulario { display: grid; gap: 8px; }
-.admin-panel label { font-size: 14px; font-weight: bold; }
-.admin-panel :where(input:not([type='hidden']):not([type='checkbox']):not([type='radio']), select, textarea) { max-width: 100%; min-width: 0; padding: 12px 14px; border: 1px solid #43516a; border-radius: 7px; background: #0d1728; color: var(--texto); font: inherit; color-scheme: dark; }
-.admin-panel .campo_formulario input { width: 100%; }
-.admin-panel button { border: 1px solid var(--dorado); background: var(--dorado); color: #171b24; font: bold 14px Arial, sans-serif; }
-.admin-panel button:hover { background: #ffda86; }
-.admin-panel .contenido_admin > form button { justify-self: start; }
-.admin-panel .menu_admin button { font-weight: normal; }
-.admin-panel .menu_admin button:hover { background: #25334a; }
-.admin-panel table { background: transparent; color: var(--texto); }
-.admin-panel th, .admin-panel td { border-bottom-color: var(--borde); }
-.admin-panel th { background: #101a2a; }
-.admin-panel #reader { max-width: 100%; }
-.admin-panel #reader :is(video, img) { max-width: 100%; }
-.admin-panel :is(select, textarea):focus-visible { outline: 3px solid var(--dorado); outline-offset: 4px; }
+.admin-panel header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 32px;
+    text-align: left;
+    background: #101929;
+    border-bottom: 1px solid var(--borde);
+}
+
+.admin-panel .logo {
+    color: var(--dorado);
+}
+
+.admin-panel .logo h1 {
+    font-size: 22px;
+    margin: 0;
+    letter-spacing: -.5px;
+}
+
+.admin-panel .admin-leyenda {
+    margin: 0;
+    font-size: 14px;
+    color: var(--suave);
+}
+
+.admin-panel .contenedor_admin {
+    min-height: calc(100vh - 74px);
+}
+
+.admin-panel .menu_admin {
+    width: 205px;
+    flex: 0 0 205px;
+    margin: 0;
+    padding: 28px 16px;
+    gap: 6px;
+    border-right: 1px solid var(--borde);
+    background: #101929;
+}
+
+.admin-panel .menu_admin a {
+    display: block;
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: 7px;
+    color: var(--suave);
+    font-size: 14px;
+}
+
+.admin-panel .menu_admin a:hover {
+    color: var(--texto);
+    background: #1e2b42;
+}
+
+.admin-panel .menu_admin a[aria-current="page"] {
+    background: #3c3424;
+    color: var(--dorado);
+}
+
+.admin-panel .menu_admin form {
+    margin: 24px 0 0;
+}
+
+.admin-panel .menu_admin button {
+    background: transparent;
+    color: var(--suave);
+    border: 1px solid var(--borde);
+    width: 100%;
+}
+
+.admin-panel .menu_admin button {
+    font-weight: normal;
+}
+
+.admin-panel .menu_admin button:hover {
+    background: #25334a;
+}
+
+.admin-panel .contenido_admin {
+    width: auto;
+    max-width: 1520px;
+    margin: 0 auto;
+    padding: 36px;
+    background: transparent;
+    border-radius: 0;
+}
+
+.admin-panel h2, .admin-panel h3, .admin-panel h4 {
+    color: var(--texto);
+    text-align: left;
+}
+
+.admin-panel h2 {
+    font-size: 30px;
+    line-height: 1.2;
+    margin: 8px 0 12px;
+    letter-spacing: -.7px;
+}
+
+.admin-panel h3 {
+    font-size: 18px;
+    margin: 0 0 5px;
+}
+
+.admin-panel h4 {
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+.admin-panel p {
+    margin-top: 0;
+}
+
+.admin-panel a {
+    text-decoration: none;
+    color: var(--dorado);
+}
+
+.admin-panel a:hover {
+    color: #ffdfa0;
+}
+
+.admin-panel :is(a, button, input):focus-visible {
+    outline: 3px solid var(--dorado);
+    outline-offset: 4px;
+}
+
+.admin-panel .aviso.error {
+    background: #3b222d;
+    color: #ffd3d0;
+    border-color: #8a4e59;
+}
+
+.admin-panel .aviso.ok {
+    background: #173b32;
+    color: #bcf2d7;
+    border-color: #357560;
+}
+
+.admin-panel .saltar-contenido {
+    position: absolute;
+    top: -100px;
+    left: 16px;
+    z-index: 10;
+    padding: 10px 16px;
+    background: var(--dorado);
+    color: #171b24;
+}
+
+.admin-panel .saltar-contenido:focus {
+    top: 8px;
+}
+
+.admin-panel .tarjeta-admin {
+    border-color: var(--borde);
+    background: var(--panel);
+    color: var(--texto);
+    overflow-wrap: anywhere;
+}
+
+.admin-panel .tarjeta-admin h3 {
+    color: var(--texto);
+}
+
+.admin-panel .contenido_admin > form {
+    display: grid;
+    gap: 16px;
+    max-width: 620px;
+    margin-top: 24px;
+}
+
+.admin-panel .campo_formulario {
+    display: grid;
+    gap: 8px;
+}
+
+.admin-panel label {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.admin-panel :where(input:not([type='hidden']):not([type='checkbox']):not([type='radio']), select, textarea) {
+    max-width: 100%;
+    min-width: 0;
+    padding: 12px 14px;
+    border: 1px solid #43516a;
+    border-radius: 7px;
+    background: #0d1728;
+    color: var(--texto);
+    font: inherit;
+    color-scheme: dark;
+}
+
+.admin-panel .campo_formulario input {
+    width: 100%;
+}
+
+.admin-panel button {
+    border: 1px solid var(--dorado);
+    background: var(--dorado);
+    color: #171b24;
+    font: bold 14px Arial, sans-serif;
+}
+
+.admin-panel button:hover {
+    background: #ffda86;
+}
+
+.admin-panel .contenido_admin > form button {
+    justify-self: start;
+}
+
+.admin-panel table {
+    background: transparent;
+    color: var(--texto);
+}
+
+.admin-panel th, .admin-panel td {
+    border-bottom-color: var(--borde);
+}
+
+.admin-panel th {
+    background: #101a2a;
+}
+
+.admin-panel #reader {
+    max-width: 100%;
+}
+
+.admin-panel #reader :is(video, img) {
+    max-width: 100%;
+}
+
+.admin-panel :is(select, textarea):focus-visible {
+    outline: 3px solid var(--dorado);
+    outline-offset: 4px;
+}
 
 .dashboard-encabezado {
     margin-bottom: 25px;
@@ -12079,7 +12362,60 @@ a { color: #8d1515; }
 .dashboard-estado {
     color: #1f2937;
 }
--e 
+
+@media (max-width: 1180px) {
+    .admin-panel .contenido_admin {
+        padding: 28px 24px;
+    }
+}
+
+@media (max-width: 760px) {
+    .admin-panel header {
+        padding: 18px 20px;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .admin-panel .contenedor_admin {
+        display: block;
+    }
+
+    .admin-panel .menu_admin {
+        width: 100%;
+        padding: 12px;
+        border-right: 0;
+        border-bottom: 1px solid var(--borde);
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 4px;
+        justify-content: flex-start;
+    }
+
+    .admin-panel .menu_admin a {
+        padding: 8px 10px;
+    }
+
+    .admin-panel .menu_admin form {
+        margin: 0;
+    }
+
+    .admin-panel .menu_admin button {
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+
+    .admin-panel .contenido_admin {
+        margin: 0;
+        padding: 26px 16px;
+    }
+
+    .admin-panel h2 {
+        font-size: 26px;
+    }
+}
+
 
 === ARCHIVO: ./frontend/static/js/cancelacion.js ===
 document.addEventListener("DOMContentLoaded", () => {
@@ -12134,7 +12470,39 @@ function configurarModalCancelacion() {
         });
     }
 }
--e 
+
+
+=== ARCHIVO: ./frontend/static/js/validar_qr.js ===
+document.addEventListener("DOMContentLoaded", () => {
+    const boton = document.getElementById("btn-escanear");
+    const campoToken = document.getElementById("qr_token");
+
+    let scanner = null;
+
+    boton.addEventListener("click", () => {
+        if (!scanner) {
+            scanner = new Html5Qrcode("reader");
+        }
+
+        scanner.start(
+            { facingMode: "environment" },
+            {
+                fps: 10,
+                qrbox: 250
+            },
+            (decodedText) => {
+                campoToken.value = decodedText;
+
+                scanner.stop().catch(console.error);
+
+                alert("QR leído correctamente");
+            }
+        ).catch((error) => {
+            console.error(error);
+            alert("No se pudo abrir la cámara");
+        });
+    });
+});
 
 === ARCHIVO: ./frontend/static/js/funciones.js ===
 document.addEventListener("DOMContentLoaded", function () {
@@ -12147,6 +12515,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const precio = document.getElementById("precio-funcion");
     const datos = document.getElementById("datos-funcion-seleccionada");
     const boton = document.getElementById("btn-elegir-butacas");
+    const poster = document.querySelector(".u8-poster img");
 
     // Actualizar el resumen de la función seleccionada.
     function actualizarResumen(opcion) {
@@ -12201,8 +12570,23 @@ document.addEventListener("DOMContentLoaded", function () {
         });
 
     }
+    if (poster && poster.dataset.fallback) {
+        const mostrarFallback = () => {
+            if (poster.getAttribute("src") !== poster.dataset.fallback) {
+                poster.src = poster.dataset.fallback;
+            }
+        };
 
-});-e 
+        poster.addEventListener("error", mostrarFallback, {
+            once: true
+        });
+
+        if (poster.complete && poster.naturalWidth === 0) {
+            mostrarFallback();
+        }
+    }   
+
+});
 
 === ARCHIVO: ./frontend/static/js/filtros_cartelera.js ===
 document.addEventListener("DOMContentLoaded", () => {
@@ -12234,7 +12618,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 });
--e 
+
 
 === ARCHIVO: ./frontend/static/js/servicios.js ===
 document.addEventListener("DOMContentLoaded", () => {
@@ -12317,7 +12701,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     actualizarVista();
-});-e 
+});
 
 === ARCHIVO: ./frontend/static/js/posters_publicos.js ===
 document.querySelectorAll(".sitio-publico img[data-poster-fallback]").forEach((imagen) => {
@@ -12329,7 +12713,7 @@ document.querySelectorAll(".sitio-publico img[data-poster-fallback]").forEach((i
     imagen.addEventListener("error", mostrarRespaldo);
     if (imagen.complete && imagen.naturalWidth === 0) mostrarRespaldo();
 });
--e 
+
 
 === ARCHIVO: ./frontend/static/js/butacas.js ===
 document.addEventListener("DOMContentLoaded", function () {
@@ -12446,7 +12830,7 @@ document.addEventListener("DOMContentLoaded", function () {
     continuarCompra();
     actualizarResumen();
 
-});-e 
+});
 
 === ARCHIVO: ./frontend/static/js/mis_compras.js ===
 document.addEventListener("DOMContentLoaded", function () {
@@ -12492,7 +12876,7 @@ document.addEventListener("DOMContentLoaded", function () {
             boton.click();
         }
     }
-});-e 
+});
 
 === ARCHIVO: ./frontend/static/js/mis_entradas.js ===
 document.addEventListener("DOMContentLoaded", () => {
@@ -12546,7 +12930,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 });
--e 
+
 
 === ARCHIVO: ./frontend/static/js/admin_servicios.js ===
 document.querySelectorAll("[data-confirmar-eliminacion]").forEach((formulario) => {
@@ -12556,7 +12940,7 @@ document.querySelectorAll("[data-confirmar-eliminacion]").forEach((formulario) =
         }
     });
 });
--e 
+
 
 === ARCHIVO: ./frontend/static/js/admin_funciones.js ===
 const formulario = document.querySelector(".formulario-funcion");
@@ -12620,7 +13004,7 @@ if (formulario) {
     fecha.addEventListener("input", actualizarInformacion);
     filtrarSalas(salaInicial);
 }
--e 
+
 
 === ARCHIVO: ./frontend/static/js/admin_peliculas.js ===
 document.querySelectorAll("img[data-poster-fallback]").forEach((imagen) => {
@@ -12635,7 +13019,7 @@ document.querySelectorAll("img[data-poster-fallback]").forEach((imagen) => {
         mostrarImagenPredeterminada();
     }
 });
--e 
+
 
 === ARCHIVO: ./frontend/static/js/acceso.js ===
 document.querySelectorAll("[data-mostrar-password]").forEach((boton) => {
@@ -12648,17 +13032,29 @@ document.querySelectorAll("[data-mostrar-password]").forEach((boton) => {
         boton.setAttribute("aria-pressed", String(mostrar));
     });
 });
--e 
+
 
 === ARCHIVO: ./frontend/static/_init_.css ===
--e 
+
 
 === ARCHIVO: ./frontend/app.py ===
 import os
+import sys
 import secrets
 from pathlib import Path
 from dotenv import load_dotenv
 from flask import Flask, render_template, request, session, abort, url_for
+
+# 0. Registramos la raíz en sys.path
+RAIZ = Path(__file__).resolve().parents[1]
+
+# Registramos la raíz en sys.path
+if str(RAIZ) not in sys.path:
+    sys.path.insert(0, str(RAIZ))
+
+# Carga de variables de entorno (.env)
+load_dotenv(RAIZ / ".env")
+
 from frontend.utils.auth_helpers import usuario_actual
 
 # Importación de Blueprints
@@ -12667,10 +13063,6 @@ from frontend.routes.public_routes import public_bp
 from frontend.routes.compras_routes import compras_bp
 from frontend.routes.usuario_routes import usuario_bp
 from frontend.routes.admin_routes import admin_bp
-
-# Carga de variables de entorno (.env)
-RAIZ = Path(__file__).resolve().parent.parent
-load_dotenv(RAIZ / ".env")
 
 app = Flask(
     __name__,
@@ -12735,11 +13127,12 @@ app.register_blueprint(admin_bp)
 
 if __name__ == "__main__":
     host = os.environ.get("FLASK_HOST", "127.0.0.1")
-    app.run(host=host, port=8080, debug=os.environ.get("FLASK_DEBUG") == "1")-e 
+    app.run(host=host, port=8080, debug=os.environ.get("FLASK_DEBUG") == "1")
 
 === ARCHIVO: ./frontend/utils/pdf_service.py ===
 from io import BytesIO
 from datetime import datetime
+from email.utils import parsedate_to_datetime
 from xml.sax.saxutils import escape
 import requests
 
@@ -12753,149 +13146,111 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from frontend.utils.api_client import BACKEND_URL
 
 
-def _tabla_informe_pdf(titulo, encabezados, filas, anchos, estilos):
-    #"""Construye una sección con título y tabla formateada para el informe en PDF."""
-    contenido = [
-        [
-            Paragraph(escape(str(valor if valor is not None else "")), estilos["BodyText"])
-            for valor in encabezados
-        ]
+def formatear_fecha(fecha):
+    """Formatea cadenas de fecha u objetos datetime a formato legible DD/MM/YYYY - HH:MM."""
+    if not fecha:
+        return "No disponible"
+
+    try:
+        fecha_obj = parsedate_to_datetime(str(fecha))
+        return fecha_obj.strftime("%d/%m/%Y - %H:%M")
+    except (TypeError, ValueError):
+        return str(fecha)
+
+
+def crear_tabla(datos, anchos, encabezado=False):
+    """Crea una tabla estilizada de ReportLab."""
+    tabla = Table(datos, colWidths=anchos)
+    estilos_tabla = [
+        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+        ("PADDING", (0, 0), (-1, -1), 8),
+        ("VALIGN", (0, 0), (-1, -1), "MIDDLE")
     ]
-    for fila in filas:
-        contenido.append([
-            Paragraph(
-                escape(str(valor if valor is not None else "")),
-                estilos["BodyText"],
+    if encabezado:
+        estilos_tabla.append(
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eee4d5"))
+        )
+    tabla.setStyle(TableStyle(estilos_tabla))
+    return tabla
+
+
+def agregar_entrada(elementos, entrada, estilos, estilo_codigo, token_session=None):
+    """Agrega la sección y tabla de una entrada con su correspondiente imagen de código QR."""
+    elementos.append(Paragraph(
+        f"<b>{escape(str(entrada.get('pelicula', '')))}</b>",
+        estilos["Heading3"]
+    ))
+
+    datos = [
+        ["Función", escape(formatear_fecha(entrada.get("fecha_hora_inicio", "")))],
+        ["Cine", escape(str(entrada.get("local", "")))],
+        ["Dirección", escape(str(entrada.get("direccion", "No disponible")))],
+        ["Sala", escape(str(entrada.get("sala", "")))],
+        ["Butaca", f"{escape(str(entrada.get('fila', '')))}{escape(str(entrada.get('numero', '')))}"]
+    ]
+
+    elementos.append(crear_tabla(datos, [35 * mm, 120 * mm]))
+    elementos.append(Spacer(1, 8))
+
+    headers = {}
+    if token_session:
+        headers["Authorization"] = "Bearer " + token_session
+
+    try:
+        respuesta_qr = requests.get(
+            f"{BACKEND_URL}/qr/{entrada['id_entrada']}",
+            headers=headers,
+            timeout=15
+        )
+        if respuesta_qr.status_code == 200:
+            imagen_qr = Image(
+                BytesIO(respuesta_qr.content),
+                width=35 * mm,
+                height=35 * mm
             )
-            for valor in fila
-        ])
-    if not filas:
-        contenido.append([
-            Paragraph("Sin datos para mostrar.", estilos["BodyText"]),
-            *[Paragraph("", estilos["BodyText"]) for _ in encabezados[1:]],
-        ])
+            elementos.append(imagen_qr)
+            elementos.append(Spacer(1, 5))
+    except requests.exceptions.RequestException:
+        pass
 
-    tabla = Table(contenido, colWidths=anchos, repeatRows=1, hAlign="LEFT")
-    tabla.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#922632")),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("GRID", (0, 0), (-1, -1), 0.35, colors.HexColor("#dfd1b8")),
-        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-        ("ROWBACKGROUNDS", (0, 1), (-1, -1), [
-            colors.white,
-            colors.HexColor("#fff8e9"),
-        ]),
-        ("LEFTPADDING", (0, 0), (-1, -1), 5),
-        ("RIGHTPADDING", (0, 0), (-1, -1), 5),
-        ("TOPPADDING", (0, 0), (-1, -1), 5),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
-    ]))
-    return [Paragraph(escape(titulo), estilos["Heading2"]), Spacer(1, 5), tabla, Spacer(1, 12)]
-
-
-def crear_informe_estadisticas_pdf(ventas, ocupacion):
-    #"""Genera un archivo PDF con el informe completo de ventas y ocupación."""
-    buffer = BytesIO()
-    documento = SimpleDocTemplate(
-        buffer,
-        pagesize=A4,
-        rightMargin=20 * mm,
-        leftMargin=20 * mm,
-        topMargin=18 * mm,
-        bottomMargin=18 * mm,
-        title="Informe de ventas y rendimiento",
-        author="Cine Paradiso",
+    codigo_manual = entrada.get("qr_token", "No disponible")
+    texto_codigo = Paragraph(
+        f"Token QR: <b>{escape(str(codigo_manual))}</b>",
+        estilo_codigo
     )
-    estilos = getSampleStyleSheet()
-    historia = [
-        Paragraph("Informe de ventas y rendimiento", estilos["Title"]),
-        Paragraph(
-            f"Generado el {datetime.now().strftime('%d/%m/%Y %H:%M')}. "
-            "Incluye los datos históricos disponibles.",
-            estilos["BodyText"],
-        ),
-        Spacer(1, 14),
-    ]
+    elementos.append(texto_codigo)
+    elementos.append(Spacer(1, 15))
 
-    historia.extend(_tabla_informe_pdf(
-        "Ventas por género",
-        ["Género", "Entradas vendidas", "Recaudación estimada"],
-        [
-            [
-                fila.get("genero") or "Sin género",
-                fila.get("entradas_vendidas", 0),
-                f"${fila.get('importe_estimado_entradas', 0)}",
-            ]
-            for fila in ventas.get("ventas_por_genero", [])
-        ],
-        [52 * mm, 48 * mm, 70 * mm],
-        estilos,
-    ))
-    
-    historia.extend(_tabla_informe_pdf(
-        "Ventas por franja horaria",
-        ["Franja", "Entradas vendidas", "Recaudación estimada"],
-        [
-            [
-                fila.get("franja_horaria", ""),
-                fila.get("entradas_vendidas", 0),
-                f"${fila.get('importe_estimado_entradas', 0)}",
-            ]
-            for fila in ventas.get("ventas_por_franja_horaria", [])
-        ],
-        [52 * mm, 48 * mm, 70 * mm],
-        estilos,
-    ))
-    
-    historia.extend([
-        Paragraph("Cancelaciones", estilos["Heading2"]),
-        Paragraph(
-            f"Compras canceladas: {ventas.get('cantidad_cancelaciones', 0)}",
-            estilos["BodyText"],
-        ),
-        Spacer(1, 12),
-    ])
 
-    historia.extend(_tabla_informe_pdf(
-        "Ocupación por función",
-        ["Película", "Inicio", "Sala", "Butacas", "Capacidad", "Ocupación"],
-        [
-            [
-                fila.get("pelicula", ""),
-                fila.get("fecha_hora_inicio", ""),
-                fila.get("sala", ""),
-                fila.get("butacas_ocupadas", 0),
-                fila.get("capacidad", 0),
-                f"{fila.get('porcentaje_ocupacion', 0)}%",
-            ]
-            for fila in ocupacion.get("ocupacion_por_funcion", [])
-        ],
-        [40 * mm, 36 * mm, 24 * mm, 22 * mm, 24 * mm, 24 * mm],
-        estilos,
+def agregar_servicios(elementos, servicios, estilos):
+    """Agrega la sección y tabla de servicios adicionales comprados."""
+    elementos.append(Paragraph(
+        "SERVICIOS ADICIONALES",
+        estilos["Heading2"]
     ))
 
-    historia.extend(_tabla_informe_pdf(
-        "Ocupación por película",
-        ["Película", "Ocupación promedio", "Aforo total vendido"],
-        [
-            [
-                fila.get("pelicula", ""),
-                f"{fila.get('porcentaje_ocupacion', 0)}%",
-                f"{fila.get('butacas_ocupadas', 0)} / {fila.get('capacidad_total', 0)}",
-            ]
-            for fila in ocupacion.get("ocupacion_por_pelicula", [])
-        ],
-        [70 * mm, 50 * mm, 50 * mm],
-        estilos,
-    ))
+    if servicios:
+        datos = [["Servicio", "Cantidad", "Subtotal"]]
+        for servicio in servicios:
+            datos.append([
+                escape(str(servicio.get("nombre", ""))),
+                str(servicio.get("cantidad", 0)),
+                f"$ {servicio.get('subtotal', 0)}"
+            ])
+        elementos.append(
+            crear_tabla(datos, [80 * mm, 30 * mm, 45 * mm], encabezado=True)
+        )
+    else:
+        elementos.append(Paragraph(
+            "No se compraron servicios adicionales.",
+            estilos["Normal"]
+        ))
 
-    documento.build(historia)
-    buffer.seek(0)
-    return buffer
+    elementos.append(Spacer(1, 15))
 
 
-def crear_comprobante_pdf(compra, entradas, servicios, token_session):
-    #"""Genera el comprobante de compra en PDF con código QR e información completa de entradas."""
+def crear_comprobante_pdf(compra, entradas, servicios, token_session=None):
+    """Genera el comprobante de compra en PDF con código QR e información completa."""
     buffer = BytesIO()
     documento = SimpleDocTemplate(
         buffer,
@@ -12918,118 +13273,45 @@ def crear_comprobante_pdf(compra, entradas, servicios, token_session):
         spaceAfter=15
     )
 
+    estilo_codigo = ParagraphStyle(
+        "CodigoValidacion",
+        parent=estilos["Normal"],
+        alignment=TA_CENTER,
+        fontSize=9,
+        textColor=colors.HexColor("#444444")
+    )
+
     elementos.append(Paragraph("CINE PARADISO", titulo))
     elementos.append(Paragraph(
-        f"Comprobante de compra N° {compra['id_compra']}",
+        f"Comprobante de compra N° {compra.get('id_compra', '')}",
         estilos["Heading2"]
     ))
     elementos.append(Spacer(1, 10))
 
     datos_compra = [
-        ["Cliente", f"{escape(str(compra['nombre']))} {escape(str(compra['apellido']))}"],
-        ["Email", escape(str(compra["email"]))],
-        ["Fecha", escape(str(compra["fecha_hora"]))],
-        ["Estado", escape(str(compra["estado"]))],
-        ["Total", f"$ {compra['total']}"]
+        ["Cliente", f"{escape(str(compra.get('nombre', '')))} {escape(str(compra.get('apellido', '')))}"],
+        ["Email", escape(str(compra.get("email", "")))],
+        ["Fecha", escape(formatear_fecha(compra.get("fecha_hora", "")))],
+        ["Estado", escape(str(compra.get("estado", "")))],
+        ["Total", f"$ {compra.get('total', 0)}"]
     ]
 
-    tabla_compra = Table(datos_compra, colWidths=[35 * mm, 120 * mm])
-    tabla_compra.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (0, -1), colors.HexColor("#eee4d5")),
-        ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-        ("PADDING", (0, 0), (-1, -1), 8),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE")
-    ]))
+    elementos.append(crear_tabla(
+        datos_compra,
+        [35 * mm, 120 * mm]
+    ))
 
-    elementos.append(tabla_compra)
     elementos.append(Spacer(1, 18))
     elementos.append(Paragraph("ENTRADAS", estilos["Heading2"]))
 
     for entrada in entradas:
-        elementos.append(Paragraph(
-            f"<b>{escape(str(entrada['pelicula']))}</b>",
-            estilos["Heading3"]
-        ))
+        agregar_entrada(elementos, entrada, estilos, estilo_codigo, token_session)
 
-        datos_entrada = [
-            ["Función", escape(str(entrada["fecha_hora_inicio"]))],
-            ["Cine", escape(str(entrada["local"]))],
-            ["Dirección", escape(str(entrada.get("direccion", "No disponible")))],
-            ["Sala", escape(str(entrada["sala"]))],
-            ["Butaca", f"{escape(str(entrada['fila']))}{escape(str(entrada['numero']))}"]
-        ]
-
-        tabla_entrada = Table(datos_entrada, colWidths=[35 * mm, 120 * mm])
-        tabla_entrada.setStyle(TableStyle([
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-            ("PADDING", (0, 0), (-1, -1), 7)
-        ]))
-
-        elementos.append(tabla_entrada)
-        elementos.append(Spacer(1, 8))
-
-        # Petición a la API para recuperar la imagen del código QR
-        headers = {}
-        if token_session:
-            headers["Authorization"] = "Bearer " + token_session
-
-        respuesta_qr = requests.get(
-            f"{BACKEND_URL}/qr/{entrada['id_entrada']}",
-            headers=headers,
-            timeout=15
-        )
-
-        if respuesta_qr.status_code == 200:
-            imagen_qr = Image(
-                BytesIO(respuesta_qr.content),
-                width=35 * mm,
-                height=35 * mm
-            )
-            elementos.append(imagen_qr)
-            elementos.append(Spacer(1, 5))
-
-        estilo_codigo = ParagraphStyle(
-            "CodigoValidacion",
-            parent=estilos["Normal"],
-            alignment=TA_CENTER,
-            fontSize=10,
-            textColor=colors.HexColor("#333333")
-        )
-
-        codigo_manual = entrada.get("qr_token", "No disponible")
-        texto_codigo = Paragraph(
-            f"Código: <b>{escape(str(codigo_manual))}</b>",
-            estilo_codigo
-        )
-        elementos.append(texto_codigo)
-        elementos.append(Spacer(1, 15))
-
-    elementos.append(Paragraph("SERVICIOS ADICIONALES", estilos["Heading2"]))
-
-    if servicios:
-        datos_servicios = [["Servicio", "Cantidad", "Subtotal"]]
-        for servicio in servicios:
-            datos_servicios.append([
-                escape(str(servicio["nombre"])),
-                str(servicio["cantidad"]),
-                f"$ {servicio['subtotal']}"
-            ])
-
-        tabla_servicios = Table(datos_servicios, colWidths=[80 * mm, 30 * mm, 45 * mm])
-        tabla_servicios.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eee4d5")),
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
-            ("PADDING", (0, 0), (-1, -1), 8)
-        ]))
-        elementos.append(tabla_servicios)
-    else:
-        elementos.append(Paragraph("No se compraron servicios adicionales.", estilos["Normal"]))
-
-    elementos.append(Spacer(1, 15))
+    agregar_servicios(elementos, servicios, estilos)
 
     documento.build(elementos)
     buffer.seek(0)
-    return buffer-e 
+    return buffer
 
 === ARCHIVO: ./frontend/utils/api_client.py ===
 import os
@@ -13102,7 +13384,7 @@ def lista(datos, clave):
         return datos
     if isinstance(datos, dict):
         return datos.get(clave, [])
-    return []-e 
+    return []
 
 === ARCHIVO: ./frontend/utils/auth_helpers.py ===
 from functools import wraps
@@ -13269,7 +13551,7 @@ def requiere_admin(funcion):
         if usuario_actual().get("rol", "").strip().casefold() != "administrador":
             abort(403)
         return funcion(*args, **kwargs)
-    return vista-e 
+    return vista
 
 === ARCHIVO: ./frontend/utils/poster_helper.py ===
 from pathlib import Path
@@ -13347,9 +13629,24 @@ def obtener_servicios_seleccionados(texto):
         })
         ids.add(id_servicio)
 
-    return servicios-e 
+    return servicios
 
-=== ARCHIVO: ./FRONT_UPGRADE/routes/usuario_routes.py ===
+=== ARCHIVO: ./frontend/FRONT_UPGRADE/pdf_service.py ===
+
+
+=== ARCHIVO: ./frontend/FRONT_UPGRADE/usuario_routes.py ===
+
+
+=== ARCHIVO: ./frontend/FRONT_UPGRADE/compras_routes.py ===
+# Código corregido en ver_servicios():
+    datos, estado = llamar_backend("GET", "/servicios")
+    servicios = lista(datos, "servicios")
+
+    for s in servicios:
+        img = s.get("imagen") or ""
+        s["imagen_url"] = f"{BACKEND_ORIGEN}{img}" if img else None
+
+=== ARCHIVO: ./frontend/FRONT_UPGRADE/MODULO_APP/routes/usuario_routes.py ===
 import requests
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash, abort, Response, send_file
 
@@ -13499,9 +13796,9 @@ def descargar_comprobante_pdf(id_compra):
         mimetype="application/pdf",
         as_attachment=True,
         download_name=f"comprobante_{id_compra}.pdf"
-    )-e 
+    )
 
-=== ARCHIVO: ./FRONT_UPGRADE/routes/auth_routes.py ===
+=== ARCHIVO: ./frontend/FRONT_UPGRADE/MODULO_APP/routes/auth_routes.py ===
 import secrets
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash
 
@@ -13600,9 +13897,9 @@ def logout():
         return redirect(url_for("index"))
 
     session.clear()
-    return redirect(url_for("index"))-e 
+    return redirect(url_for("index"))
 
-=== ARCHIVO: ./FRONT_UPGRADE/routes/public_routes.py ===
+=== ARCHIVO: ./frontend/FRONT_UPGRADE/MODULO_APP/routes/public_routes.py ===
 from datetime import datetime
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash, abort
 
@@ -13751,9 +14048,9 @@ def ver_resenas_pelicula(id_pelicula):
         error_resenas=mensaje_error(datos) if estado != 200 else None,
         propia=propia,
         error_propio=error_propio,
-    ), 200 if estado == 200 else estado-e 
+    ), 200 if estado == 200 else estado
 
-=== ARCHIVO: ./FRONT_UPGRADE/routes/compras_routes.py ===
+=== ARCHIVO: ./frontend/FRONT_UPGRADE/MODULO_APP/routes/compras_routes.py ===
 import os
 from datetime import datetime
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash
@@ -14085,9 +14382,9 @@ def procesar_compra():
         return redirect(url_for("usuario.ver_comprobante", id_compra=id_compra))
 
     flash("No se pudo confirmar la compra: " + mensaje_error(resultado), "error")
-    return redirect(url_for("ver_compra", id_funcion=id_funcion, butacas=butacas_texto))-e 
+    return redirect(url_for("ver_compra", id_funcion=id_funcion, butacas=butacas_texto))
 
-=== ARCHIVO: ./FRONT_UPGRADE/routes/admin_routes.py ===
+=== ARCHIVO: ./frontend/FRONT_UPGRADE/MODULO_APP/routes/admin_routes.py ===
 from datetime import datetime
 from flask import Blueprint, render_template, request, redirect, url_for, flash, abort, send_file
 
@@ -14631,9 +14928,9 @@ def validar_qr():
         )
         flash(mensaje_error(resultado), "ok" if estado == 200 else "error")
 
-    return render_template("admin/validar_qr.html", resultado=resultado)-e 
+    return render_template("admin/validar_qr.html", resultado=resultado)
 
-=== ARCHIVO: ./FRONT_UPGRADE/app.py ===
+=== ARCHIVO: ./frontend/FRONT_UPGRADE/MODULO_APP/app.py ===
 import os
 import secrets
 from pathlib import Path
@@ -14716,9 +15013,9 @@ app.register_blueprint(admin_bp)
 
 if __name__ == "__main__":
     host = os.environ.get("FLASK_HOST", "127.0.0.1")
-    app.run(host=host, port=8080, debug=os.environ.get("FLASK_DEBUG") == "1")-e 
+    app.run(host=host, port=8080, debug=os.environ.get("FLASK_DEBUG") == "1")
 
-=== ARCHIVO: ./FRONT_UPGRADE/utils/pdf_service.py ===
+=== ARCHIVO: ./frontend/FRONT_UPGRADE/MODULO_APP/utils/pdf_service.py ===
 from io import BytesIO
 from datetime import datetime
 from xml.sax.saxutils import escape
@@ -15010,9 +15307,9 @@ def crear_comprobante_pdf(compra, entradas, servicios, token_session):
 
     documento.build(elementos)
     buffer.seek(0)
-    return buffer-e 
+    return buffer
 
-=== ARCHIVO: ./FRONT_UPGRADE/utils/api_client.py ===
+=== ARCHIVO: ./frontend/FRONT_UPGRADE/MODULO_APP/utils/api_client.py ===
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -15083,9 +15380,9 @@ def lista(datos, clave):
         return datos
     if isinstance(datos, dict):
         return datos.get(clave, [])
-    return []-e 
+    return []
 
-=== ARCHIVO: ./FRONT_UPGRADE/utils/auth_helpers.py ===
+=== ARCHIVO: ./frontend/FRONT_UPGRADE/MODULO_APP/utils/auth_helpers.py ===
 from functools import wraps
 from datetime import datetime
 from urllib.parse import urljoin, urlsplit, unquote, parse_qs
@@ -15250,9 +15547,9 @@ def requiere_admin(funcion):
         if usuario_actual().get("rol", "").strip().casefold() != "administrador":
             abort(403)
         return funcion(*args, **kwargs)
-    return vista-e 
+    return vista
 
-=== ARCHIVO: ./FRONT_UPGRADE/utils/poster_helper.py ===
+=== ARCHIVO: ./frontend/FRONT_UPGRADE/MODULO_APP/utils/poster_helper.py ===
 from pathlib import Path
 from urllib.parse import urljoin
 from flask import url_for
@@ -15328,7 +15625,7 @@ def obtener_servicios_seleccionados(texto):
         })
         ids.add(id_servicio)
 
-    return servicios-e 
+    return servicios
 
 === ARCHIVO: ./backend/autenticacion.py ===
 """Configuración de JWT y revocación persistente al cerrar sesión."""
@@ -15400,7 +15697,7 @@ def token_vencido(cabecera, datos):
 @jwt.revoked_token_loader
 def token_cerrado(cabecera, datos):
     return jsonify({"error": "La sesión ya fue cerrada"}), 401
--e 
+
 
 === ARCHIVO: ./backend/crear_admin.py ===
 """Crear una cuenta administrativa desde la terminal, nunca desde registro publico."""
@@ -15432,7 +15729,7 @@ def main():
 
 if __name__ == "__main__":
     main()
--e 
+
 
 === ARCHIVO: ./backend/tests/test_reservas_routes.py ===
 import unittest
@@ -15536,7 +15833,7 @@ class TransaccionesReservasTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
--e 
+
 
 === ARCHIVO: ./backend/tests/test_b08_funciones.py ===
 import unittest
@@ -16077,7 +16374,7 @@ class TestB08(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
--e 
+
 
 === ARCHIVO: ./backend/tests/test_db_helpers.py ===
 import unittest
@@ -16173,7 +16470,7 @@ class AyudantesSQL(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
--e 
+
 
 === ARCHIVO: ./backend/tests/test_reservas_service.py ===
 import unittest
@@ -16287,7 +16584,7 @@ class EstadosReservaTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
--e 
+
 
 === ARCHIVO: ./backend/tests/test_b09.py ===
 import os
@@ -16419,7 +16716,7 @@ class ContratoNovB09Test(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
--e 
+
 
 === ARCHIVO: ./backend/tests/test_correcciones.py ===
 import os
@@ -16557,7 +16854,7 @@ class Correcciones(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
--e 
+
 
 === ARCHIVO: ./backend/tests/test_importacion_omdb.py ===
 import os
@@ -16761,7 +17058,7 @@ class ImportacionOMDbTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
--e 
+
 
 === ARCHIVO: ./backend/tests/test_correo_service.py ===
 import unittest
@@ -16873,7 +17170,7 @@ class TestCorreoService(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()-e 
+    unittest.main()
 
 === ARCHIVO: ./backend/tests/test_inicio_funcion_compra.py ===
 import os
@@ -17020,7 +17317,7 @@ class InicioFuncionCompra(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main()-e 
+    unittest.main()
 
 === ARCHIVO: ./backend/tests/test_regresiones_compra_poster.py ===
 import sqlite3
@@ -17098,7 +17395,7 @@ class RegresionesCompraPoster(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
--e 
+
 
 === ARCHIVO: ./backend/tests/test_resenas.py ===
 import unittest
@@ -17307,7 +17604,7 @@ class ServicioResenasTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
--e 
+
 
 === ARCHIVO: ./backend/tests/test_servicios_imagen.py ===
 import os
@@ -17426,7 +17723,7 @@ class ServiciosImagen(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
--e 
+
 
 === ARCHIVO: ./backend/tests/test_estadisticas.py ===
 import unittest
@@ -17759,7 +18056,7 @@ class ValidatorEstadisticasTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
--e 
+
 
 === ARCHIVO: ./backend/tests/test_administracion_salas.py ===
 import unittest
@@ -18055,7 +18352,7 @@ class TestAdministracionSalas(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
--e 
+
 
 === ARCHIVO: ./backend/tests/test_revocacion_tokens.py ===
 from datetime import datetime, timezone
@@ -18124,7 +18421,7 @@ class RevocacionTokens(unittest.TestCase):
 
 if __name__=='__main__':
     unittest.main()
--e 
+
 
 === ARCHIVO: ./backend/tests/test_inicio_funcion_reserva.py ===
 import os
@@ -18199,7 +18496,7 @@ class InicioFuncionReserva(unittest.TestCase):
 
 
 if __name__=='__main__':unittest.main()
--e 
+
 
 === ARCHIVO: ./backend/tests/test_omdb_routes.py ===
 import os
@@ -18360,7 +18657,7 @@ class RutasOMDb(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
--e 
+
 
 === ARCHIVO: ./backend/tests/test_limitador.py ===
 import unittest
@@ -18487,7 +18784,7 @@ class LimitadorSolicitudes(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
--e 
+
 
 === ARCHIVO: ./backend/tests/test_aporte_backend.py ===
 """Pruebas del aporte con Flask real y MySQL simulado: sin credenciales ni datos reales."""
@@ -18728,7 +19025,7 @@ class AporteBackend(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
--e 
+
 
 === ARCHIVO: ./backend/app.py ===
 import os
@@ -18813,7 +19110,7 @@ def index():
 if __name__ == "__main__":
     host = os.environ.get("FLASK_HOST", "127.0.0.1")
     app.run(host, port=5001, debug=os.environ.get("FLASK_DEBUG") == "1")
--e 
+
 
 === ARCHIVO: ./backend/src/services/estadisticas_service.py ===
 import backend.src.repositories.estadisticas_repository as repo
@@ -18859,7 +19156,7 @@ def consultar_ocupacion_service(cursor, desde=None, hasta=None, id_local=None):
             "id_local": id_local
         }
     }
--e 
+
 
 === ARCHIVO: ./backend/src/services/qr_service.py ===
 from datetime import datetime, timedelta
@@ -18964,7 +19261,7 @@ def obtener_qr_imagen_service(cursor, id_entrada, id_usuario):
     archivo.seek(0)
 
     return archivo, None
--e 
+
 
 === ARCHIVO: ./backend/src/services/compra_service.py ===
 import uuid
@@ -19254,7 +19551,7 @@ def enviar_comprobante_compra(comprobante, entradas):
             "correo_enviado": False,
             "mensaje_correo": "La compra se realizó, pero no se pudo enviar el correo."
         }
--e 
+
 
 === ARCHIVO: ./backend/src/services/cancelacion_service.py ===
 from backend.src.constants import (
@@ -19318,38 +19615,33 @@ def cancelar_compra(cursor, id_usuario, id_compra):
         "estado": ESTADO_COMPRA_CANCELADA,
         "mensaje": "Compra cancelada correctamente"
     }, None
--e 
+
 
 === ARCHIVO: ./backend/src/services/servicios_service.py ===
 import os
 import uuid
-from flask import current_app
+from flask import current_app, url_for
 from werkzeug.utils import secure_filename
-
 from backend.src.repositories import servicios_repository as repo
 from backend.src.validators.servicios_validator import archivo_permitido, validar_servicio
 
 
 def _guardar_imagen(archivo):
-    extension = secure_filename(archivo.filename).rsplit(".", 1)[1].lower()
+    nombre_seguro = secure_filename(archivo.filename or "")
+    extension = nombre_seguro.rsplit(".", 1)[1].lower()
     nombre = f"{uuid.uuid4().hex}.{extension}"
     carpeta = os.path.join(current_app.static_folder, "img", "servicios")
     os.makedirs(carpeta, exist_ok=True)
     destino = os.path.join(carpeta, nombre)
 
-    try:
-        archivo.save(destino)
-    except OSError:
-        if os.path.exists(destino):
-            os.remove(destino)
-        raise
-
-    return f"img/servicios/{nombre}"
+    archivo.save(destino)
+    return url_for("static", filename=f"img/servicios/{nombre}")
 
 
 def descartar_imagen(imagen):
     if imagen:
-        ruta = os.path.join(current_app.static_folder, imagen)
+        ruta_relativa = imagen.removeprefix("/static/").lstrip("/")
+        ruta = os.path.join(current_app.static_folder, ruta_relativa)
         try:
             os.remove(ruta)
         except OSError:
@@ -19411,9 +19703,16 @@ def guardar_servicio(cursor, request, id_servicio=None):
 
 
 def eliminar_servicio(cursor, id_servicio):
+    servicio = repo.obtener_servicio(cursor, id_servicio)
+    if not servicio:
+        raise LookupError("Servicio inexistente")
+
+    imagen = servicio.get("imagen") or ""
     borradas = repo.eliminar_servicio(cursor, id_servicio)
     if not borradas:
-        raise LookupError("Servicio inexistente")-e 
+        raise LookupError("Servicio inexistente")
+
+    return imagen
 
 === ARCHIVO: ./backend/src/services/reservas_service.py ===
 from datetime import timedelta
@@ -19727,7 +20026,7 @@ def editar_reserva_pendiente(
         "total": float(total),
         "estado": ESTADO_COMPRA_PENDIENTE,
     }, None
--e 
+
 
 === ARCHIVO: ./backend/src/services/butacas_service.py ===
 from backend.src.repositories.butacas_repository import (
@@ -19761,11 +20060,14 @@ def configurar_butacas_servicio(cursor, id_sala, butacas):
         "id_sala": id_sala,
         "cantidad": len(butacas)
     }, None
--e 
+
 
 === ARCHIVO: ./backend/src/services/omdb_service.py ===
 import os
 import requests
+import logging
+from pathlib import Path
+from deep_translator import MyMemoryTranslator
 
 from backend.src.validators.duracion_validator import minutos_de_duracion
 from backend.src.validators.peliculas_validator import validar_pelicula
@@ -19836,18 +20138,59 @@ def _normalizar_pelicula(datos):
         "poster": poster if poster != "N/A" else None
     }
 
+def descargar_poster(url, id_imdb):
+    if not url or url == "N/A":
+        return None
+
+    if not isinstance(id_imdb, str) or not id_imdb.startswith("tt"):
+        return None
+
+    try:
+        respuesta = requests.get(url, timeout=TIMEOUT)
+        respuesta.raise_for_status()
+
+        tipo_imagen = respuesta.headers.get("Content-Type", "").split(";")[0]
+
+        extensiones = {
+            "image/jpeg": ".jpg",
+            "image/png": ".png",
+            "image/webp": ".webp"
+        }
+        
+        extension = extensiones.get(tipo_imagen)
+        if not extension:
+            return None
+        if len(respuesta.content) > 10 * 1024 * 1024:
+            return None
+
+        carpeta = Path(__file__).resolve().parents[2] / "static" / "img" / "posters"
+        carpeta.mkdir(parents=True, exist_ok=True)
+
+        nombre_archivo = f"{id_imdb}{extension}"
+        ruta_archivo = carpeta / nombre_archivo
+        with open(ruta_archivo, "wb") as archivo:
+            archivo.write(respuesta.content)
+
+        return f"/static/img/posters/{nombre_archivo}"
+    except requests.exceptions.RequestException:
+        logging.exception("No se pudo descargar el póster de %s", id_imdb)
+        return None
 
 def preparar_pelicula_para_guardar(pelicula):
     if not isinstance(pelicula, dict):
         raise ValueError("Se requieren los datos completos de la película de OMDb.")
+        
     id_imdb = pelicula.get("id_imdb")
+    
     if not isinstance(id_imdb, str) or not id_imdb:
         raise ValueError("OMDb no devolvió un identificador IMDb válido.")
 
+    poster = descargar_poster(pelicula.get("poster"), id_imdb)
+    
     datos = {
         "titulo": pelicula.get("titulo"),
         "sinopsis": pelicula.get("sinopsis") or "Sin información",
-        "poster": pelicula.get("poster") or "/static/img/default.svg",
+        "poster": poster, #or "/static/img/default.svg",
         "duracion_minutos": minutos_de_duracion(pelicula.get("duracion")),
         "clasificacion": pelicula.get("clasificacion") or "Sin información",
         "genero": pelicula.get("genero") or "Sin información",
@@ -19915,20 +20258,36 @@ def obtener_pelicula_por_titulo(titulo):
 
 
 def _traducir_texto(texto):
-    if not texto or texto == "N/A":
-        return texto
+    resultado = texto
 
-    try:
-        traductor = MyMemoryTranslator(
-            source="en",
-            target="es"
-        )
+    if texto and texto != "N/A":
+        try:
+            traductor = MyMemoryTranslator(source="en-US", target="es-AR")
+            limite = 450
+            partes = []
+            inicio = 0
 
-        traduccion = traductor.translate(texto)
-        return traduccion if traduccion else texto
-    except Exception:
-        return texto
--e 
+            while inicio < len(texto):
+                fin = min(inicio + limite, len(texto))
+                if fin < len(texto):
+                    espacio = texto.rfind(" ", inicio, fin)
+                    if espacio > inicio:
+                        fin = espacio
+
+                fragmento = texto[inicio:fin].strip()
+                if fragmento:
+                    traduccion = traductor.translate(fragmento)
+                    partes.append(traduccion if traduccion else fragmento)
+
+                inicio = fin
+
+            if partes:
+                resultado = " ".join(partes)
+        except Exception as error:
+            print(error)
+
+    return resultado
+
 
 === ARCHIVO: ./backend/src/services/peliculas_service.py ===
 from backend.src.repositories.peliculas_repository import (
@@ -20013,7 +20372,7 @@ def editar_pelicula_service(cursor, id_pelicula, datos):
         },
         "status": 200,
     }
--e 
+
 
 === ARCHIVO: ./backend/src/services/funciones_service.py ===
 from datetime import datetime, timedelta
@@ -20181,7 +20540,7 @@ def modificar_funcion_servicio(cursor, id_funcion, data):
         horario_nuevo,
         precio_base,
     )
--e 
+
 
 === ARCHIVO: ./backend/src/services/eliminacion_estructura_service.py ===
 from backend.src.repositories import locales_repository as locales
@@ -20226,7 +20585,7 @@ def eliminar_estructura(cursor, tipo, identificador):
         return "no_eliminado"
 
     return "eliminado"
--e 
+
 
 === ARCHIVO: ./backend/src/services/resenas_service.py ===
 from backend.src.repositories import resenas_repository as repo
@@ -20271,7 +20630,7 @@ def guardar_resena(cursor, id_usuario, id_pelicula, puntuacion, comentario):
     )
 
     return {"mensaje": "La reseña se guardó correctamente."}, None
--e 
+
 
 === ARCHIVO: ./backend/src/services/salas_service.py ===
 from backend.src.repositories import salas_repository as repo
@@ -20289,7 +20648,7 @@ def crear_sala(cursor, id_local, nombre, capacidad):
         return None
 
     return repo.crear_sala(cursor, id_local, nombre, capacidad)
--e 
+
 
 === ARCHIVO: ./backend/src/services/correo_service.py ===
 from io import BytesIO
@@ -20380,7 +20739,7 @@ def enviar_mail_compra(comprobante, entradas_qr):
         )
 
     mail.send(mensaje)
--e 
+
 
 === ARCHIVO: ./backend/src/services/auth_service.py ===
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -20440,7 +20799,7 @@ def obtener_perfil_usuario(cursor, id_usuario):
 
     usuario = obtener_perfil(cursor, id_usuario)
 
-    return usuario-e 
+    return usuario
 
 === ARCHIVO: ./backend/src/services/comprobante_service.py ===
 from backend.src.repositories.compra_repository import (
@@ -20477,14 +20836,14 @@ def obtener_comprobante(cursor, id_compra, id_usuario):
         "entradas": entradas,
         "servicios": servicios
     }
--e 
+
 
 === ARCHIVO: ./backend/src/services/_init_.py ===
--e 
+
 
 === ARCHIVO: ./backend/src/__init__.py ===
 
--e 
+
 
 === ARCHIVO: ./backend/src/routes/servicios_routes.py ===
 from flask_jwt_extended import jwt_required
@@ -20574,10 +20933,12 @@ def borrar_servicio(id_servicio):
         return respuesta_acceso
 
     conexion = get_connection()
+    imagen = ""
     try:
-        with conexion.cursor() as cursor:
-            servicios_service.eliminar_servicio(cursor, id_servicio)
+        with conexion.cursor(dictionary=True) as cursor:
+            imagen = servicios_service.eliminar_servicio(cursor, id_servicio)
         conexion.commit()
+        servicios_service.descartar_imagen(imagen)
         return jsonify({"mensaje": "Servicio eliminado"}), 200
     except LookupError:
         conexion.rollback()
@@ -20591,7 +20952,7 @@ def borrar_servicio(id_servicio):
         conexion.rollback()
         return jsonify({"error": "No se pudo eliminar el servicio"}), 500
     finally:
-        conexion.close()-e 
+        conexion.close()
 
 === ARCHIVO: ./backend/src/routes/estadisticas_routes.py ===
 from flask_jwt_extended import jwt_required
@@ -20695,7 +21056,7 @@ def consultar_estadisticas_ocupacion():
     finally:
         if conexion is not None:
             conexion.close()
--e 
+
 
 === ARCHIVO: ./backend/src/routes/reservas_routes.py ===
 from flask_jwt_extended import jwt_required
@@ -20880,7 +21241,7 @@ def modificar_reserva(id_compra):
         "mensaje": "La reserva fue modificada correctamente.",
         "reserva": reserva,
     }), 200
--e 
+
 
 === ARCHIVO: ./backend/src/routes/auth_routes.py ===
 from backend.limites import controlar_intentos
@@ -21066,7 +21427,7 @@ def logout():
     session.clear()
 
     return jsonify({"mensaje": "Sesión cerrada"}), 200
--e 
+
 
 === ARCHIVO: ./backend/src/routes/resenas_routes.py ===
 from flask_jwt_extended import jwt_required
@@ -21195,7 +21556,7 @@ def guardar_resena(id_pelicula):
     finally:
         if conn is not None:
             conn.close()
--e 
+
 
 === ARCHIVO: ./backend/src/routes/butacas.py ===
 from flask_jwt_extended import jwt_required
@@ -21257,7 +21618,7 @@ def consultar_butacas(id_funcion):
     finally:
         if conn is not None:
             conn.close()
--e 
+
 
 === ARCHIVO: ./backend/src/routes/compras_routes.py ===
 from flask_jwt_extended import jwt_required
@@ -21669,7 +22030,7 @@ def cancelar_compra_route(id_compra):
     finally:
         if conexion is not None:
             conexion.close()
--e 
+
 
 === ARCHIVO: ./backend/src/routes/peliculas_routes.py ===
 from flask_jwt_extended import jwt_required
@@ -21950,7 +22311,7 @@ def importar_pelicula_omdb():
         return _respuesta_error_omdb(error)
 
     return _persistir_pelicula_omdb(pelicula)
--e 
+
 
 === ARCHIVO: ./backend/src/routes/qr_routes.py ===
 from flask_jwt_extended import jwt_required
@@ -22057,7 +22418,7 @@ def ver_qr(id_entrada):
     finally:
         if conexion is not None:
             conexion.close()
--e 
+
 
 === ARCHIVO: ./backend/src/routes/configuracion_butacas.py ===
 from flask_jwt_extended import jwt_required
@@ -22130,7 +22491,7 @@ def configurar_butacas(id_sala):
     finally:
         if conn is not None:
             conn.close()
--e 
+
 
 === ARCHIVO: ./backend/src/routes/salas_routes.py ===
 from flask_jwt_extended import jwt_required
@@ -22305,7 +22666,7 @@ def crear_sala(id_local):
 
     finally:
         if conn is not None:
-            conn.close()-e 
+            conn.close()
 
 === ARCHIVO: ./backend/src/routes/funciones_routes.py ===
 from flask_jwt_extended import jwt_required
@@ -22552,10 +22913,10 @@ def actualizar_funcion(id_funcion):
             cursor.close()
         if conn is not None:
             conn.close()
--e 
+
 
 === ARCHIVO: ./backend/src/routes/_init_.py ===
--e 
+
 
 === ARCHIVO: ./backend/src/routes/locales_routes.py ===
 from flask_jwt_extended import jwt_required
@@ -22698,7 +23059,7 @@ def crear_local_route():
     finally:
         if conn is not None:
             conn.close()
--e 
+
 
 === ARCHIVO: ./backend/src/constants.py ===
 RESERVA_DURACION_MINUTOS = 15
@@ -22722,7 +23083,7 @@ ESTADOS_COMPRA_VALIDOS = frozenset(
 ESTADO_BUTACA_DISPONIBLE = "disponible"
 ESTADO_BUTACA_RESERVADA = "reservada"
 ESTADO_BUTACA_OCUPADA = "ocupada"
--e 
+
 
 === ARCHIVO: ./backend/src/validators/resenas_validator.py ===
 def validar_datos_resena(datos):
@@ -22738,7 +23099,7 @@ def validar_datos_resena(datos):
         return "El comentario debe tener como máximo 1000 caracteres."
 
     return None
--e 
+
 
 === ARCHIVO: ./backend/src/validators/qr_validator.py ===
 def validar_datos_qr(datos):
@@ -22759,7 +23120,7 @@ def validar_datos_qr(datos):
         return False, "El ID de la función es inválido."
 
     return True, None
--e 
+
 
 === ARCHIVO: ./backend/src/validators/peliculas_validator.py ===
 from backend.src.validators.duracion_validator import minutos_de_duracion
@@ -22799,7 +23160,7 @@ def validar_id_pelicula(id_pelicula):
     if type(id_pelicula) is not int or id_pelicula <= 0:
         return "El ID de la película debe ser un entero positivo."
     return None
--e 
+
 
 === ARCHIVO: ./backend/src/validators/reservas_validator.py ===
 def validar_datos_reserva(id_funcion: int | None, data: object):
@@ -22902,7 +23263,7 @@ def validar_datos_reserva(id_funcion: int | None, data: object):
             })
 
     return errores
--e 
+
 
 === ARCHIVO: ./backend/src/validators/compra_validator.py ===
 def crear_error(codigo, mensaje):
@@ -22953,7 +23314,7 @@ def validar_datos_compra(data):
             'No se pueden seleccionar butacas repetidas.'
         )
 
-    return True, None-e 
+    return True, None
 
 === ARCHIVO: ./backend/src/validators/funciones_validator.py ===
 from datetime import datetime
@@ -23011,7 +23372,7 @@ def obtener_campos_faltantes_funcion(data):
         return campos
 
     return [campo for campo in campos if campo not in data]
--e 
+
 
 === ARCHIVO: ./backend/src/validators/omdb_validator.py ===
 import re
@@ -23053,7 +23414,7 @@ def validar_importacion_omdb(datos):
         return error
 
     return None
--e 
+
 
 === ARCHIVO: ./backend/src/validators/salas_validator.py ===
 def validar_id_local(id_local):
@@ -23083,7 +23444,7 @@ def validar_id_sala(id_sala):
         return "El ID de la sala debe ser positivo."
 
     return None
--e 
+
 
 === ARCHIVO: ./backend/src/validators/locales_validator.py ===
 def validar_datos_local(data):
@@ -23105,7 +23466,7 @@ def validar_id_local(id_local):
     if type(id_local) is not int or id_local <= 0:
         return "El ID del local debe ser positivo."
 
-    return None-e 
+    return None
 
 === ARCHIVO: ./backend/src/validators/butacas_validator.py ===
 def validar_butacas(data):
@@ -23143,7 +23504,7 @@ def validar_butacas(data):
         return None, "No puede haber butacas repetidas."
 
     return claves, None
--e 
+
 
 === ARCHIVO: ./backend/src/validators/peliculas_validators.py ===
 def validar_pelicula(datos):
@@ -23211,7 +23572,7 @@ def validar_id_pelicula(id_pelicula):
         )
 
     return id_pelicula
--e 
+
 
 === ARCHIVO: ./backend/src/validators/servicios_validator.py ===
 from decimal import Decimal, InvalidOperation
@@ -23262,7 +23623,7 @@ def validar_servicio(datos):
         )
 
     return nombre.strip(), descripcion.strip(), precio
--e 
+
 
 === ARCHIVO: ./backend/src/validators/inicio_funcion_validator.py ===
 from datetime import datetime
@@ -23273,7 +23634,7 @@ def validar_inicio_funcion(fecha_inicio, ahora):
         raise ValueError("No se pudo validar el horario de la función.")
     if fecha_inicio <= ahora:
         raise ValueError("La función ya comenzó. No se pueden realizar compras ni reservas.")
--e 
+
 
 === ARCHIVO: ./backend/src/validators/auth_validator.py ===
 import re
@@ -23349,7 +23710,7 @@ def validar_datos_login(datos):
             "level": "error"
         })
 
-    return errores-e 
+    return errores
 
 === ARCHIVO: ./backend/src/validators/estadisticas_validator.py ===
 from datetime import datetime
@@ -23384,7 +23745,7 @@ def validar_filtros_estadisticas(args):
         return None, None, id_local, "La fecha desde no puede ser posterior a hasta."
 
     return desde, hasta, id_local, None
--e 
+
 
 === ARCHIVO: ./backend/src/validators/duracion_validator.py ===
 """Compatibilidad entre minutos numericos y Runtime de OMDb."""
@@ -23404,10 +23765,10 @@ def minutos_de_duracion(valor):
     if not 1 <= minutos <= 1440:
         raise ValueError("La duración debe estar entre 1 y 1440 minutos.")
     return minutos
--e 
+
 
 === ARCHIVO: ./backend/src/validators/_init_.py ===
--e 
+
 
 === ARCHIVO: ./backend/src/repositories/funciones_repository.py ===
 def obtener_cartelera(cursor):
@@ -23520,7 +23881,7 @@ def obtener_sala_por_id(cursor, id_sala):
 def existe_funcion(cursor, id_funcion):
     query = "SELECT id_funcion FROM funcion WHERE id_funcion = %s"
     cursor.execute(query, (id_funcion,))
-    return cursor.fetchone() is not None-e 
+    return cursor.fetchone() is not None
 
 === ARCHIVO: ./backend/src/repositories/reservas_repositories.py ===
 import uuid
@@ -23743,7 +24104,7 @@ def actualizar_total_compra(cursor, id_compra, total):
         "UPDATE compra SET total = %s WHERE id_compra = %s",
         (total, id_compra),
     )
--e 
+
 
 === ARCHIVO: ./backend/src/repositories/locales_repository.py ===
 def obtener_locales(cursor):
@@ -23790,7 +24151,7 @@ def crear_local(cursor, nombre, direccion):
         "INSERT INTO local (nombre, direccion) VALUES (%s, %s)",
         (nombre, direccion)
     )
-    return cursor.lastrowid-e 
+    return cursor.lastrowid
 
 === ARCHIVO: ./backend/src/repositories/butacas_repository.py ===
 from backend.src.constants import (
@@ -23857,7 +24218,7 @@ def crear_butacas(cursor, id_sala, butacas):
         "INSERT INTO butaca (id_sala, fila, numero) VALUES (%s, %s, %s)",
         [(id_sala, fila, numero) for fila, numero in butacas]
     )
--e 
+
 
 === ARCHIVO: ./backend/src/repositories/compra_repository.py ===
 from datetime import datetime
@@ -24175,7 +24536,7 @@ def obtener_entradas_para_cancelar(cursor, id_compra):
     """
     cursor.execute(query, (id_compra,))
     return cursor.fetchall()
--e 
+
 
 === ARCHIVO: ./backend/src/repositories/salas_repository.py ===
 def obtener_salas_por_local(cursor, id_local):
@@ -24223,7 +24584,7 @@ def sala_en_uso(cursor, id_sala):
 def eliminar_sala_y_butacas(cursor, id_sala):
     cursor.execute("DELETE FROM butaca WHERE id_sala = %s", (id_sala,))
     cursor.execute("DELETE FROM sala WHERE id_sala = %s", (id_sala,))
-    return cursor.rowcount-e 
+    return cursor.rowcount
 
 === ARCHIVO: ./backend/src/repositories/auth_repository.py ===
 
@@ -24263,7 +24624,7 @@ def obtener_perfil(cursor, id_usuario):
         WHERE id_usuario = %s
     """
     cursor.execute(query, (id_usuario,))
-    return cursor.fetchone()-e 
+    return cursor.fetchone()
 
 === ARCHIVO: ./backend/src/repositories/servicios_repository.py ===
 def obtener_servicios(cursor):
@@ -24312,7 +24673,7 @@ def eliminar_servicio(cursor, id_servicio):
         DELETE FROM servicio_adicional
         WHERE id_servicio = %s
     """, (id_servicio,))
-    return cursor.rowcount-e 
+    return cursor.rowcount
 
 === ARCHIVO: ./backend/src/repositories/tokens_repository.py ===
 """Consultas de tokens invalidados al cerrar sesión."""
@@ -24332,7 +24693,7 @@ def guardar_token_revocado(cursor, identificador, vencimiento):
 
 def eliminar_tokens_vencidos(cursor):
     cursor.execute("DELETE FROM token_revocado WHERE vence_en <= UTC_TIMESTAMP()")
--e 
+
 
 === ARCHIVO: ./backend/src/repositories/estadisticas_repository.py ===
 from backend.src.constants import (
@@ -24612,7 +24973,7 @@ def obtener_cantidad_cancelaciones(cursor, desde=None, hasta=None, id_local=None
     if res and "cantidad_cancelaciones" in res:
         return res
     return {"cantidad_cancelaciones": 0}
--e 
+
 
 === ARCHIVO: ./backend/src/repositories/resenas_repository.py ===
 def obtener_resumen_resenas(cursor, id_pelicula):
@@ -24700,7 +25061,7 @@ def guardar_resena(cursor, id_usuario, id_pelicula, puntuacion, comentario):
         """,
         (id_usuario, id_pelicula, puntuacion, comentario),
     )
--e 
+
 
 === ARCHIVO: ./backend/src/repositories/peliculas_repository.py ===
 def obtener_peliculas(cursor):
@@ -24921,7 +25282,7 @@ def guardar_pelicula(cursor, pelicula):
         "id": id_pelicula,
         "accion": accion,
     }
--e 
+
 
 === ARCHIVO: ./backend/src/repositories/qr_repository.py ===
 from backend.src.constants import ESTADO_COMPRA_CONFIRMADA
@@ -24964,10 +25325,10 @@ def obtener_entrada_para_qr(cursor, id_entrada, id_usuario):
     """
     cursor.execute(query, (id_entrada, id_usuario, ESTADO_COMPRA_CONFIRMADA))
     return cursor.fetchone()
--e 
+
 
 === ARCHIVO: ./backend/src/repositories/_init_.py ===
--e 
+
 
 === ARCHIVO: ./backend/seguridad.py ===
 """Identidad y permisos del usuario autenticado."""
@@ -25010,7 +25371,7 @@ def verificar_acceso(roles_permitidos):
     if not isinstance(rol, str) or rol.strip().casefold() not in roles_permitidos:
         return None, (jsonify({"error": "No tenés permisos para esta acción"}), 403)
     return id_usuario, None
--e 
+
 
 === ARCHIVO: ./backend/limites.py ===
 """Control de intentos de login y registro por IP y ruta."""
@@ -25062,7 +25423,7 @@ def controlar_intentos(max_dia=200, max_hora=50):
             {"Retry-After": str(espera)},
         )
     return None
--e 
+
 
 === ARCHIVO: ./backend/db/__init__.py ===
 """Conexion compartida y ejecucion usada por el importador de peliculas."""
@@ -25116,7 +25477,7 @@ def ejecutar_buscar_uno(query, valores=None):
             conexion.close()
     except mysql.connector.Error:
         return {"exito": False, "datos": None, "mensaje": "No se pudo consultar MySQL."}
--e 
+
 
 === ARCHIVO: ./backend/db/db.py ===
 import os
@@ -25135,7 +25496,7 @@ def get_connection():
         database=os.environ.get("DB_NAME", "cine_paradiso"),
         connection_timeout=5,
     )
--e 
+
 
 === ARCHIVO: ./backend/db/init_db.sql ===
 -- Inicialización de la base de datos
@@ -25283,14 +25644,14 @@ CREATE TABLE IF NOT EXISTS token_revocado (
     vence_en DATETIME NOT NULL,
     INDEX (vence_en)
 );
--e 
+
 
 === ARCHIVO: ./backend/db/migraciones/2026_11_08_nov_b06.sql ===
 -- NOV-B06: identifica películas importadas desde OMDb por su IMDb ID.
 ALTER TABLE pelicula
     ADD COLUMN id_externo_api VARCHAR(20) NULL AFTER id_pelicula,
     ADD UNIQUE KEY uq_pelicula_id_externo_api (id_externo_api);
--e 
+
 
 === ARCHIVO: ./backend/db/migraciones/migration_v2_nov_b09.sql ===
 USE cine_paradiso;
@@ -25371,7 +25732,7 @@ END//
 DELIMITER ;
 
 CALL migrar_nov_b09();
-DROP PROCEDURE migrar_nov_b09;-e 
+DROP PROCEDURE migrar_nov_b09;
 
 === ARCHIVO: ./backend/db/migraciones/2026_11_14_resenas.sql ===
 USE cine_paradiso;
@@ -25390,12 +25751,12 @@ CREATE TABLE IF NOT EXISTS resena (
     FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario),
     FOREIGN KEY (id_pelicula) REFERENCES pelicula(id_pelicula)
 );
--e 
+
 
 === ARCHIVO: ./backend/db/migraciones/2026_11_18_ampliar_poster.sql ===
 -- Ejecutar sobre la base seleccionada antes de iniciar la aplicación actualizada.
 ALTER TABLE pelicula MODIFY COLUMN poster VARCHAR(2048) NOT NULL;
--e 
+
 
 === ARCHIVO: ./backend/db/migraciones/ocupacion_Activa.sql ===
 -- Liberar butacas canceladas conservando historial
@@ -25417,7 +25778,7 @@ ADD UNIQUE KEY uq_entrada_ocupacion_activa (
 );
 
 ALTER TABLE entrada
-DROP INDEX id_funcion;-e 
+DROP INDEX id_funcion;
 
 === ARCHIVO: ./backend/db/migraciones/migracion_imagen_servicios.sql ===
 -- Seleccionar antes la base de destino con USE.
@@ -25445,7 +25806,7 @@ END//
 DELIMITER ;
 CALL migrar_imagen_servicios();
 DROP PROCEDURE migrar_imagen_servicios;
--e 
+
 
 === ARCHIVO: ./backend/db/migraciones/2026_11_11_descripcion_servicios.sql ===
 -- Seleccionar antes la base de destino con USE.
@@ -25475,7 +25836,7 @@ END//
 DELIMITER ;
 CALL migrar_descripcion_servicios();
 DROP PROCEDURE migrar_descripcion_servicios;
--e 
+
 
 === ARCHIVO: ./backend/db/migraciones/2026_11_02_jwt.sql ===
 -- Ejecutar UNA VEZ sobre la base seleccionada, con permisos CREATE.
@@ -25485,7 +25846,7 @@ CREATE TABLE IF NOT EXISTS token_revocado (
     vence_en DATETIME NOT NULL,
     INDEX (vence_en)
 );
--e 
+
 
 === ARCHIVO: ./backend/db/datos_prueba.sql ===
 -- Datos ficticios para desarrollo. Cargar UNA VEZ tras crear las tablas.

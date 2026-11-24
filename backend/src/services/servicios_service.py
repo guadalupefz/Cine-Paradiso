@@ -1,32 +1,27 @@
 import os
 import uuid
-from flask import current_app
+from flask import current_app, url_for
 from werkzeug.utils import secure_filename
-
 from backend.src.repositories import servicios_repository as repo
 from backend.src.validators.servicios_validator import archivo_permitido, validar_servicio
 
 
 def _guardar_imagen(archivo):
-    extension = secure_filename(archivo.filename).rsplit(".", 1)[1].lower()
+    nombre_seguro = secure_filename(archivo.filename or "")
+    extension = nombre_seguro.rsplit(".", 1)[1].lower()
     nombre = f"{uuid.uuid4().hex}.{extension}"
     carpeta = os.path.join(current_app.static_folder, "img", "servicios")
     os.makedirs(carpeta, exist_ok=True)
     destino = os.path.join(carpeta, nombre)
 
-    try:
-        archivo.save(destino)
-    except OSError:
-        if os.path.exists(destino):
-            os.remove(destino)
-        raise
-
-    return f"img/servicios/{nombre}"
+    archivo.save(destino)
+    return url_for("static", filename=f"img/servicios/{nombre}")
 
 
 def descartar_imagen(imagen):
     if imagen:
-        ruta = os.path.join(current_app.static_folder, imagen)
+        ruta_relativa = imagen.removeprefix("/static/").lstrip("/")
+        ruta = os.path.join(current_app.static_folder, ruta_relativa)
         try:
             os.remove(ruta)
         except OSError:
@@ -88,6 +83,13 @@ def guardar_servicio(cursor, request, id_servicio=None):
 
 
 def eliminar_servicio(cursor, id_servicio):
+    servicio = repo.obtener_servicio(cursor, id_servicio)
+    if not servicio:
+        raise LookupError("Servicio inexistente")
+
+    imagen = servicio.get("imagen") or ""
     borradas = repo.eliminar_servicio(cursor, id_servicio)
     if not borradas:
         raise LookupError("Servicio inexistente")
+
+    return imagen

@@ -68,17 +68,8 @@ def ver_servicios():
     servicios = lista(datos, "servicios")
 
     for s in servicios:
-        img = s.get("imagen")
-        if img:
-            if img.startswith(("http://", "https://")):
-                s["imagen_url"] = img
-            else:
-                ruta_limpia = img.lstrip("/")
-                if not ruta_limpia.startswith("static/"):
-                    ruta_limpia = f"static/{ruta_limpia}"
-                s["imagen_url"] = f"{BACKEND_ORIGEN}/{ruta_limpia}"
-        else:
-            s["imagen_url"] = None
+        img = s.get("imagen") or ""
+        s["imagen_url"] = f"{BACKEND_ORIGEN}{img}" if img else None
 
     if not id_funcion and not ids_butacas:
         return render_template(

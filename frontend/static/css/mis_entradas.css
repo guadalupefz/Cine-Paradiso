@@ -6,7 +6,8 @@
 }
 
 body {
-    min-width: 1100px;
+    width: 100%;
+    min-width: 0;
     background: #f8f2e5;
     color: #332a25;
     font-family: Arial, sans-serif;
@@ -940,4 +941,209 @@ a {
     color: #96343b;
     font-family: Georgia, serif;
     font-size: 24px;
+}
+
+/* Tablets y pantallas medianas */
+@media (max-width: 900px) {
+    .pagina {
+        padding: 30px 22px 40px;
+    }
+
+    .navbar {
+        padding: 0 22px;
+        gap: 18px;
+    }
+
+    .navbar nav {
+        gap: 18px;
+    }
+
+    .entrada-card {
+        grid-template-columns: 135px minmax(0, 1fr);
+        gap: 18px;
+    }
+
+    .poster-actual {
+        width: 135px;
+        height: 205px;
+    }
+
+    .entrada-acciones {
+        grid-column: 2;
+    }
+
+    .historial-card {
+        grid-template-columns: 50px minmax(0, 1fr) minmax(0, 1fr);
+        gap: 12px;
+    }
+
+    .historial-estado {
+        grid-column: 2 / -1;
+    }
+
+    .modal-contenido {
+        grid-template-columns: 1fr;
+    }
+
+    .modal-cancelacion {
+        max-width: 650px;
+    }
+}
+
+/* Celulares */
+@media (max-width: 600px) {
+    .navbar {
+        height: auto;
+        min-height: 72px;
+        padding: 14px 18px;
+        flex-wrap: wrap;
+    }
+
+    .logo {
+        font-size: 22px;
+    }
+
+    .navbar nav {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px 20px;
+    }
+
+    .navbar nav a {
+        padding: 8px 0;
+    }
+
+    .cuenta {
+        margin-left: auto;
+    }
+
+    .pagina {
+        padding: 24px 16px 35px;
+    }
+
+    .breadcrumb {
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 28px;
+    }
+
+    .titulo-seccion {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 16px;
+        padding-bottom: 20px;
+    }
+
+    .titulo-seccion h1 {
+        font-size: 38px;
+    }
+
+    .usuario {
+        text-align: left;
+    }
+
+    .tabs {
+        gap: 18px;
+        flex-wrap: wrap;
+        margin-bottom: 22px;
+    }
+
+    .tab {
+        padding: 12px 0;
+    }
+
+    .entrada-card {
+        grid-template-columns: minmax(0, 1fr);
+        padding: 18px;
+        gap: 16px;
+    }
+
+    .poster-actual {
+        width: 145px;
+        height: 215px;
+        justify-self: center;
+    }
+
+    .entrada-info {
+        padding-top: 0;
+    }
+
+    .entrada-info h2 {
+        font-size: 25px;
+    }
+
+    .entrada-acciones {
+        grid-column: auto;
+    }
+
+    .historial-card {
+        grid-template-columns: 44px minmax(0, 1fr);
+        gap: 10px 12px;
+        padding: 14px;
+    }
+
+    .historial-icon {
+        width: 40px;
+        height: 40px;
+        grid-row: span 3;
+    }
+
+    .historial-info,
+    .historial-detalle,
+    .historial-estado {
+        grid-column: 2;
+    }
+
+    .historial-info h2 {
+        font-size: 17px;
+    }
+
+    .footer {
+        align-items: flex-start;
+        flex-direction: column;
+        padding: 22px 18px;
+    }
+
+    .footer div {
+        flex-wrap: wrap;
+        gap: 10px 18px;
+    }
+
+    .modal-overlay {
+        align-items: flex-start;
+        padding: 10px;
+    }
+
+    .modal-cancelacion {
+        max-height: calc(100vh - 20px);
+        padding: 18px;
+    }
+
+    .modal-header h2 {
+        font-size: 27px;
+    }
+
+    .modal-contenido {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 14px;
+    }
+
+    .compra-card,
+    .columna-formulario {
+        padding: 13px;
+    }
+
+    .pelicula-modal {
+        align-items: flex-start;
+    }
+
+    .pelicula-datos h3 {
+        font-size: 19px;
+    }
+
+    .exito-card {
+        padding: 26px 20px;
+    }
 }

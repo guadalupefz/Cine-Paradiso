@@ -7,10 +7,35 @@
 <form method="post" action="{{ url_for('auth.registro') }}" class="formulario-cuenta" {% if error_formulario %}aria-describedby="error-registro"{% endif %}>
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
     <input type="hidden" name="next" value="{{ destino or '' }}">
-    <div class="nombres-cuenta"><div class="campo-cuenta"><label for="nombre">Nombre</label><input id="nombre" name="nombre" autocomplete="given-name" maxlength="100" required value="{{ datos_formulario.nombre }}"></div><div class="campo-cuenta"><label for="apellido">Apellido</label><input id="apellido" name="apellido" autocomplete="family-name" maxlength="100" required value="{{ datos_formulario.apellido }}"></div></div>
-    <div class="campo-cuenta"><label for="email">Correo electrónico</label><input id="email" name="email" type="email" autocomplete="email" maxlength="150" required value="{{ datos_formulario.email }}" placeholder="nombre@ejemplo.com"></div>
-    <div class="campo-cuenta"><label for="password">Contraseña</label><div class="entrada-password"><input id="password" name="password" type="password" autocomplete="new-password" maxlength="256" required aria-describedby="ayuda-password"><button class="mostrar-password" type="button" data-mostrar-password="password" aria-controls="password" aria-pressed="false">Mostrar</button></div><small id="ayuda-password">Usá una contraseña larga y única. Máximo 256 caracteres.</small></div>
-    <div class="campo-cuenta"><label for="confirmar_password">Confirmar contraseña</label><div class="entrada-password"><input id="confirmar_password" name="confirmar_password" type="password" autocomplete="new-password" maxlength="256" required><button class="mostrar-password" type="button" data-mostrar-password="confirmar_password" aria-controls="confirmar_password" aria-pressed="false">Mostrar</button></div></div>
+    <div class="nombres-cuenta">
+        <div class="campo-cuenta">
+            <label for="nombre">Nombre</label>
+            <input id="nombre" name="nombre" autocomplete="given-name" maxlength="100" required value="{{ datos_formulario.nombre }}">
+        </div>
+        <div class="campo-cuenta">
+            <label for="apellido">Apellido</label>
+            <input id="apellido" name="apellido" autocomplete="family-name" maxlength="100" required value="{{ datos_formulario.apellido }}">
+        </div>
+    </div>
+    <div class="campo-cuenta">
+        <label for="email">Correo electrónico</label>
+        <input id="email" name="email" type="email" autocomplete="email" maxlength="150" required value="{{ datos_formulario.email }}" placeholder="nombre@ejemplo.com">
+    </div>
+    <div class="campo-cuenta">
+        <label for="password">Contraseña</label>
+        <div class="entrada-password">
+            <input id="password" name="password" type="password" autocomplete="new-password" maxlength="256" required aria-describedby="ayuda-password">
+            <button class="mostrar-password" type="button" data-mostrar-password="password" aria-controls="password" aria-pressed="false">Mostrar</button>
+        </div>
+        <small id="ayuda-password">Usá una contraseña larga y única. Máximo 256 caracteres.</small>
+    </div>
+    <div class="campo-cuenta">
+        <label for="confirmar_password">Confirmar contraseña</label>
+        <div class="entrada-password">
+            <input id="confirmar_password" name="confirmar_password" type="password" autocomplete="new-password" maxlength="256" required>
+            <button class="mostrar-password" type="button" data-mostrar-password="confirmar_password" aria-controls="confirmar_password" aria-pressed="false">Mostrar</button>
+        </div>
+    </div>
     <button class="continuar-acceso" type="submit">Crear cuenta</button>
 </form>
 <p class="alternativa-acceso">¿Ya tenés cuenta? <a href="{{ url_for('auth.login', next=destino) }}">Iniciar sesión</a></p>

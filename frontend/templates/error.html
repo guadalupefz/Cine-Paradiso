@@ -1,1 +1,13 @@
-{% extends "base.html" %}{% block content %}<h2>No se pudo continuar</h2><p role="alert">{{ mensaje }}</p><a href="{{ url_for('public.index') }}">Volver al inicio</a>{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}Error · Cine Paradiso{% endblock %}
+
+{% block content %}
+    <h2>No se pudo continuar</h2>
+
+    <p role="alert">{{ mensaje }}</p>
+
+    <a href="{{ url_for('public.index') }}">
+        Volver al inicio
+    </a>
+{% endblock %}

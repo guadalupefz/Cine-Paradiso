@@ -1,5 +1,8 @@
 import os
 import requests
+import logging
+from pathlib import Path
+from deep_translator import MyMemoryTranslator
 
 from backend.src.validators.duracion_validator import minutos_de_duracion
 from backend.src.validators.peliculas_validator import validar_pelicula
@@ -70,18 +73,59 @@ def _normalizar_pelicula(datos):
         "poster": poster if poster != "N/A" else None
     }
 
+def descargar_poster(url, id_imdb):
+    if not url or url == "N/A":
+        return None
+
+    if not isinstance(id_imdb, str) or not id_imdb.startswith("tt"):
+        return None
+
+    try:
+        respuesta = requests.get(url, timeout=TIMEOUT)
+        respuesta.raise_for_status()
+
+        tipo_imagen = respuesta.headers.get("Content-Type", "").split(";")[0]
+
+        extensiones = {
+            "image/jpeg": ".jpg",
+            "image/png": ".png",
+            "image/webp": ".webp"
+        }
+        
+        extension = extensiones.get(tipo_imagen)
+        if not extension:
+            return None
+        if len(respuesta.content) > 10 * 1024 * 1024:
+            return None
+
+        carpeta = Path(__file__).resolve().parents[2] / "static" / "img" / "posters"
+        carpeta.mkdir(parents=True, exist_ok=True)
+
+        nombre_archivo = f"{id_imdb}{extension}"
+        ruta_archivo = carpeta / nombre_archivo
+        with open(ruta_archivo, "wb") as archivo:
+            archivo.write(respuesta.content)
+
+        return f"/static/img/posters/{nombre_archivo}"
+    except requests.exceptions.RequestException:
+        logging.exception("No se pudo descargar el póster de %s", id_imdb)
+        return None
 
 def preparar_pelicula_para_guardar(pelicula):
     if not isinstance(pelicula, dict):
         raise ValueError("Se requieren los datos completos de la película de OMDb.")
+        
     id_imdb = pelicula.get("id_imdb")
+    
     if not isinstance(id_imdb, str) or not id_imdb:
         raise ValueError("OMDb no devolvió un identificador IMDb válido.")
 
+    poster = descargar_poster(pelicula.get("poster"), id_imdb)
+    
     datos = {
         "titulo": pelicula.get("titulo"),
         "sinopsis": pelicula.get("sinopsis") or "Sin información",
-        "poster": pelicula.get("poster") or "/static/img/default.svg",
+        "poster": poster, #or "/static/img/default.svg",
         "duracion_minutos": minutos_de_duracion(pelicula.get("duracion")),
         "clasificacion": pelicula.get("clasificacion") or "Sin información",
         "genero": pelicula.get("genero") or "Sin información",
@@ -149,16 +193,32 @@ def obtener_pelicula_por_titulo(titulo):
 
 
 def _traducir_texto(texto):
-    if not texto or texto == "N/A":
-        return texto
+    resultado = texto
 
-    try:
-        traductor = MyMemoryTranslator(
-            source="en",
-            target="es"
-        )
+    if texto and texto != "N/A":
+        try:
+            traductor = MyMemoryTranslator(source="en-US", target="es-AR")
+            limite = 450
+            partes = []
+            inicio = 0
 
-        traduccion = traductor.translate(texto)
-        return traduccion if traduccion else texto
-    except Exception:
-        return texto
+            while inicio < len(texto):
+                fin = min(inicio + limite, len(texto))
+                if fin < len(texto):
+                    espacio = texto.rfind(" ", inicio, fin)
+                    if espacio > inicio:
+                        fin = espacio
+
+                fragmento = texto[inicio:fin].strip()
+                if fragmento:
+                    traduccion = traductor.translate(fragmento)
+                    partes.append(traduccion if traduccion else fragmento)
+
+                inicio = fin
+
+            if partes:
+                resultado = " ".join(partes)
+        except Exception as error:
+            print(error)
+
+    return resultado

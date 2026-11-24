@@ -29,7 +29,7 @@
             <img
                 src="{{ pelicula.poster or url_for('static', filename='img/poster_sin_imagen.svg') }}"
                 alt="Póster de {{ pelicula.titulo }}"
-                onerror="this.onerror=null;this.src='{{ url_for('static', filename='img/poster_sin_imagen.svg') }}';"
+                data-fallback="{{ url_for('static', filename='img/poster_sin_imagen.svg') }}"
             >
         </aside>
 
