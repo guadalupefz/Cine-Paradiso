@@ -161,8 +161,8 @@ def formatear_fecha(fecha):
         return "No disponible"
 
     try:
-        fecha = parsedate_to_datetime(str(fecha))
-        return fecha.strftime("%d/%m/%Y - %H:%M")
+        fecha_obj = parsedate_to_datetime(str(fecha))
+        return fecha_obj.strftime("%d/%m/%Y - %H:%M")
     except (TypeError, ValueError):
         return str(fecha)
 
@@ -170,23 +170,23 @@ def formatear_fecha(fecha):
 def crear_tabla(datos, anchos, encabezado=False):
     """Crea una tabla estilizada de ReportLab."""
     tabla = Table(datos, colWidths=anchos)
-    estilos = [
+    estilos_tabla = [
         ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
         ("PADDING", (0, 0), (-1, -1), 8),
         ("VALIGN", (0, 0), (-1, -1), "MIDDLE")
     ]
     if encabezado:
-        estilos.append(
+        estilos_tabla.append(
             ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#eee4d5"))
         )
-    tabla.setStyle(TableStyle(estilos))
+    tabla.setStyle(TableStyle(estilos_tabla))
     return tabla
 
 
 def agregar_entrada(elementos, entrada, estilos, estilo_codigo, token_session=None):
     """Agrega la sección y tabla de una entrada con su correspondiente imagen de código QR."""
     elementos.append(Paragraph(
-        f"<b>{escape(str(entrada.get('pelicula', '')))}</b>",
+        f"&lt;b&gt;{escape(str(entrada.get('pelicula', '')))}&lt;/b&gt;",
         estilos["Heading3"]
     ))
 
@@ -224,7 +224,7 @@ def agregar_entrada(elementos, entrada, estilos, estilo_codigo, token_session=No
 
     codigo_manual = entrada.get("qr_token", "No disponible")
     texto_codigo = Paragraph(
-        f"Token QR: <b>{escape(str(codigo_manual))}</b>",
+        f"Token QR: &lt;b&gt;{escape(str(codigo_manual))}&lt;/b&gt;",
         estilo_codigo
     )
     elementos.append(texto_codigo)
