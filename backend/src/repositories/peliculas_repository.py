@@ -115,31 +115,7 @@ def editar_pelicula(cursor, id_pelicula, datos):
     )
 
 
-def sincronizar_pelicula(cursor, pelicula):
-    cursor.execute(
-        """
-        INSERT INTO pelicula (
-            id_externo_api,
-            titulo,
-            sinopsis,
-            poster,
-            duracion_minutos,
-            clasificacion,
-            genero
-        )
-        VALUES (%s, %s, %s, %s, %s, %s, %s)
-        """,
-        (
-            pelicula["id_externo_api"],
-            pelicula["titulo"],
-            pelicula["sinopsis"],
-            pelicula["poster"],
-            pelicula["duracion_minutos"],
-            pelicula["clasificacion"],
-            pelicula["genero"],
-        ),
-    )
-    return cursor.lastrowid
+
 
 
 def guardar_pelicula(cursor, pelicula):
