@@ -133,7 +133,10 @@
                         <small>Total de tu visita</small>
                         <span class="monto-total" id="monto-total-visita">{% if funcion and funcion.precio_base %}ARS 0{% else %}No disponible{% endif %}</span>
                     </div>
-                    <button type="submit" class="btn-continuar-extras" {% if not (funcion and funcion.precio_base) %}disabled{% endif %}>Continuar a resumen →</button>
+                    <button type="submit" class="btn-continuar-extras" 
+                        {% if not (funcion and funcion.precio_base) %}disabled{% endif %}>
+                            Continuar a resumen →
+                    </button>
                 </div>
             </div>
         </form>
