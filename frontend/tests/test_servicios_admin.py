@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 os.environ.setdefault("SECRET_KEY", "clave-ficticia-para-pruebas-de-frontend-2026")
 from frontend import app as frontend
-from backend.src.routes.servicios_routes import validar_servicio
+from backend.src.validators.servicios_validator import validar_servicio
 
 
 class ServiciosAdmin(unittest.TestCase):
