@@ -66,12 +66,6 @@ def limpiar_reservas_expiradas(cursor, id_funcion):
     )
 
 
-def obtener_precio_base_funcion(cursor, id_funcion: int):
-    query = "SELECT precio_base FROM funcion WHERE id_funcion = %s FOR UPDATE;"
-    cursor.execute(query, (id_funcion,))
-    res = cursor.fetchone()
-    return res['precio_base'] if res else None
-
 def crear_compra_pendiente(
     cursor, id_usuario: int, total: Decimal, fecha_hora_creacion
 ):

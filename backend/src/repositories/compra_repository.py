@@ -85,15 +85,6 @@ def crear_entrada(cursor, id_compra, id_funcion, id_butaca, qr_token):
     return cursor.lastrowid
 
 
-def obtener_compra_por_id(cursor, id_compra):
-    query = """
-        SELECT id_compra, id_usuario, fecha_hora, total, estado
-        FROM compra
-        WHERE id_compra = %s
-    """
-    cursor.execute(query, (id_compra,))
-    return cursor.fetchone()
-
 
 def obtener_compra_para_confirmar(cursor, id_compra):
     query = """
