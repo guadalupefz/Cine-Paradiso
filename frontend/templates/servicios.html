@@ -37,7 +37,7 @@
                 </p>
             </div>
         </div>
-      
+
         <!-- Aviso si el precio no está disponible -->
         {% if not (funcion and funcion.precio_base) %}
             <div class="alerta-precio-no-disponible">
@@ -49,7 +49,7 @@
         <!-- Sección servicios -->
         <section class="seccion-servicios">
             <div class="encabezado-seccion-servicios">
-                
+
                 {% if not modo_catalogo %}
                     <h2>Comprar</h2>
                 {% endif %}
@@ -83,7 +83,7 @@
                             </div>
                             <div class="pie-tarjeta-servicio">
                                 <span class="precio-servicio" data-precio="{{ servicio.precio }}">ARS {{ servicio.precio }}</span>
-                        
+
                                 {% if not modo_catalogo %}
                                     <div class="controles-cantidad">
                                         <button type="button" class="btn-cantidad btn-restar" data-id="{{ servicio.id_servicio }}" disabled>-</button>
@@ -133,7 +133,7 @@
                         <small>Total de tu visita</small>
                         <span class="monto-total" id="monto-total-visita">{% if funcion and funcion.precio_base %}ARS 0{% else %}No disponible{% endif %}</span>
                     </div>
-                    <button type="submit" class="btn-continuar-extras" 
+                    <button type="submit" class="btn-continuar-extras"
                         {% if not (funcion and funcion.precio_base) %}disabled{% endif %}>
                             Continuar a resumen →
                     </button>
