@@ -1972,15 +1972,15 @@ def admin_butacas(id_sala):
     locales = lista(locales_datos, "locales") if estado_locales == 200 else []
 
     for local in locales:
-        datos, estado = llamar_backend("GET", f"/locales/{local['id_local']}/salas")
-        if estado == 200:
-            for sala in lista(datos, "salas"):
-                if sala["id_sala"] == id_sala:
-                    sala_seleccionada = {**sala, "local_nombre": local["nombre"]}
-                    break
-        if sala_seleccionada:
-            break
-
+        if sala_seleccionada is None:
+            datos, estado = llamar_backend(
+                "GET", f"/locales/{local['id_local']}/salas")
+            if estado == 200:
+                for sala in lista(datos, "salas"):
+                    if sala["id_sala"] == id_sala and sala_seleccionada is None:
+                        sala_seleccionada = {
+                            **sala, "local_nombre": local["nombre"]}
+                        
     if sala_seleccionada is None:
         flash("La sala seleccionada no existe o no está disponible.", "error")
         return redirect(url_for("admin_salas"))
